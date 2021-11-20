@@ -1,6 +1,6 @@
 extends Object
 
-const LineInfo = preload("res://addons/Wol/core/program/yarn_line.gd")
+const LineInfo = preload("res://addons/Wol/core/program/wol_line.gd")
 
 var id : String
 var substitutions : Array = []#String

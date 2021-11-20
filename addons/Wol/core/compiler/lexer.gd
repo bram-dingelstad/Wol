@@ -33,50 +33,50 @@ func _init():
 
 func create_states():
 	var patterns : Dictionary = {}
-	patterns[YarnGlobals.TokenType.Text] = ".*"
+	patterns[WolGlobals.TokenType.Text] = ".*"
 
-	patterns[YarnGlobals.TokenType.Number] = "\\-?[0-9]+(\\.[0-9+])?"
-	patterns[YarnGlobals.TokenType.Str] = "\"([^\"\\\\]*(?:\\.[^\"\\\\]*)*)\""
-	patterns[YarnGlobals.TokenType.TagMarker] = "\\#"
-	patterns[YarnGlobals.TokenType.LeftParen] = "\\("
-	patterns[YarnGlobals.TokenType.RightParen] =  "\\)"
-	patterns[YarnGlobals.TokenType.EqualTo] = "(==|is(?!\\w)|eq(?!\\w))"
-	patterns[YarnGlobals.TokenType.EqualToOrAssign] = "(=|to(?!\\w))"
-	patterns[YarnGlobals.TokenType.NotEqualTo] = "(\\!=|neq(?!\\w))"
-	patterns[YarnGlobals.TokenType.GreaterThanOrEqualTo] = "(\\>=|gte(?!\\w))"
-	patterns[YarnGlobals.TokenType.GreaterThan] = "(\\>|gt(?!\\w))"
-	patterns[YarnGlobals.TokenType.LessThanOrEqualTo] = "(\\<=|lte(?!\\w))"
-	patterns[YarnGlobals.TokenType.LessThan] = "(\\<|lt(?!\\w))"
-	patterns[YarnGlobals.TokenType.AddAssign] =  "\\+="
-	patterns[YarnGlobals.TokenType.MinusAssign] = "\\-="
-	patterns[YarnGlobals.TokenType.MultiplyAssign] = "\\*="
-	patterns[YarnGlobals.TokenType.DivideAssign] = "\\/="
-	patterns[YarnGlobals.TokenType.Add] = "\\+"
-	patterns[YarnGlobals.TokenType.Minus] = "\\-"
-	patterns[YarnGlobals.TokenType.Multiply] = "\\*"
-	patterns[YarnGlobals.TokenType.Divide] = "\\/"
-	patterns[YarnGlobals.TokenType.Modulo] = "\\%"
-	patterns[YarnGlobals.TokenType.And] = "(\\&\\&|and(?!\\w))"
-	patterns[YarnGlobals.TokenType.Or] = "(\\|\\||or(?!\\w))"
-	patterns[YarnGlobals.TokenType.Xor] = "(\\^|xor(?!\\w))"
-	patterns[YarnGlobals.TokenType.Not] = "(\\!|not(?!\\w))"
-	patterns[YarnGlobals.TokenType.Variable] = "\\$([A-Za-z0-9_\\.])+"
-	patterns[YarnGlobals.TokenType.Comma] = "\\,"
-	patterns[YarnGlobals.TokenType.TrueToken] = "true(?!\\w)"
-	patterns[YarnGlobals.TokenType.FalseToken] = "false(?!\\w)"
-	patterns[YarnGlobals.TokenType.NullToken] = "null(?!\\w)"
-	patterns[YarnGlobals.TokenType.BeginCommand] = "\\<\\<"
-	patterns[YarnGlobals.TokenType.EndCommand] = "\\>\\>"
-	patterns[YarnGlobals.TokenType.OptionStart] = "\\[\\["
-	patterns[YarnGlobals.TokenType.OptionEnd] = "\\]\\]"
-	patterns[YarnGlobals.TokenType.OptionDelimit] = "\\|"
-	patterns[YarnGlobals.TokenType.Identifier] = "[a-zA-Z0-9_:\\.]+"
-	patterns[YarnGlobals.TokenType.IfToken] = "if(?!\\w)"
-	patterns[YarnGlobals.TokenType.ElseToken] = "else(?!\\w)"
-	patterns[YarnGlobals.TokenType.ElseIf] = "elseif(?!\\w)"
-	patterns[YarnGlobals.TokenType.EndIf] = "endif(?!\\w)"
-	patterns[YarnGlobals.TokenType.Set] = "set(?!\\w)"
-	patterns[YarnGlobals.TokenType.ShortcutOption] = "\\-\\>\\s*"
+	patterns[WolGlobals.TokenType.Number] = "\\-?[0-9]+(\\.[0-9+])?"
+	patterns[WolGlobals.TokenType.Str] = "\"([^\"\\\\]*(?:\\.[^\"\\\\]*)*)\""
+	patterns[WolGlobals.TokenType.TagMarker] = "\\#"
+	patterns[WolGlobals.TokenType.LeftParen] = "\\("
+	patterns[WolGlobals.TokenType.RightParen] =  "\\)"
+	patterns[WolGlobals.TokenType.EqualTo] = "(==|is(?!\\w)|eq(?!\\w))"
+	patterns[WolGlobals.TokenType.EqualToOrAssign] = "(=|to(?!\\w))"
+	patterns[WolGlobals.TokenType.NotEqualTo] = "(\\!=|neq(?!\\w))"
+	patterns[WolGlobals.TokenType.GreaterThanOrEqualTo] = "(\\>=|gte(?!\\w))"
+	patterns[WolGlobals.TokenType.GreaterThan] = "(\\>|gt(?!\\w))"
+	patterns[WolGlobals.TokenType.LessThanOrEqualTo] = "(\\<=|lte(?!\\w))"
+	patterns[WolGlobals.TokenType.LessThan] = "(\\<|lt(?!\\w))"
+	patterns[WolGlobals.TokenType.AddAssign] =  "\\+="
+	patterns[WolGlobals.TokenType.MinusAssign] = "\\-="
+	patterns[WolGlobals.TokenType.MultiplyAssign] = "\\*="
+	patterns[WolGlobals.TokenType.DivideAssign] = "\\/="
+	patterns[WolGlobals.TokenType.Add] = "\\+"
+	patterns[WolGlobals.TokenType.Minus] = "\\-"
+	patterns[WolGlobals.TokenType.Multiply] = "\\*"
+	patterns[WolGlobals.TokenType.Divide] = "\\/"
+	patterns[WolGlobals.TokenType.Modulo] = "\\%"
+	patterns[WolGlobals.TokenType.And] = "(\\&\\&|and(?!\\w))"
+	patterns[WolGlobals.TokenType.Or] = "(\\|\\||or(?!\\w))"
+	patterns[WolGlobals.TokenType.Xor] = "(\\^|xor(?!\\w))"
+	patterns[WolGlobals.TokenType.Not] = "(\\!|not(?!\\w))"
+	patterns[WolGlobals.TokenType.Variable] = "\\$([A-Za-z0-9_\\.])+"
+	patterns[WolGlobals.TokenType.Comma] = "\\,"
+	patterns[WolGlobals.TokenType.TrueToken] = "true(?!\\w)"
+	patterns[WolGlobals.TokenType.FalseToken] = "false(?!\\w)"
+	patterns[WolGlobals.TokenType.NullToken] = "null(?!\\w)"
+	patterns[WolGlobals.TokenType.BeginCommand] = "\\<\\<"
+	patterns[WolGlobals.TokenType.EndCommand] = "\\>\\>"
+	patterns[WolGlobals.TokenType.OptionStart] = "\\[\\["
+	patterns[WolGlobals.TokenType.OptionEnd] = "\\]\\]"
+	patterns[WolGlobals.TokenType.OptionDelimit] = "\\|"
+	patterns[WolGlobals.TokenType.Identifier] = "[a-zA-Z0-9_:\\.]+"
+	patterns[WolGlobals.TokenType.IfToken] = "if(?!\\w)"
+	patterns[WolGlobals.TokenType.ElseToken] = "else(?!\\w)"
+	patterns[WolGlobals.TokenType.ElseIf] = "elseif(?!\\w)"
+	patterns[WolGlobals.TokenType.EndIf] = "endif(?!\\w)"
+	patterns[WolGlobals.TokenType.Set] = "set(?!\\w)"
+	patterns[WolGlobals.TokenType.ShortcutOption] = "\\-\\>\\s*"
 
 	#compound states
 	var shortcut_option : String= SHORTCUT + DASH + OPTION
@@ -87,84 +87,84 @@ func create_states():
 	_states = {}
 
 	_states[BASE] = LexerState.new(patterns)
-	_states[BASE].add_transition(YarnGlobals.TokenType.BeginCommand,COMMAND,true)
-	_states[BASE].add_transition(YarnGlobals.TokenType.OptionStart,LINK,true)
-	_states[BASE].add_transition(YarnGlobals.TokenType.ShortcutOption,shortcut_option)
-	_states[BASE].add_transition(YarnGlobals.TokenType.TagMarker,TAG,true)
-	_states[BASE].add_text_rule(YarnGlobals.TokenType.Text)
+	_states[BASE].add_transition(WolGlobals.TokenType.BeginCommand,COMMAND,true)
+	_states[BASE].add_transition(WolGlobals.TokenType.OptionStart,LINK,true)
+	_states[BASE].add_transition(WolGlobals.TokenType.ShortcutOption,shortcut_option)
+	_states[BASE].add_transition(WolGlobals.TokenType.TagMarker,TAG,true)
+	_states[BASE].add_text_rule(WolGlobals.TokenType.Text)
 
 	_states[TAG] = LexerState.new(patterns)
-	_states[TAG].add_transition(YarnGlobals.TokenType.Identifier,BASE)
+	_states[TAG].add_transition(WolGlobals.TokenType.Identifier,BASE)
 
 	_states[shortcut_option] = LexerState.new(patterns)
 	_states[shortcut_option].track_indent = true
-	_states[shortcut_option].add_transition(YarnGlobals.TokenType.BeginCommand,EXPRESSION,true)
-	_states[shortcut_option].add_transition(YarnGlobals.TokenType.TagMarker,shortcut_option_tag,true)
-	_states[shortcut_option].add_text_rule(YarnGlobals.TokenType.Text,BASE)
+	_states[shortcut_option].add_transition(WolGlobals.TokenType.BeginCommand,EXPRESSION,true)
+	_states[shortcut_option].add_transition(WolGlobals.TokenType.TagMarker,shortcut_option_tag,true)
+	_states[shortcut_option].add_text_rule(WolGlobals.TokenType.Text,BASE)
 	
 	_states[shortcut_option_tag] = LexerState.new(patterns)
-	_states[shortcut_option_tag].add_transition(YarnGlobals.TokenType.Identifier,shortcut_option)
+	_states[shortcut_option_tag].add_transition(WolGlobals.TokenType.Identifier,shortcut_option)
 
 	_states[COMMAND] = LexerState.new(patterns)
-	_states[COMMAND].add_transition(YarnGlobals.TokenType.IfToken,EXPRESSION)
-	_states[COMMAND].add_transition(YarnGlobals.TokenType.ElseToken)
-	_states[COMMAND].add_transition(YarnGlobals.TokenType.ElseIf,EXPRESSION)
-	_states[COMMAND].add_transition(YarnGlobals.TokenType.EndIf)
-	_states[COMMAND].add_transition(YarnGlobals.TokenType.Set,ASSIGNMENT)
-	_states[COMMAND].add_transition(YarnGlobals.TokenType.EndCommand,BASE,true)
-	_states[COMMAND].add_transition(YarnGlobals.TokenType.Identifier,command_or_expression)
-	_states[COMMAND].add_text_rule(YarnGlobals.TokenType.Text)
+	_states[COMMAND].add_transition(WolGlobals.TokenType.IfToken,EXPRESSION)
+	_states[COMMAND].add_transition(WolGlobals.TokenType.ElseToken)
+	_states[COMMAND].add_transition(WolGlobals.TokenType.ElseIf,EXPRESSION)
+	_states[COMMAND].add_transition(WolGlobals.TokenType.EndIf)
+	_states[COMMAND].add_transition(WolGlobals.TokenType.Set,ASSIGNMENT)
+	_states[COMMAND].add_transition(WolGlobals.TokenType.EndCommand,BASE,true)
+	_states[COMMAND].add_transition(WolGlobals.TokenType.Identifier,command_or_expression)
+	_states[COMMAND].add_text_rule(WolGlobals.TokenType.Text)
 
 	_states[command_or_expression] = LexerState.new(patterns)
-	_states[command_or_expression].add_transition(YarnGlobals.TokenType.LeftParen,EXPRESSION)
-	_states[command_or_expression].add_transition(YarnGlobals.TokenType.EndCommand,BASE,true)
-	_states[command_or_expression].add_text_rule(YarnGlobals.TokenType.Text)
+	_states[command_or_expression].add_transition(WolGlobals.TokenType.LeftParen,EXPRESSION)
+	_states[command_or_expression].add_transition(WolGlobals.TokenType.EndCommand,BASE,true)
+	_states[command_or_expression].add_text_rule(WolGlobals.TokenType.Text)
 
 	_states[ASSIGNMENT] = LexerState.new(patterns)
-	_states[ASSIGNMENT].add_transition(YarnGlobals.TokenType.Variable)
-	_states[ASSIGNMENT].add_transition(YarnGlobals.TokenType.EqualToOrAssign, EXPRESSION)
-	_states[ASSIGNMENT].add_transition(YarnGlobals.TokenType.AddAssign, EXPRESSION)
-	_states[ASSIGNMENT].add_transition(YarnGlobals.TokenType.MinusAssign, EXPRESSION)
-	_states[ASSIGNMENT].add_transition(YarnGlobals.TokenType.MultiplyAssign, EXPRESSION)
-	_states[ASSIGNMENT].add_transition(YarnGlobals.TokenType.DivideAssign, EXPRESSION)
+	_states[ASSIGNMENT].add_transition(WolGlobals.TokenType.Variable)
+	_states[ASSIGNMENT].add_transition(WolGlobals.TokenType.EqualToOrAssign, EXPRESSION)
+	_states[ASSIGNMENT].add_transition(WolGlobals.TokenType.AddAssign, EXPRESSION)
+	_states[ASSIGNMENT].add_transition(WolGlobals.TokenType.MinusAssign, EXPRESSION)
+	_states[ASSIGNMENT].add_transition(WolGlobals.TokenType.MultiplyAssign, EXPRESSION)
+	_states[ASSIGNMENT].add_transition(WolGlobals.TokenType.DivideAssign, EXPRESSION)
 
 	_states[EXPRESSION] = LexerState.new(patterns)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.EndCommand, BASE)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.Number)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.Str)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.LeftParen)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.RightParen)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.EqualTo)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.EqualToOrAssign)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.NotEqualTo)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.GreaterThanOrEqualTo)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.GreaterThan)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.LessThanOrEqualTo)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.LessThan)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.Add)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.Minus)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.Multiply)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.Divide)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.Modulo)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.And)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.Or)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.Xor)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.Not)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.Variable)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.Comma)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.TrueToken)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.FalseToken)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.NullToken)
-	_states[EXPRESSION].add_transition(YarnGlobals.TokenType.Identifier)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.EndCommand, BASE)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.Number)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.Str)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.LeftParen)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.RightParen)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.EqualTo)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.EqualToOrAssign)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.NotEqualTo)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.GreaterThanOrEqualTo)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.GreaterThan)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.LessThanOrEqualTo)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.LessThan)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.Add)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.Minus)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.Multiply)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.Divide)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.Modulo)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.And)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.Or)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.Xor)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.Not)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.Variable)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.Comma)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.TrueToken)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.FalseToken)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.NullToken)
+	_states[EXPRESSION].add_transition(WolGlobals.TokenType.Identifier)
 
 	_states[LINK] = LexerState.new(patterns)
-	_states[LINK].add_transition(YarnGlobals.TokenType.OptionEnd, BASE, true)
-	_states[LINK].add_transition(YarnGlobals.TokenType.OptionDelimit, link_destination, true)
-	_states[LINK].add_text_rule(YarnGlobals.TokenType.Text)
+	_states[LINK].add_transition(WolGlobals.TokenType.OptionEnd, BASE, true)
+	_states[LINK].add_transition(WolGlobals.TokenType.OptionDelimit, link_destination, true)
+	_states[LINK].add_text_rule(WolGlobals.TokenType.Text)
 
 	_states[link_destination] = LexerState.new(patterns)
-	_states[link_destination].add_transition(YarnGlobals.TokenType.Identifier)
-	_states[link_destination].add_transition(YarnGlobals.TokenType.OptionEnd, BASE)
+	_states[link_destination].add_transition(WolGlobals.TokenType.Identifier)
+	_states[link_destination].add_transition(WolGlobals.TokenType.OptionEnd, BASE)
 
 	_defaultState = _states[BASE]
 
@@ -192,7 +192,7 @@ func tokenize(text:String)->Array:
 		tokens+=tokenize_line(line,lineNumber)
 		lineNumber+=1
 
-	var endOfInput : Token = Token.new(YarnGlobals.TokenType.EndOfInput,_currentState,lineNumber,0)
+	var endOfInput : Token = Token.new(WolGlobals.TokenType.EndOfInput,_currentState,lineNumber,0)
 	tokens.append(endOfInput)
 
 	# print(tokens)
@@ -212,7 +212,7 @@ func tokenize_line(line:String, lineNumber : int)->Array:
 		#we add an indenation token to record indent level
 		_indentStack.push_front(IntBoolPair.new(indentation,true))
 
-		var indent : Token = Token.new(YarnGlobals.TokenType.Indent,_currentState,lineNumber,prevIndentation.key)
+		var indent : Token = Token.new(WolGlobals.TokenType.Indent,_currentState,lineNumber,prevIndentation.key)
 		indent.value = "%*s" % [indentation - prevIndentation.key,""]
 
 		_shouldTrackIndent = false
@@ -224,7 +224,7 @@ func tokenize_line(line:String, lineNumber : int)->Array:
 		while indentation < _indentStack.front().key:
 			var top : IntBoolPair = _indentStack.pop_front()
 			if top.value:
-				var deIndent : Token = Token.new(YarnGlobals.TokenType.Dedent,_currentState,lineNumber,0)
+				var deIndent : Token = Token.new(WolGlobals.TokenType.Dedent,_currentState,lineNumber,0)
 				tokenStack.push_front(deIndent)
 	
 	
@@ -251,22 +251,22 @@ func tokenize_line(line:String, lineNumber : int)->Array:
 
 			var tokenText : String
 
-			if rule.tokenType == YarnGlobals.TokenType.Text:
+			if rule.tokenType == WolGlobals.TokenType.Text:
 				#if this is text then we back up to the most recent
 				#delimiting token and treat everything from there as text.
 				
 				var startIndex : int = indentation
 
 				if tokenStack.size() > 0 :
-					while tokenStack.front().type == YarnGlobals.TokenType.Identifier:
+					while tokenStack.front().type == WolGlobals.TokenType.Identifier:
 						tokenStack.pop_front()
 					
 					var startDelimitToken : Token = tokenStack.front()
 					startIndex =  startDelimitToken.column
 
-					if startDelimitToken.type == YarnGlobals.TokenType.Indent:
+					if startDelimitToken.type == WolGlobals.TokenType.Indent:
 						startIndex += startDelimitToken.value.length()
-					if startDelimitToken.type == YarnGlobals.TokenType.Dedent:
+					if startDelimitToken.type == WolGlobals.TokenType.Dedent:
 						startIndex = indentation
 				#
 				
@@ -281,7 +281,7 @@ func tokenize_line(line:String, lineNumber : int)->Array:
 			column += tokenText.length()
 
 			#pre-proccess string
-			if rule.tokenType == YarnGlobals.TokenType.Str:
+			if rule.tokenType == WolGlobals.TokenType.Str:
 				tokenText = tokenText.substr(1,tokenText.length() - 2)
 				tokenText = tokenText.replace("\\\\", "\\")
 				tokenText = tokenText.replace("\\\"","\"")
@@ -356,7 +356,7 @@ class Token:
 		self.value = value
 
 	func _to_string():
-		return "%s (%s) at %s:%s (state: %s)" % [YarnGlobals.token_type_name(type),value,lineNumber,column,lexerState]
+		return "%s (%s) at %s:%s (state: %s)" % [WolGlobals.token_type_name(type),value,lineNumber,column,lexerState]
 	
 
 class LexerState:
@@ -416,7 +416,7 @@ class Rule:
 		self.delimitsText = delimitsText
 
 	func _to_string():
-		return "[Rule : %s - %s]" % [YarnGlobals.token_type_name(tokenType),regex]
+		return "[Rule : %s - %s]" % [WolGlobals.token_type_name(tokenType),regex]
 
 class IntBoolPair:
 	var key : int

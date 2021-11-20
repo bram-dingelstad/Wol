@@ -1,6 +1,6 @@
 extends Object
 
-const YarnGlobals = preload("res://addons/Wol/autoloads/execution_states.gd")
+const WolGlobals = preload("res://addons/Wol/autoloads/execution_states.gd")
 const Lexer = preload("res://addons/Wol/core/compiler/lexer.gd")
 
 
@@ -14,8 +14,8 @@ enum Associativity {
 	Left,Right,None
 }
 
-func parse_node()->YarnNode:
-	return YarnNode.new("Start",null,self)
+func parse_node()->WolNode:
+	return WolNode.new("Start",null,self)
 
 func next_symbol_is(validTypes:Array)->bool:
 	var type = self._tokens.front().type
@@ -37,7 +37,7 @@ func expect_symbol(tokenTypes:Array = [])->Lexer.Token:
 	var size = tokenTypes.size()
 	
 	if size == 0:
-		if t.type == YarnGlobals.TokenType.EndOfInput:
+		if t.type == WolGlobals.TokenType.EndOfInput:
 			printerr("unexpected end of input")
 			return null
 		return t
@@ -75,11 +75,11 @@ class ParseNode:
 	func tags_to_string(indentLevel : int)->String:
 		return "%s" % "TAGS<tags_to_string>NOTIMPLEMENTED"
 
-	func get_node_parent()->YarnNode:
+	func get_node_parent()->WolNode:
 		var node = self
 		while node != null:
-			if node.has_method("yarn_node"):
-				return node as YarnNode
+			if node.has_method("wol_node"):
+				return node as WolNode
 			node = node.parent
 		return null
 
@@ -90,8 +90,8 @@ class ParseNode:
 	func set_parent(parent):
 		self.parent = parent
 
-#this is a Yarn Node - contains all the text
-class YarnNode extends ParseNode:
+#this is a Wol Node - contains all the text
+class WolNode extends ParseNode:
 
 	var name : String
 	var source : String
@@ -103,11 +103,11 @@ class YarnNode extends ParseNode:
 
 		self.name = name
 		while (parser.tokens().size() > 0 &&
-			  !parser.next_symbol_is([YarnGlobals.TokenType.Dedent,YarnGlobals.TokenType.EndOfInput])):
+			  !parser.next_symbol_is([WolGlobals.TokenType.Dedent,WolGlobals.TokenType.EndOfInput])):
 			statements.append(Statement.new(self,parser))
 			#print(statements.size())
 
-	func yarn_node():
+	func wol_node():
 		pass
 
 	func tree_string(indentLevel : int)->String:
@@ -127,7 +127,7 @@ class Header extends ParseNode:
 
 
 class Statement extends ParseNode:
-	var Type = YarnGlobals.StatementTypes
+	var Type = WolGlobals.StatementTypes
 
 	var type : int
 	var block : Block
@@ -158,8 +158,8 @@ class Statement extends ParseNode:
 		elif CustomCommand.can_parse(parser):
 			customCommand = CustomCommand.new(self,parser)
 			type = Type.CustomCommand
-		elif parser.next_symbol_is([YarnGlobals.TokenType.Text]):
-			line = parser.expect_symbol([YarnGlobals.TokenType.Text]).value
+		elif parser.next_symbol_is([WolGlobals.TokenType.Text]):
+			line = parser.expect_symbol([WolGlobals.TokenType.Text]).value
 			type = Type.Line
 		else:
 			printerr("expected a statement but got %s instead. (probably an inbalanced if statement)" % parser.tokens().front()._to_string())
@@ -167,9 +167,9 @@ class Statement extends ParseNode:
 		
 		var tags : Array = []
 
-		while parser.next_symbol_is([YarnGlobals.TokenType.TagMarker]):
-			parser.expect_symbol([YarnGlobals.TokenType.TagMarker])
-			var tag : String = parser.expect_symbol([YarnGlobals.TokenType.Identifier]).value
+		while parser.next_symbol_is([WolGlobals.TokenType.TagMarker]):
+			parser.expect_symbol([WolGlobals.TokenType.TagMarker])
+			var tag : String = parser.expect_symbol([WolGlobals.TokenType.Identifier]).value
 			tags.append(tag)
 
 		if(tags.size()>0):
@@ -213,20 +213,20 @@ class CustomCommand extends ParseNode:
 	var clientCommand : String
 
 	func _init(parent:ParseNode,parser).(parent,parser):
-		parser.expect_symbol([YarnGlobals.TokenType.BeginCommand])
+		parser.expect_symbol([WolGlobals.TokenType.BeginCommand])
 
 		var commandTokens = []
 		commandTokens.append(parser.expect_symbol())
 
-		while !parser.next_symbol_is([YarnGlobals.TokenType.EndCommand]):
+		while !parser.next_symbol_is([WolGlobals.TokenType.EndCommand]):
 			commandTokens.append(parser.expect_symbol())
 
-		parser.expect_symbol([YarnGlobals.TokenType.EndCommand])
+		parser.expect_symbol([WolGlobals.TokenType.EndCommand])
 		
 		#if first token is identifier and second is leftt parenthesis
 		#evaluate as function
-		if (commandTokens.size() > 1 && commandTokens[0].type == YarnGlobals.TokenType.Identifier
-			&& commandTokens[1].type == YarnGlobals.TokenType.LeftParen):
+		if (commandTokens.size() > 1 && commandTokens[0].type == WolGlobals.TokenType.Identifier
+			&& commandTokens[1].type == WolGlobals.TokenType.LeftParen):
 			var p = get_script().new(commandTokens,parser.library)
 			var expression : ExpressionNode = ExpressionNode.parse(self,p)
 			type = Type.Expression
@@ -245,8 +245,8 @@ class CustomCommand extends ParseNode:
 		return ""
 	
 	static func can_parse(parser)->bool:
-		return (parser.next_symbols_are([YarnGlobals.TokenType.BeginCommand,YarnGlobals.TokenType.Text])
-				|| parser.next_symbols_are([YarnGlobals.TokenType.BeginCommand,YarnGlobals.TokenType.Identifier]))
+		return (parser.next_symbols_are([WolGlobals.TokenType.BeginCommand,WolGlobals.TokenType.Text])
+				|| parser.next_symbols_are([WolGlobals.TokenType.BeginCommand,WolGlobals.TokenType.Identifier]))
 
 
 	
@@ -264,7 +264,7 @@ class ShortcutOptionGroup extends ParseNode:
 		var sIndex : int = 1
 		options.append(ShortCutOption.new(sIndex, self, parser))
 		sIndex+=1
-		while parser.next_symbol_is([YarnGlobals.TokenType.ShortcutOption]):
+		while parser.next_symbol_is([WolGlobals.TokenType.ShortcutOption]):
 			options.append(ShortCutOption.new(sIndex, self, parser))
 			sIndex+=1
 
@@ -282,43 +282,43 @@ class ShortcutOptionGroup extends ParseNode:
 		return info.join("")
 	
 	static func can_parse(parser)->bool:
-		return parser.next_symbol_is([YarnGlobals.TokenType.ShortcutOption])
+		return parser.next_symbol_is([WolGlobals.TokenType.ShortcutOption])
 	pass
 
 class ShortCutOption extends ParseNode:
 
 	var label : String
 	var condition : ExpressionNode
-	var node : YarnNode
+	var node : WolNode
 
 	func _init(index:int, parent:ParseNode, parser).(parent,parser):
-		parser.expect_symbol([YarnGlobals.TokenType.ShortcutOption])
-		label = parser.expect_symbol([YarnGlobals.TokenType.Text]).value
+		parser.expect_symbol([WolGlobals.TokenType.ShortcutOption])
+		label = parser.expect_symbol([WolGlobals.TokenType.Text]).value
 
 		# parse the conditional << if $x >> when it exists
 
 		var tags : Array = []#string
-		while( parser.next_symbols_are([YarnGlobals.TokenType.BeginCommand,YarnGlobals.TokenType.IfToken])
-			|| parser.next_symbol_is([YarnGlobals.TokenType.TagMarker])):
+		while( parser.next_symbols_are([WolGlobals.TokenType.BeginCommand,WolGlobals.TokenType.IfToken])
+			|| parser.next_symbol_is([WolGlobals.TokenType.TagMarker])):
 			
-			if parser.next_symbols_are([YarnGlobals.TokenType.BeginCommand, YarnGlobals.TokenType.IfToken]):
-				parser.expect_symbol([YarnGlobals.TokenType.BeginCommand])
-				parser.expect_symbol([YarnGlobals.TokenType.IfToken])
+			if parser.next_symbols_are([WolGlobals.TokenType.BeginCommand, WolGlobals.TokenType.IfToken]):
+				parser.expect_symbol([WolGlobals.TokenType.BeginCommand])
+				parser.expect_symbol([WolGlobals.TokenType.IfToken])
 				condition = ExpressionNode.parse(self,parser)
-				parser.expect_symbol([YarnGlobals.TokenType.EndCommand])
-			elif parser.next_symbol_is([YarnGlobals.TokenType.TagMarker]):
-				parser.expect_symbol([YarnGlobals.TokenType.TagMarker])
-				var tag : String = parser.expect_symbol([YarnGlobals.TokenType.Identifier]).value;
+				parser.expect_symbol([WolGlobals.TokenType.EndCommand])
+			elif parser.next_symbol_is([WolGlobals.TokenType.TagMarker]):
+				parser.expect_symbol([WolGlobals.TokenType.TagMarker])
+				var tag : String = parser.expect_symbol([WolGlobals.TokenType.Identifier]).value;
 				tags.append(tag)
 
 		
 		self.tags = tags
 		# parse remaining statements
 
-		if parser.next_symbol_is([YarnGlobals.TokenType.Indent]):
-			parser.expect_symbol([YarnGlobals.TokenType.Indent])
-			node = YarnNode.new("%s.%s" %[self.get_node_parent().name ,index], self,parser)
-			parser.expect_symbol([YarnGlobals.TokenType.Dedent])
+		if parser.next_symbol_is([WolGlobals.TokenType.Indent]):
+			parser.expect_symbol([WolGlobals.TokenType.Indent])
+			node = WolNode.new("%s.%s" %[self.get_node_parent().name ,index], self,parser)
+			parser.expect_symbol([WolGlobals.TokenType.Dedent])
 
 
 	func tree_string(indentLevel : int)->String:
@@ -346,15 +346,15 @@ class Block extends ParseNode:
 
 	func _init(parent:ParseNode, parser).(parent,parser):
 		#read indent
-		parser.expect_symbol([YarnGlobals.TokenType.Indent])
+		parser.expect_symbol([WolGlobals.TokenType.Indent])
 
 		#keep reading statements until we hit a dedent
-		while !parser.next_symbol_is([YarnGlobals.TokenType.Dedent]):
+		while !parser.next_symbol_is([WolGlobals.TokenType.Dedent]):
 			#parse all statements including nested blocks
 			statements.append(Statement.new(self,parser))
 
 		#clean up dedent
-		parser.expect_symbol([YarnGlobals.TokenType.Dedent])
+		parser.expect_symbol([WolGlobals.TokenType.Dedent])
 	
 		
 	func tree_string(indentLevel : int)->String:
@@ -370,7 +370,7 @@ class Block extends ParseNode:
 		return info.join("")
 
 	static func can_parse(parser)->bool:
-		return parser.next_symbol_is([YarnGlobals.TokenType.Indent])
+		return parser.next_symbol_is([WolGlobals.TokenType.Indent])
 
 #Option Statements are links to other nodes
 class OptionStatement extends ParseNode:
@@ -383,20 +383,20 @@ class OptionStatement extends ParseNode:
 		var strings : Array = []#string
 
 		#parse [[LABEL
-		parser.expect_symbol([YarnGlobals.TokenType.OptionStart])
-		strings.append(parser.expect_symbol([YarnGlobals.TokenType.Text]).value)
+		parser.expect_symbol([WolGlobals.TokenType.OptionStart])
+		strings.append(parser.expect_symbol([WolGlobals.TokenType.Text]).value)
 
 		#if there is a | get the next string
-		if parser.next_symbol_is([YarnGlobals.TokenType.OptionDelimit]):
-			parser.expect_symbol([YarnGlobals.TokenType.OptionDelimit])
-			var t = parser.expect_symbol([YarnGlobals.TokenType.Text,YarnGlobals.TokenType.Identifier])
+		if parser.next_symbol_is([WolGlobals.TokenType.OptionDelimit]):
+			parser.expect_symbol([WolGlobals.TokenType.OptionDelimit])
+			var t = parser.expect_symbol([WolGlobals.TokenType.Text,WolGlobals.TokenType.Identifier])
 			#print("Token %s"%t.value)
 			strings.append(t.value as String)
 		
 		label = strings[0] if strings.size() > 1 else ""
 		destination = strings[1] if strings.size() > 1 else strings[0]
 
-		parser.expect_symbol([YarnGlobals.TokenType.OptionEnd])
+		parser.expect_symbol([WolGlobals.TokenType.OptionEnd])
 
 	func tree_string(indentLevel : int)->String:
 		if label != null:
@@ -405,7 +405,7 @@ class OptionStatement extends ParseNode:
 			return tab(indentLevel,"Option: -> %s"%destination)
 
 	static func can_parse(parser)->bool:
-		return parser.next_symbol_is([YarnGlobals.TokenType.OptionStart])
+		return parser.next_symbol_is([WolGlobals.TokenType.OptionStart])
 
 class IfStatement extends ParseNode:
 	
@@ -416,80 +416,80 @@ class IfStatement extends ParseNode:
 		#<<if Expression>>
 		var prime : Clause = Clause.new()
 
-		parser.expect_symbol([YarnGlobals.TokenType.BeginCommand])
-		parser.expect_symbol([YarnGlobals.TokenType.IfToken])
+		parser.expect_symbol([WolGlobals.TokenType.BeginCommand])
+		parser.expect_symbol([WolGlobals.TokenType.IfToken])
 		prime.expression = ExpressionNode.parse(self,parser)
-		parser.expect_symbol([YarnGlobals.TokenType.EndCommand])
+		parser.expect_symbol([WolGlobals.TokenType.EndCommand])
 
 		#read statements until 'endif' or 'else' or 'else if'
 		var statements : Array = []#statement
-		while (!parser.next_symbols_are([YarnGlobals.TokenType.BeginCommand, YarnGlobals.TokenType.EndIf])
-			&& !parser.next_symbols_are([YarnGlobals.TokenType.BeginCommand, YarnGlobals.TokenType.ElseToken])
-			&& !parser.next_symbols_are([YarnGlobals.TokenType.BeginCommand, YarnGlobals.TokenType.ElseIf])):
+		while (!parser.next_symbols_are([WolGlobals.TokenType.BeginCommand, WolGlobals.TokenType.EndIf])
+			&& !parser.next_symbols_are([WolGlobals.TokenType.BeginCommand, WolGlobals.TokenType.ElseToken])
+			&& !parser.next_symbols_are([WolGlobals.TokenType.BeginCommand, WolGlobals.TokenType.ElseIf])):
 			
 			statements.append(Statement.new(self,parser))
 
 			#ignore dedent
-			while parser.next_symbol_is([YarnGlobals.TokenType.Dedent]):
-				parser.expect_symbol([YarnGlobals.TokenType.Dedent])
+			while parser.next_symbol_is([WolGlobals.TokenType.Dedent]):
+				parser.expect_symbol([WolGlobals.TokenType.Dedent])
 		
 		
 		prime.statements = statements
 		clauses.append(prime)
 
 		#handle all else if
-		while parser.next_symbols_are([YarnGlobals.TokenType.BeginCommand,YarnGlobals.TokenType.ElseIf]):
+		while parser.next_symbols_are([WolGlobals.TokenType.BeginCommand,WolGlobals.TokenType.ElseIf]):
 			var clauseElif : Clause = Clause.new()
 
 			#parse condition syntax
-			parser.expect_symbol([YarnGlobals.TokenType.BeginCommand])
-			parser.expect_symbol([YarnGlobals.TokenType.ElseIf])
+			parser.expect_symbol([WolGlobals.TokenType.BeginCommand])
+			parser.expect_symbol([WolGlobals.TokenType.ElseIf])
 			clauseElif.expression = ExpressionNode.parse(self,parser)
-			parser.expect_symbol([YarnGlobals.TokenType.EndCommand])
+			parser.expect_symbol([WolGlobals.TokenType.EndCommand])
 
 
 			var elifStatements : Array = []#statement
-			while (!parser.next_symbols_are([YarnGlobals.TokenType.BeginCommand, YarnGlobals.TokenType.EndIf])
-				&& !parser.next_symbols_are([YarnGlobals.TokenType.BeginCommand, YarnGlobals.TokenType.ElseToken])
-				&& !parser.next_symbols_are([YarnGlobals.TokenType.BeginCommand, YarnGlobals.TokenType.ElseIf])):
+			while (!parser.next_symbols_are([WolGlobals.TokenType.BeginCommand, WolGlobals.TokenType.EndIf])
+				&& !parser.next_symbols_are([WolGlobals.TokenType.BeginCommand, WolGlobals.TokenType.ElseToken])
+				&& !parser.next_symbols_are([WolGlobals.TokenType.BeginCommand, WolGlobals.TokenType.ElseIf])):
 				
 				elifStatements.append(Statement.new(self,parser))
 
 				#ignore dedent
-				while parser.next_symbol_is([YarnGlobals.TokenType.Dedent]):
-					parser.expect_symbol([YarnGlobals.TokenType.Dedent])
+				while parser.next_symbol_is([WolGlobals.TokenType.Dedent]):
+					parser.expect_symbol([WolGlobals.TokenType.Dedent])
 			
 			
 			clauseElif.statements = statements
 			clauses.append(clauseElif)
 		
 		#handle else if exists
-		if (parser.next_symbols_are([YarnGlobals.TokenType.BeginCommand,
-			YarnGlobals.TokenType.ElseToken,YarnGlobals.TokenType.EndCommand])):
+		if (parser.next_symbols_are([WolGlobals.TokenType.BeginCommand,
+			WolGlobals.TokenType.ElseToken,WolGlobals.TokenType.EndCommand])):
 
 			#expect no expression - just <<else>>
-			parser.expect_symbol([YarnGlobals.TokenType.BeginCommand])
-			parser.expect_symbol([YarnGlobals.TokenType.ElseToken])
-			parser.expect_symbol([YarnGlobals.TokenType.EndCommand])
+			parser.expect_symbol([WolGlobals.TokenType.BeginCommand])
+			parser.expect_symbol([WolGlobals.TokenType.ElseToken])
+			parser.expect_symbol([WolGlobals.TokenType.EndCommand])
 
 			#parse until hit endif
 			var clauseElse : Clause = Clause.new()
 			var elStatements : Array = []#statement
-			while !parser.next_symbols_are([YarnGlobals.TokenType.BeginCommand,YarnGlobals.TokenType.EndIf]):
+			while !parser.next_symbols_are([WolGlobals.TokenType.BeginCommand,WolGlobals.TokenType.EndIf]):
 				elStatements.append(Statement.new(self,parser))
 
 			clauseElse.statements = elStatements
 			clauses.append(clauseElse)
 
 			#ignore dedent
-			while parser.next_symbol_is([YarnGlobals.TokenType.Dedent]):
-				parser.expect_symbol([YarnGlobals.TokenType.Dedent])
+			while parser.next_symbol_is([WolGlobals.TokenType.Dedent]):
+				parser.expect_symbol([WolGlobals.TokenType.Dedent])
 
 		
 		#finish
-		parser.expect_symbol([YarnGlobals.TokenType.BeginCommand])
-		parser.expect_symbol([YarnGlobals.TokenType.EndIf])
-		parser.expect_symbol([YarnGlobals.TokenType.EndCommand])
+		parser.expect_symbol([WolGlobals.TokenType.BeginCommand])
+		parser.expect_symbol([WolGlobals.TokenType.EndIf])
+		parser.expect_symbol([WolGlobals.TokenType.EndCommand])
 
 
 	func tree_string(indentLevel : int)->String:
@@ -509,7 +509,7 @@ class IfStatement extends ParseNode:
 		return info.join("")
 
 	static func can_parse(parser)->bool:
-		return parser.next_symbols_are([YarnGlobals.TokenType.BeginCommand,YarnGlobals.TokenType.IfToken])
+		return parser.next_symbols_are([WolGlobals.TokenType.BeginCommand,WolGlobals.TokenType.IfToken])
 	pass
 
 class ValueNode extends ParseNode:
@@ -521,26 +521,26 @@ class ValueNode extends ParseNode:
 
 		var t : Lexer.Token = token
 		if t == null :
-			parser.expect_symbol([YarnGlobals.TokenType.Number,
-		YarnGlobals.TokenType.Variable,YarnGlobals.TokenType.Str])
+			parser.expect_symbol([WolGlobals.TokenType.Number,
+		WolGlobals.TokenType.Variable,WolGlobals.TokenType.Str])
 		use_token(t)
 
 	#store value depending on type
 	func use_token(t:Lexer.Token):
 		match t.type:
-			YarnGlobals.TokenType.Number:
+			WolGlobals.TokenType.Number:
 				value = Value.new(float(t.value))
-			YarnGlobals.TokenType.Str:
+			WolGlobals.TokenType.Str:
 				value = Value.new(t.value)
-			YarnGlobals.TokenType.FalseToken:
+			WolGlobals.TokenType.FalseToken:
 				value = Value.new(false)
-			YarnGlobals.TokenType.TrueToken:
+			WolGlobals.TokenType.TrueToken:
 				value = Value.new(true)
-			YarnGlobals.TokenType.Variable:
+			WolGlobals.TokenType.Variable:
 				value = Value.new(null)
-				value.type = YarnGlobals.ValueType.Variable
+				value.type = WolGlobals.ValueType.Variable
 				value.variable = t.value
-			YarnGlobals.TokenType.NullToken:
+			WolGlobals.TokenType.NullToken:
 				value = Value.new(null)
 			_:
 				printerr("%s, Invalid token type" % t.name)
@@ -564,20 +564,20 @@ class ExpressionNode extends ParseNode:
 
 		#no function - means value
 		if value!=null:
-			self.type = YarnGlobals.ExpressionType.Value
+			self.type = WolGlobals.ExpressionType.Value
 			self.value = value
 		else:#function
 
-			self.type = YarnGlobals.ExpressionType.FunctionCall
+			self.type = WolGlobals.ExpressionType.FunctionCall
 			self.function = function
 			self.params = params
 	
 	func tree_string(indentLevel : int)->String:
 		var info : PoolStringArray = []
 		match type:
-			YarnGlobals.ExpressionType.Value:
+			WolGlobals.ExpressionType.Value:
 				return value.tree_string(indentLevel)
-			YarnGlobals.ExpressionType.FunctionCall:
+			WolGlobals.ExpressionType.FunctionCall:
 				info.append(tab(indentLevel,"Func[%s - params(%s)]:{"%[function,params.size()]))
 				for param in params:
 					#print("----> %s paramSize:%s"%[(function) , params.size()])
@@ -599,16 +599,16 @@ class ExpressionNode extends ParseNode:
 		var funcStack : Array = []#token
 		
 		var validTypes : Array = [
-			YarnGlobals.TokenType.Number,
-			YarnGlobals.TokenType.Variable,
-			YarnGlobals.TokenType.Str,
-			YarnGlobals.TokenType.LeftParen,
-			YarnGlobals.TokenType.RightParen,
-			YarnGlobals.TokenType.Identifier,
-			YarnGlobals.TokenType.Comma,
-			YarnGlobals.TokenType.TrueToken,
-			YarnGlobals.TokenType.FalseToken,
-			YarnGlobals.TokenType.NullToken
+			WolGlobals.TokenType.Number,
+			WolGlobals.TokenType.Variable,
+			WolGlobals.TokenType.Str,
+			WolGlobals.TokenType.LeftParen,
+			WolGlobals.TokenType.RightParen,
+			WolGlobals.TokenType.Identifier,
+			WolGlobals.TokenType.Comma,
+			WolGlobals.TokenType.TrueToken,
+			WolGlobals.TokenType.FalseToken,
+			WolGlobals.TokenType.NullToken
 		]
 		validTypes+=Operator.op_types()
 		validTypes.invert()
@@ -619,26 +619,26 @@ class ExpressionNode extends ParseNode:
 		while parser.tokens().size() > 0 && parser.next_symbol_is(validTypes):
 			var next = parser.expect_symbol(validTypes) #lexer.Token
 
-			if(	next.type == YarnGlobals.TokenType.Variable ||
-				next.type == YarnGlobals.TokenType.Number ||
-				next.type == YarnGlobals.TokenType.Str ||
-				next.type == YarnGlobals.TokenType.TrueToken ||
-				next.type == YarnGlobals.TokenType.FalseToken ||
-				next.type == YarnGlobals.TokenType.NullToken ):
+			if(	next.type == WolGlobals.TokenType.Variable ||
+				next.type == WolGlobals.TokenType.Number ||
+				next.type == WolGlobals.TokenType.Str ||
+				next.type == WolGlobals.TokenType.TrueToken ||
+				next.type == WolGlobals.TokenType.FalseToken ||
+				next.type == WolGlobals.TokenType.NullToken ):
 				
 				#output primitives
 				rpn.append(next)
-			elif next.type == YarnGlobals.TokenType.Identifier:
+			elif next.type == WolGlobals.TokenType.Identifier:
 				opStack.push_back(next)
 				funcStack.push_back(next)
 
 				#next token is parent - left
-				next = parser.expect_symbol([YarnGlobals.TokenType.LeftParen])
+				next = parser.expect_symbol([WolGlobals.TokenType.LeftParen])
 				opStack.push_back(next)
-			elif next.type == YarnGlobals.TokenType.Comma:
+			elif next.type == WolGlobals.TokenType.Comma:
 
 				#resolve sub expression before moving on
-				while opStack.back().type != YarnGlobals.TokenType.LeftParen:
+				while opStack.back().type != WolGlobals.TokenType.LeftParen:
 					var p = opStack.pop_back()
 					if p == null:
 						printerr("unbalanced parenthesis %s " % next.name)
@@ -648,8 +648,8 @@ class ExpressionNode extends ParseNode:
 				
 				#next token in opStack left paren
 				# next parser token not allowed to be right paren or comma
-				if parser.next_symbol_is([YarnGlobals.TokenType.RightParen,
-					YarnGlobals.TokenType.Comma]):
+				if parser.next_symbol_is([WolGlobals.TokenType.RightParen,
+					WolGlobals.TokenType.Comma]):
 					printerr("Expected Expression : %s" % parser.tokens().front().name)
 				
 				#find the closest function on stack
@@ -668,17 +668,17 @@ class ExpressionNode extends ParseNode:
 				#is only unary when the last token was a left paren,
 				#an operator, or its the first token.
 
-				if (next.type == YarnGlobals.TokenType.Minus):
+				if (next.type == WolGlobals.TokenType.Minus):
 					if (last == null ||
-						 last.type == YarnGlobals.TokenType.LeftParen ||
+						 last.type == WolGlobals.TokenType.LeftParen ||
 						 Operator.is_op(last.type)):
 						#unary minus
-						next.type = YarnGlobals.TokenType.UnaryMinus
+						next.type = WolGlobals.TokenType.UnaryMinus
 				
 				#cannot assign inside expression
 				# x = a is the same as x == a
-				if next.type == YarnGlobals.TokenType.EqualToOrAssign:
-					next.type = YarnGlobals.TokenType.EqualTo
+				if next.type == WolGlobals.TokenType.EqualToOrAssign:
+					next.type = WolGlobals.TokenType.EqualTo
 
 				
 				#operator precedence
@@ -688,25 +688,25 @@ class ExpressionNode extends ParseNode:
 
 				opStack.push_back(next)
 			
-			elif next.type == YarnGlobals.TokenType.LeftParen:
+			elif next.type == WolGlobals.TokenType.LeftParen:
 				#entered parenthesis sub expression
 				opStack.push_back(next)
-			elif next.type == YarnGlobals.TokenType.RightParen:
+			elif next.type == WolGlobals.TokenType.RightParen:
 				#leaving sub expression
 				# resolve order of operations
-				while opStack.back().type != YarnGlobals.TokenType.LeftParen:
+				while opStack.back().type != WolGlobals.TokenType.LeftParen:
 					rpn.append(opStack.pop_back())
 					if opStack.back() == null:
 						printerr("Unbalanced parenthasis #RightParen. Parser.ExpressionNode")
 				
 				
 				opStack.pop_back()
-				if opStack.back().type == YarnGlobals.TokenType.Identifier:
+				if opStack.back().type == WolGlobals.TokenType.Identifier:
 					#function call
 					#last token == left paren this == no params
 					#else
 					#we have more than 1 param
-					if last.type != YarnGlobals.TokenType.LeftParen:
+					if last.type != WolGlobals.TokenType.LeftParen:
 						funcStack.back().paramCount+=1
 					
 					rpn.append(opStack.pop_back())
@@ -735,7 +735,7 @@ class ExpressionNode extends ParseNode:
 				var info : OperatorInfo = Operator.op_info(next.type)
 
 				if evalStack.size() < info.arguments:
-					printerr("Error parsing : Not enough arguments for %s [ got %s expected - was %s]"%[YarnGlobals.token_type_name(next.type),evalStack.size(),info.arguments])
+					printerr("Error parsing : Not enough arguments for %s [ got %s expected - was %s]"%[WolGlobals.token_type_name(next.type),evalStack.size(),info.arguments])
 
 				var params : Array = []#ExpressionNode
 				for i in range(info.arguments):
@@ -749,7 +749,7 @@ class ExpressionNode extends ParseNode:
 				
 				evalStack.append(expression)
 
-			elif next.type == YarnGlobals.TokenType.Identifier:
+			elif next.type == WolGlobals.TokenType.Identifier:
 				#function call
 
 				var function : String = next.value
@@ -785,8 +785,8 @@ class ExpressionNode extends ParseNode:
 	static func get_func_name(type)->String:
 		var string : String = ""
 		
-		for key in YarnGlobals.TokenType.keys():
-			if YarnGlobals.TokenType[key] == type:
+		for key in WolGlobals.TokenType.keys():
+			if WolGlobals.TokenType[key] == type:
 				return key					
 		return string
 
@@ -822,35 +822,35 @@ class Assignment extends ParseNode:
 	var operation
 
 	func _init(parent:ParseNode,parser).(parent,parser):
-		parser.expect_symbol([YarnGlobals.TokenType.BeginCommand])
-		parser.expect_symbol([YarnGlobals.TokenType.Set])
-		destination = parser.expect_symbol([YarnGlobals.TokenType.Variable]).value
+		parser.expect_symbol([WolGlobals.TokenType.BeginCommand])
+		parser.expect_symbol([WolGlobals.TokenType.Set])
+		destination = parser.expect_symbol([WolGlobals.TokenType.Variable]).value
 		operation = parser.expect_symbol(Assignment.valid_ops()).type
 		value = ExpressionNode.parse(self,parser)
-		parser.expect_symbol([YarnGlobals.TokenType.EndCommand])
+		parser.expect_symbol([WolGlobals.TokenType.EndCommand])
 
 	func tree_string(indentLevel : int)->String:
 		var info : PoolStringArray = []
 		info.append(tab(indentLevel,"set:"))
 		info.append(tab(indentLevel+1,destination))
-		info.append(tab(indentLevel+1,YarnGlobals.token_type_name(operation)))
+		info.append(tab(indentLevel+1,WolGlobals.token_type_name(operation)))
 		info.append(value.tree_string(indentLevel+1))
 		return info.join("")
 
 		
 	static func can_parse(parser)->bool:
 		return parser.next_symbols_are([
-			YarnGlobals.TokenType.BeginCommand,
-			YarnGlobals.TokenType.Set
+			WolGlobals.TokenType.BeginCommand,
+			WolGlobals.TokenType.Set
 		])
 
 	static func valid_ops()->Array:
 		return [
-			YarnGlobals.TokenType.EqualToOrAssign,
-			YarnGlobals.TokenType.AddAssign,
-			YarnGlobals.TokenType.MinusAssign,
-			YarnGlobals.TokenType.DivideAssign,
-			YarnGlobals.TokenType.MultiplyAssign
+			WolGlobals.TokenType.EqualToOrAssign,
+			WolGlobals.TokenType.AddAssign,
+			WolGlobals.TokenType.MinusAssign,
+			WolGlobals.TokenType.DivideAssign,
+			WolGlobals.TokenType.MultiplyAssign
 		]
 
 class Operator extends ParseNode:
@@ -875,7 +875,7 @@ class Operator extends ParseNode:
 
 		#determine associativity and operands
 		# each operand has
-		var TokenType = YarnGlobals.TokenType
+		var TokenType = WolGlobals.TokenType
 
 		match op:
 			TokenType.Not, TokenType.UnaryMinus:
@@ -903,27 +903,27 @@ class Operator extends ParseNode:
 
 	static func op_types()->Array:
 		return [
-			YarnGlobals.TokenType.Not,
-			YarnGlobals.TokenType.UnaryMinus,
+			WolGlobals.TokenType.Not,
+			WolGlobals.TokenType.UnaryMinus,
 
-			YarnGlobals.TokenType.Add,
-			YarnGlobals.TokenType.Minus,
-			YarnGlobals.TokenType.Divide,
-			YarnGlobals.TokenType.Multiply,
-			YarnGlobals.TokenType.Modulo,
+			WolGlobals.TokenType.Add,
+			WolGlobals.TokenType.Minus,
+			WolGlobals.TokenType.Divide,
+			WolGlobals.TokenType.Multiply,
+			WolGlobals.TokenType.Modulo,
 
-			YarnGlobals.TokenType.EqualToOrAssign,
-			YarnGlobals.TokenType.EqualTo,
-			YarnGlobals.TokenType.GreaterThan,
-			YarnGlobals.TokenType.GreaterThanOrEqualTo,
-			YarnGlobals.TokenType.LessThan,
-			YarnGlobals.TokenType.LessThanOrEqualTo,
-			YarnGlobals.TokenType.NotEqualTo,
+			WolGlobals.TokenType.EqualToOrAssign,
+			WolGlobals.TokenType.EqualTo,
+			WolGlobals.TokenType.GreaterThan,
+			WolGlobals.TokenType.GreaterThanOrEqualTo,
+			WolGlobals.TokenType.LessThan,
+			WolGlobals.TokenType.LessThanOrEqualTo,
+			WolGlobals.TokenType.NotEqualTo,
 
-			YarnGlobals.TokenType.And,
-			YarnGlobals.TokenType.Or,
+			WolGlobals.TokenType.And,
+			WolGlobals.TokenType.Or,
 
-			YarnGlobals.TokenType.Xor
+			WolGlobals.TokenType.Xor
 		]
 
 

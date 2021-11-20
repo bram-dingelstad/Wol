@@ -15,7 +15,7 @@ config/icon="res://icon.png"
 
 [autoload]
 
-YarnGlobals="*res://addons/Wol/autoloads/execution_states.gd"
+WolGlobals="*res://addons/Wol/autoloads/execution_states.gd"
 
 [editor_plugins]
 

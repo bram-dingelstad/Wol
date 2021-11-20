@@ -1,13 +1,13 @@
 extends Object
 
-const YarnGlobals = preload("res://addons/Wol/autoloads/execution_states.gd")
+const WolGlobals = preload("res://addons/Wol/autoloads/execution_states.gd")
 
 const NULL_STRING : String = "null"
 const FALSE_STRING : String= "false"
 const TRUE_STRING : String = "true"
 const NANI : String = "NaN"
 
-var type : int = YarnGlobals.ValueType.Nullean
+var type : int = WolGlobals.ValueType.Nullean
 var number : float = 0
 var string : String = ""
 var variable : String = ""
@@ -16,7 +16,7 @@ var boolean : bool = false
 
 func _init(value = NANI):
 	if typeof(value) == TYPE_OBJECT && value.get_script() == self.get_script():
-		if value.type == YarnGlobals.ValueType.Variable:
+		if value.type == WolGlobals.ValueType.Variable:
 			self.type = value.type
 			self.variable = value.variable
 	else:
@@ -24,23 +24,23 @@ func _init(value = NANI):
 
 func value():
 	match type:
-		YarnGlobals.ValueType.Number:
+		WolGlobals.ValueType.Number:
 			return number
-		YarnGlobals.ValueType.Str:
+		WolGlobals.ValueType.Str:
 			return string
-		YarnGlobals.ValueType.Boolean:
+		WolGlobals.ValueType.Boolean:
 			return boolean
-		YarnGlobals.ValueType.Variable:
+		WolGlobals.ValueType.Variable:
 			return variable
 	return null
 
 func as_bool():
 	match type:
-		YarnGlobals.ValueType.Number:
+		WolGlobals.ValueType.Number:
 			return number != 0
-		YarnGlobals.ValueType.Str:
+		WolGlobals.ValueType.Str:
 			return !string.empty()
-		YarnGlobals.ValueType.Boolean:
+		WolGlobals.ValueType.Boolean:
 			return boolean
 	return false
 
@@ -49,37 +49,37 @@ func as_string():
 
 func as_number():
 	match type:
-		YarnGlobals.ValueType.Number:
+		WolGlobals.ValueType.Number:
 			return number
-		YarnGlobals.ValueType.Str:
+		WolGlobals.ValueType.Str:
 			return float(string)
-		YarnGlobals.ValueType.Boolean:
+		WolGlobals.ValueType.Boolean:
 			return 0.0 if !boolean else 1.0
 	return .0
 
 func set_value(value):
 	if value == null || (typeof(value) == TYPE_STRING && value == NANI):
-		type = YarnGlobals.ValueType.Nullean
+		type = WolGlobals.ValueType.Nullean
 		return
 
 	match typeof(value):
 		TYPE_INT,TYPE_REAL:
-			type = YarnGlobals.ValueType.Number
+			type = WolGlobals.ValueType.Number
 			number = value
 		TYPE_STRING:
-			type = YarnGlobals.ValueType.Str
+			type = WolGlobals.ValueType.Str
 			string = value
 		TYPE_BOOL:
-			type = YarnGlobals.ValueType.Boolean
+			type = WolGlobals.ValueType.Boolean
 			boolean = value
 
 #operations >>
 
 #addition
 func add(other):
-	if self.type == YarnGlobals.ValueType.Str || other.type == YarnGlobals.ValueType.Str:
+	if self.type == WolGlobals.ValueType.Str || other.type == WolGlobals.ValueType.Str:
 		return get_script().new("%s%s"%[self.value(),other.value()])
-	if self.type == YarnGlobals.ValueType.Number && other.type == YarnGlobals.ValueType.Number:
+	if self.type == WolGlobals.ValueType.Number && other.type == WolGlobals.ValueType.Number:
 		return get_script().new(self.number + other.number)
 	return null
 
@@ -92,56 +92,56 @@ func equals(other)->bool:
 
 #subtract
 func sub(other):
-	if self.type == YarnGlobals.ValueType.Str || other.type == YarnGlobals.ValueType.Str:
+	if self.type == WolGlobals.ValueType.Str || other.type == WolGlobals.ValueType.Str:
 		return get_script().new(str(value()).replace(str(other.value()),""))
-	if self.type == YarnGlobals.ValueType.Number && other.type == YarnGlobals.ValueType.Number:
+	if self.type == WolGlobals.ValueType.Number && other.type == WolGlobals.ValueType.Number:
 		return get_script().new(self.number - other.number)
 	return null
 
 #multiply
 func mult(other):
-	if self.type == YarnGlobals.ValueType.Number && other.type == YarnGlobals.ValueType.Number:
+	if self.type == WolGlobals.ValueType.Number && other.type == WolGlobals.ValueType.Number:
 		return get_script().new(self.number * other.number)
 	return null
 
 #division
 func div(other):
-	if self.type == YarnGlobals.ValueType.Number && other.type == YarnGlobals.ValueType.Number:
+	if self.type == WolGlobals.ValueType.Number && other.type == WolGlobals.ValueType.Number:
 		return get_script().new(self.number / other.number)
 	return null
 
 #modulus
 func mod(other):
-	if self.type == YarnGlobals.ValueType.Number && other.type == YarnGlobals.ValueType.Number:
+	if self.type == WolGlobals.ValueType.Number && other.type == WolGlobals.ValueType.Number:
 		return get_script().new(self.number % other.number)
 	return null
 
 func negative():
-	if self.type == YarnGlobals.ValueType.Number:
+	if self.type == WolGlobals.ValueType.Number:
 		return get_script().new(-self.number)
 	return null
 
 #greater than other
 func greater(other)->bool:
-	if self.type == YarnGlobals.ValueType.Number && other.type == YarnGlobals.ValueType.Number:
+	if self.type == WolGlobals.ValueType.Number && other.type == WolGlobals.ValueType.Number:
 		return self.number > other.number
 	return false
 
 #less than other
 func less(other)->bool:
-	if self.type == YarnGlobals.ValueType.Number && other.type == YarnGlobals.ValueType.Number:
+	if self.type == WolGlobals.ValueType.Number && other.type == WolGlobals.ValueType.Number:
 		return self.number < other.number
 	return false
 
 #greater than or equal to other
 func geq(other)->bool:
-	if self.type == YarnGlobals.ValueType.Number && other.type == YarnGlobals.ValueType.Number:
+	if self.type == WolGlobals.ValueType.Number && other.type == WolGlobals.ValueType.Number:
 		return self.number > other.number || self.equals(other)
 	return false
 
 #lesser than or equal to other
 func leq(other)->bool:
-	if self.type == YarnGlobals.ValueType.Number && other.type == YarnGlobals.ValueType.Number:
+	if self.type == WolGlobals.ValueType.Number && other.type == WolGlobals.ValueType.Number:
 		return self.number < other.number || self.equals(other)
 	return false
 

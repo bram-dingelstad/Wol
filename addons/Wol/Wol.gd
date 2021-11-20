@@ -10,10 +10,10 @@ signal node_completed(node)
 signal running
 signal finished
 
-const YarnCompiler = preload("res://addons/Wol/core/compiler/compiler.gd")
-const YarnDialogue = preload("res://addons/Wol/core/dialogue.gd")
+const WolCompiler = preload("res://addons/Wol/core/compiler/compiler.gd")
+const WolDialogue = preload("res://addons/Wol/core/dialogue.gd")
 
-export(String, FILE, "*.yarn") var path setget set_path
+export(String, FILE, "*.wol") var path setget set_path
 export(String) var start_node = "Start"
 export(bool) var auto_start = false
 export(NodePath) var variable_storage_path
@@ -44,7 +44,7 @@ func init_dialogue():
 	if dialogue != null:
 		existing_state = dialogue._visitedNodeCount
 
-	dialogue = YarnDialogue.new(variable_storage)
+	dialogue = WolDialogue.new(variable_storage)
 
 	# FIXME: Remove these lines
 	if existing_state:
@@ -64,20 +64,20 @@ func set_path(_path):
 	file.open(_path, File.READ)
 	var source = file.get_as_text()
 	file.close()
-	program = YarnCompiler.compile_string(source, _path)
+	program = WolCompiler.compile_string(source, _path)
 	path = _path
 
 func _handle_line(line):
 	call_deferred('emit_signal', 'line', line)
-	return YarnGlobals.HandlerState.PauseExecution
+	return WolGlobals.HandlerState.PauseExecution
 
 func _handle_command(command):
 	call_deferred('emit_signal', 'command', command)
-	return YarnGlobals.HandlerState.PauseExecution
+	return WolGlobals.HandlerState.PauseExecution
 
 func _handle_options(options):
 	emit_signal('options', options)
-	return YarnGlobals.HandlerState.PauseExecution
+	return WolGlobals.HandlerState.PauseExecution
 
 func _handle_dialogue_complete():
 	emit_signal('finished')
@@ -98,7 +98,7 @@ func _handle_node_start(node):
 func _handle_node_complete(node):
 	emit_signal('node_completed', node)
 	running = false
-	return YarnGlobals.HandlerState.ContinueExecution
+	return WolGlobals.HandlerState.ContinueExecution
 
 func select_option(id):
 	dialogue.get_vm().set_selected_option(id)

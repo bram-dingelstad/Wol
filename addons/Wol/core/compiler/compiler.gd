@@ -1,10 +1,10 @@
 extends Object
 
 const Lexer = preload("res://addons/Wol/core/compiler/lexer.gd")
-const LineInfo = preload("res://addons/Wol/core/program/yarn_line.gd")
-const YarnNode = preload("res://addons/Wol/core/program/yarn_node.gd")
+const LineInfo = preload("res://addons/Wol/core/program/wol_line.gd")
+const WolNode = preload("res://addons/Wol/core/program/wol_node.gd")
 const Instruction = preload("res://addons/Wol/core/program/instruction.gd")
-const YarnProgram = preload("res://addons/Wol/core/program/program.gd")
+const WolProgram = preload("res://addons/Wol/core/program/program.gd")
 const Operand = preload("res://addons/Wol/core/program/operand.gd")
 
 
@@ -23,7 +23,7 @@ var _errors : int
 var _lastError : int
 
 #-----Class vars
-var _currentNode : YarnNode
+var _currentNode : WolNode
 var _rawText : bool
 var _fileName : String
 var _containsImplicitStringTags : bool
@@ -32,10 +32,10 @@ var _labelCount : int = 0
 #<String, LineInfo>
 var _stringTable : Dictionary = {}
 var _stringCount : int = 0
-#<int, YarnGlobals.TokenType>
+#<int, WolGlobals.TokenType>
 var _tokens : Dictionary = {}
 
-static func compile_string(source: String, filename: String) -> YarnProgram:
+static func compile_string(source: String, filename: String) -> WolProgram:
 	var Parser = load("res://addons/Wol/core/compiler/parser.gd")
 	var Compiler = load("res://addons/Wol/core/compiler/compiler.gd")
 
@@ -107,23 +107,23 @@ static func compile_string(source: String, filename: String) -> YarnProgram:
 
 	#--- End parsing nodes---
 
-	var program = YarnProgram.new()
+	var program = WolProgram.new()
 
 	#compile nodes
 	for node in parsedNodes:
 		compiler.compile_node(program, node)
 
 	for key in compiler._stringTable:
-		program.yarnStrings[key] = compiler._stringTable[key]
+		program.wolStrings[key] = compiler._stringTable[key]
 
 	return program
 
-func compile_node(program:YarnProgram,parsedNode)->void:
-	if program.yarnNodes.has(parsedNode.name):
+func compile_node(program:WolProgram,parsedNode)->void:
+	if program.wolNodes.has(parsedNode.name):
 		emit_error(DUPLICATE_NODES_IN_PROGRAM)
 		printerr("Duplicate node in program: %s" % parsedNode.name)
 	else:
-		var nodeCompiled : YarnNode = YarnNode.new()
+		var nodeCompiled : WolNode = WolNode.new()
 
 		nodeCompiled.nodeName = parsedNode.name
 		nodeCompiled.tags = parsedNode.tags
@@ -135,7 +135,7 @@ func compile_node(program:YarnProgram,parsedNode)->void:
 		else:
 			#compile node
 			var startLabel : String = register_label()
-			emit(YarnGlobals.ByteCode.Label,nodeCompiled,[Operand.new(startLabel)])
+			emit(WolGlobals.ByteCode.Label,nodeCompiled,[Operand.new(startLabel)])
 
 			for statement in parsedNode.statements:
 				generate_statement(nodeCompiled,statement)
@@ -146,19 +146,19 @@ func compile_node(program:YarnProgram,parsedNode)->void:
 
 			var danglingOptions = false
 			for instruction in nodeCompiled.instructions :
-				if instruction.operation == YarnGlobals.ByteCode.AddOption:
+				if instruction.operation == WolGlobals.ByteCode.AddOption:
 					danglingOptions = true
-				if instruction.operation == YarnGlobals.ByteCode.ShowOptions:
+				if instruction.operation == WolGlobals.ByteCode.ShowOptions:
 					danglingOptions = false
 
 			if danglingOptions:
-				emit(YarnGlobals.ByteCode.ShowOptions, nodeCompiled)
-				emit(YarnGlobals.ByteCode.RunNode, nodeCompiled)
+				emit(WolGlobals.ByteCode.ShowOptions, nodeCompiled)
+				emit(WolGlobals.ByteCode.RunNode, nodeCompiled)
 			else:
-				emit(YarnGlobals.ByteCode.Stop, nodeCompiled)
+				emit(WolGlobals.ByteCode.Stop, nodeCompiled)
 
 			
-		program.yarnNodes[nodeCompiled.nodeName] = nodeCompiled
+		program.wolNodes[nodeCompiled.nodeName] = nodeCompiled
 
 func register_string(text:String,nodeName:String,id:String="",lineNumber:int=-1,tags:Array=[])->String:
 	var lineIdUsed : String
@@ -189,7 +189,7 @@ func register_label(comment:String="")->String:
 	_labelCount+=1
 	return  "L%s%s" %[ _labelCount , comment]
 
-func emit(bytecode,node:YarnNode=_currentNode,operands:Array=[]):
+func emit(bytecode,node:WolNode=_currentNode,operands:Array=[]):
 	var instruction : Instruction = Instruction.new(null)
 	instruction.operation = bytecode
 	instruction.operands = operands
@@ -199,7 +199,7 @@ func emit(bytecode,node:YarnNode=_currentNode,operands:Array=[]):
 		printerr("trying to emit to null node with byteCode: %s" % bytecode)
 		return;
 	node.instructions.append(instruction)
-	if bytecode == YarnGlobals.ByteCode.Label :
+	if bytecode == WolGlobals.ByteCode.Label :
 		#add to label table
 		node.labels[instruction.operands[0].value] = node.instructions.size()-1
 
@@ -217,19 +217,19 @@ func generate_header():
 func generate_statement(node,statement):
 	# print("generating statement")
 	match statement.type:
-		YarnGlobals.StatementTypes.CustomCommand:
+		WolGlobals.StatementTypes.CustomCommand:
 			generate_custom_command(node,statement.customCommand)
-		YarnGlobals.StatementTypes.ShortcutOptionGroup:
+		WolGlobals.StatementTypes.ShortcutOptionGroup:
 			generate_shortcut_group(node,statement.shortcutOptionGroup)
-		YarnGlobals.StatementTypes.Block:
+		WolGlobals.StatementTypes.Block:
 			generate_block(node,statement.block.statements)
-		YarnGlobals.StatementTypes.IfStatement:
+		WolGlobals.StatementTypes.IfStatement:
 			generate_if(node,statement.ifStatement)
-		YarnGlobals.StatementTypes.OptionStatement:
+		WolGlobals.StatementTypes.OptionStatement:
 			generate_option(node,statement.optionStatement)
-		YarnGlobals.StatementTypes.AssignmentStatement:
+		WolGlobals.StatementTypes.AssignmentStatement:
 			generate_assignment(node,statement.assignment)
-		YarnGlobals.StatementTypes.Line:
+		WolGlobals.StatementTypes.Line:
 			generate_line(node,statement,statement.line)
 		_:
 			emit_error(ERR_COMPILATION_FAILED)
@@ -244,15 +244,15 @@ func generate_custom_command(node,command):
 	else:
 		var commandString = command.clientCommand
 		if commandString == "stop":
-			emit(YarnGlobals.ByteCode.Stop,node)
+			emit(WolGlobals.ByteCode.Stop,node)
 		else :
-			emit(YarnGlobals.ByteCode.RunCommand,node,[Operand.new(commandString)])
+			emit(WolGlobals.ByteCode.RunCommand,node,[Operand.new(commandString)])
 
 #compile instructions for linetags and use them
 # \#line:number
 func generate_line(node,statement,line:String):
 	var num : String = register_string(line,node.nodeName,"",statement.lineNumber,[]);
-	emit(YarnGlobals.ByteCode.RunLine,node,[Operand.new(num)])
+	emit(WolGlobals.ByteCode.RunLine,node,[Operand.new(num)])
 
 func generate_shortcut_group(node,shortcutGroup):
 	# print("generating shortcutoptopn group")
@@ -271,37 +271,37 @@ func generate_shortcut_group(node,shortcutGroup):
 		if option.condition != null :
 			endofClause = register_label("conditional_%s"%optionCount)
 			generate_expression(node,option.condition)
-			emit(YarnGlobals.ByteCode.JumpIfFalse,node,[Operand.new(endofClause)])
+			emit(WolGlobals.ByteCode.JumpIfFalse,node,[Operand.new(endofClause)])
 
 		var labelLineId : String  = ""#no tag TODO: ADD TAG SUPPORT
 		var labelStringId : String = register_string(option.label,node.nodeName,
 			labelLineId,option.lineNumber,[])
 		
-		emit(YarnGlobals.ByteCode.AddOption,node,[Operand.new(labelStringId),Operand.new(opDestination)])
+		emit(WolGlobals.ByteCode.AddOption,node,[Operand.new(labelStringId),Operand.new(opDestination)])
 
 		if option.condition != null :
-			emit(YarnGlobals.ByteCode.Label,node,[Operand.new(endofClause)])
-			emit(YarnGlobals.ByteCode.Pop,node)
+			emit(WolGlobals.ByteCode.Label,node,[Operand.new(endofClause)])
+			emit(WolGlobals.ByteCode.Pop,node)
 
 		optionCount+=1
 	
-	emit(YarnGlobals.ByteCode.ShowOptions,node)
-	emit(YarnGlobals.ByteCode.Jump,node)
+	emit(WolGlobals.ByteCode.ShowOptions,node)
+	emit(WolGlobals.ByteCode.Jump,node)
 
 	optionCount = 0
 
 	for option in shortcutGroup.options:
-		emit(YarnGlobals.ByteCode.Label,node,[Operand.new(labels[optionCount])])
+		emit(WolGlobals.ByteCode.Label,node,[Operand.new(labels[optionCount])])
 
 		if option.node != null :
 			generate_block(node,option.node.statements)
-		emit(YarnGlobals.ByteCode.JumpTo,node,[Operand.new(end)])
+		emit(WolGlobals.ByteCode.JumpTo,node,[Operand.new(end)])
 		optionCount+=1
 
 	#end of option group
-	emit(YarnGlobals.ByteCode.Label,node,[Operand.new(end)])
+	emit(WolGlobals.ByteCode.Label,node,[Operand.new(end)])
 	#clean up
-	emit(YarnGlobals.ByteCode.Pop,node)
+	emit(WolGlobals.ByteCode.Pop,node)
 
 
 
@@ -325,19 +325,19 @@ func generate_if(node,ifStatement):
 
 		if clause.expression!=null:	
 			generate_expression(node,clause.expression)
-			emit(YarnGlobals.ByteCode.JumpIfFalse,node,[Operand.new(endClause)])
+			emit(WolGlobals.ByteCode.JumpIfFalse,node,[Operand.new(endClause)])
 		
 		generate_block(node,clause.statements)
-		emit(YarnGlobals.ByteCode.JumpTo,node,[Operand.new(endif)])
+		emit(WolGlobals.ByteCode.JumpTo,node,[Operand.new(endif)])
 
 		if clause.expression!=null:
-			emit(YarnGlobals.ByteCode.Label,node,[Operand.new(endClause)])
+			emit(WolGlobals.ByteCode.Label,node,[Operand.new(endClause)])
 
 		if clause.expression!=null:
-			emit(YarnGlobals.ByteCode.Pop)
+			emit(WolGlobals.ByteCode.Pop)
 
 		
-	emit(YarnGlobals.ByteCode.Label,node,[Operand.new(endif)])
+	emit(WolGlobals.ByteCode.Label,node,[Operand.new(endif)])
 
 
 #compile instructions for options
@@ -347,25 +347,25 @@ func generate_option(node,option):
 
 	if option.label == null || option.label.empty():
 		#jump to another node
-		emit(YarnGlobals.ByteCode.RunNode,node,[Operand.new(destination)])
+		emit(WolGlobals.ByteCode.RunNode,node,[Operand.new(destination)])
 	else :
 		var lineID : String = ""#tags not supported TODO: ADD TAG SUPPORT
 		var stringID = register_string(option.label,node.nodeName,lineID,option.lineNumber,[])
 
-		emit(YarnGlobals.ByteCode.AddOption,node,[Operand.new(stringID),Operand.new(destination)])
+		emit(WolGlobals.ByteCode.AddOption,node,[Operand.new(stringID),Operand.new(destination)])
 
 
 #compile instructions for assigning values
 func generate_assignment(node,assignment):
 	# print("generating assign")
 	#assignment
-	if assignment.operation == YarnGlobals.TokenType.EqualToOrAssign:
+	if assignment.operation == WolGlobals.TokenType.EqualToOrAssign:
 		#evaluate the expression to a value for the stack
 		generate_expression(node,assignment.value)
 	else :
 		#this is combined op
 		#get value of var
-		emit(YarnGlobals.ByteCode.PushVariable,node,[assignment.destination])
+		emit(WolGlobals.ByteCode.PushVariable,node,[assignment.destination])
 
 		#evaluate the expression and push value to stack
 		generate_expression(node,assignment.value)
@@ -373,27 +373,27 @@ func generate_assignment(node,assignment):
 		#stack contains oldvalue and result
 
 		match assignment.operation:
-			YarnGlobals.TokenType.AddAssign:
-				emit(YarnGlobals.ByteCode.CallFunc,node,
-					[Operand.new(YarnGlobals.token_type_name(YarnGlobals.TokenType.Add))])
-			YarnGlobals.TokenType.MinusAssign:
-				emit(YarnGlobals.ByteCode.CallFunc,node,
-					[Operand.new(YarnGlobals.token_type_name(YarnGlobals.TokenType.Minus))])
-			YarnGlobals.TokenType.MultiplyAssign:
-				emit(YarnGlobals.ByteCode.CallFunc,node,
-					[Operand.new(YarnGlobals.token_type_name(YarnGlobals.TokenType.MultiplyAssign))])
-			YarnGlobals.TokenType.DivideAssign:
-				emit(YarnGlobals.ByteCode.CallFunc,node,
-					[Operand.new(YarnGlobals.token_type_name(YarnGlobals.TokenType.DivideAssign))])
+			WolGlobals.TokenType.AddAssign:
+				emit(WolGlobals.ByteCode.CallFunc,node,
+					[Operand.new(WolGlobals.token_type_name(WolGlobals.TokenType.Add))])
+			WolGlobals.TokenType.MinusAssign:
+				emit(WolGlobals.ByteCode.CallFunc,node,
+					[Operand.new(WolGlobals.token_type_name(WolGlobals.TokenType.Minus))])
+			WolGlobals.TokenType.MultiplyAssign:
+				emit(WolGlobals.ByteCode.CallFunc,node,
+					[Operand.new(WolGlobals.token_type_name(WolGlobals.TokenType.MultiplyAssign))])
+			WolGlobals.TokenType.DivideAssign:
+				emit(WolGlobals.ByteCode.CallFunc,node,
+					[Operand.new(WolGlobals.token_type_name(WolGlobals.TokenType.DivideAssign))])
 			_:
 				printerr("Unable to generate assignment")
 
 	#stack contains destination value
 	#store the top of the stack in variable
-	emit(YarnGlobals.ByteCode.StoreVariable,node,[Operand.new(assignment.destination)])
+	emit(WolGlobals.ByteCode.StoreVariable,node,[Operand.new(assignment.destination)])
 
 	#clean stack
-	emit(YarnGlobals.ByteCode.Pop,node)
+	emit(WolGlobals.ByteCode.Pop,node)
 
 
 #compile expression instructions
@@ -401,18 +401,18 @@ func generate_expression(node,expression):
 	# print("generating expression")
 	#expression = value || func call
 	match expression.type:
-		YarnGlobals.ExpressionType.Value:
+		WolGlobals.ExpressionType.Value:
 			generate_value(node,expression.value)
-		YarnGlobals.ExpressionType.FunctionCall:
+		WolGlobals.ExpressionType.FunctionCall:
 			#eval all parameters
 			for param in expression.params:
 				generate_expression(node,param)
 			
 			#put the num of of params to stack
-			emit(YarnGlobals.ByteCode.PushNumber,node,[Operand.new(expression.params.size())])
+			emit(WolGlobals.ByteCode.PushNumber,node,[Operand.new(expression.params.size())])
 
 			#call function
-			emit(YarnGlobals.ByteCode.CallFunc,node,[Operand.new(expression.function)])
+			emit(WolGlobals.ByteCode.CallFunc,node,[Operand.new(expression.function)])
 		_:
 			printerr("no expression")
 
@@ -421,18 +421,18 @@ func generate_value(node,value):
 	# print("generating value")
 	#push value to stack
 	match value.value.type:
-		YarnGlobals.ValueType.Number:
-			emit(YarnGlobals.ByteCode.PushNumber,node,[Operand.new(value.value.as_number())])
-		YarnGlobals.ValueType.Str:
+		WolGlobals.ValueType.Number:
+			emit(WolGlobals.ByteCode.PushNumber,node,[Operand.new(value.value.as_number())])
+		WolGlobals.ValueType.Str:
 			var id : String = register_string(value.value.as_string(),
 				node.nodeName,"",value.lineNumber,[])
-			emit(YarnGlobals.ByteCode.PushString,node,[Operand.new(id)])
-		YarnGlobals.ValueType.Boolean:
-			emit(YarnGlobals.ByteCode.PushBool,node,[Operand.new(value.value.as_bool())])
-		YarnGlobals.ValueType.Variable:
-			emit(YarnGlobals.ByteCode.PushVariable,node,[Operand.new(value.value.variable)])
-		YarnGlobals.ValueType.Nullean:
-			emit(YarnGlobals.ByteCode.PushNull,node)
+			emit(WolGlobals.ByteCode.PushString,node,[Operand.new(id)])
+		WolGlobals.ValueType.Boolean:
+			emit(WolGlobals.ByteCode.PushBool,node,[Operand.new(value.value.as_bool())])
+		WolGlobals.ValueType.Variable:
+			emit(WolGlobals.ByteCode.PushVariable,node,[Operand.new(value.value.variable)])
+		WolGlobals.ValueType.Nullean:
+			emit(WolGlobals.ByteCode.PushNull,node)
 		_:
 			printerr("Unrecognized valuenode type: %s" % value.value.type)
 
@@ -458,6 +458,6 @@ static func print_tokens(tokens:Array=[]):
 	var list : PoolStringArray = []
 	list.append("\n")
 	for token in tokens:
-		list.append("%s (%s line %s)\n"%[YarnGlobals.token_type_name(token.type),token.value,token.lineNumber])
+		list.append("%s (%s line %s)\n"%[WolGlobals.token_type_name(token.type),token.value,token.lineNumber])
 	print("TOKENS:")
 	print(list.join(""))

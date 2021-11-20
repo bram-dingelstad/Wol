@@ -5,9 +5,9 @@ const FMF_PLACEHOLDE = "<VALUE PLACEHOLDER>"
 
 const StandardLibrary = preload("res://addons/Wol/core/libraries/standard.gd")
 const VirtualMachine = preload("res://addons/Wol/core/virtual_machine.gd")
-const YarnLibrary = preload("res://addons/Wol/core/library.gd")
+const WolLibrary = preload("res://addons/Wol/core/library.gd")
 const Value = preload("res://addons/Wol/core/value.gd")
-const YarnProgram = preload("res://addons/Wol/core/program/program.gd")
+const WolProgram = preload("res://addons/Wol/core/program/program.gd")
 
 var _variableStorage
 
@@ -26,7 +26,7 @@ var executionComplete : bool
 func _init(variableStorage):
 	_variableStorage = variableStorage
 	_vm = VirtualMachine.new(self)
-	library = YarnLibrary.new()
+	library = WolLibrary.new()
 	_debugLog = funcref(self, "dlog")
 	_errLog = funcref(self, "elog")
 	executionComplete = false
@@ -49,7 +49,7 @@ func elog(message:String):
 	print("YARN_ERROR : %s" % message)
 
 func is_active():
-	return get_exec_state() != YarnGlobals.ExecutionState.Stopped
+	return get_exec_state() != WolGlobals.ExecutionState.Stopped
 
 #gets the current execution state of the virtual machine
 func get_exec_state():
@@ -62,7 +62,7 @@ func set_node(name:String = DEFAULT_START):
 	_vm.set_node(name)
 
 func resume():
-	if _vm.executionState == YarnGlobals.ExecutionState.Running:
+	if _vm.executionState == WolGlobals.ExecutionState.Running:
 		print('BLOCKED')
 		return
 	_vm.resume()
@@ -74,7 +74,7 @@ func stop():
 	_vm.stop()
 
 func get_all_nodes():
-	return _program.yarnNodes.keys()
+	return _program.wolNodes.keys()
 
 func current_node():
 	return _vm.get_current()
@@ -116,7 +116,7 @@ func is_node_visited(node = _vm.current_node_name()):
 
 func node_visit_count(node = _vm.current_node_name()):
 	if node is Value:
-		node = _program.yarnStrings[node.value()].text
+		node = _program.wolStrings[node.value()].text
 
 	var visitCount : int = 0
 	if _visitedNodeCount.has(node):

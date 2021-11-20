@@ -2,14 +2,14 @@ extends Node
 
 #VM Execution States
 
-enum ExecutionState{
+enum ExecutionState {
 	Stopped,
 	Running,
 	WaitingForOption,
 	Suspended
 }
 
-enum HandlerState{
+enum HandlerState {
 	PauseExecution,
 	ContinueExecution
 }
@@ -19,7 +19,7 @@ enum CompileStatus {
 	Succeeded, SucceededUntaggedStrings,
 }
 
-enum ByteCode{
+enum ByteCode {
 		# opA = string: label name
 		Label,
 		# opA = string: label name
@@ -75,16 +75,16 @@ enum TokenType {
 	#7 '#'
 	TagMarker,
 
-	#8 Command syntax ("<<foo>>")
+	#8 Command syntax ('<<foo>>')
 	BeginCommand, EndCommand,
 
-	#10 Variables ("$foo")
+	#10 Variables ('$foo')
 	Variable,
 
-	#11 Shortcut syntax ("->")
+	#11 Shortcut syntax ('->')
 	ShortcutOption,
 
-	#12 Option syntax ("[[Let's go here|Destination]]")
+	#12 Option syntax ('[[Let's go here|Destination]]')
 	OptionStart, # [[
 	OptionDelimit, # |
 	OptionEnd, # ]]
@@ -147,12 +147,12 @@ enum TokenType {
 }
 
 
-enum ExpressionType{
+enum ExpressionType {
 	Value, FunctionCall
 }
 
 
-enum StatementTypes{
+enum StatementTypes j{
 	CustomCommand,
 	ShortcutOptionGroup,
 	Block,
@@ -162,12 +162,12 @@ enum StatementTypes{
 	Line
 }
 
-enum ValueType{
+enum ValueType {
 	Number,
 	Str,
 	Boolean,
 	Variable,
-	Nullean#null lel
+	Nullean
 }
 
 func defaultValue(type):
@@ -177,16 +177,14 @@ static func token_type_name(value:int)->String:
 	for key in TokenType.keys():
 		if TokenType[key] == value:
 			return key
-	return "NOTVALID"
+	return 'NOTVALID'
 
 static func merge_dir(target, patch):
 	for key in patch:
 		target[key] = patch[key]
-	
 
-#same as top one woops
 func token_name(type)->String:
-	var string : String = ""
+	var string : String = ''
 	
 	for key in TokenType.keys():
 		if TokenType[key] == type:
@@ -195,40 +193,40 @@ func token_name(type)->String:
 
 func bytecode_name(bytecode):
 	return [
-		"Label",
-		"JumpTo",
-		"Jump",
-		"RunLine",
-		"RunCommand",
-		"AddOption",
-		"ShowOptions",
-		"PushString",
-		"PushNumber",
-		"PushBool",
-		"PushNull",
-		"JumpIfFalse",
-		"Pop",
-		"CallFunc",
-		"PushVariable",
-		"StoreVariable",
-		"Stop",
-		"RunNode"
+		'Label',
+		'JumpTo',
+		'Jump',
+		'RunLine',
+		'RunCommand',
+		'AddOption',
+		'ShowOptions',
+		'PushString',
+		'PushNumber',
+		'PushBool',
+		'PushNull',
+		'JumpIfFalse',
+		'Pop',
+		'CallFunc',
+		'PushVariable',
+		'StoreVariable',
+		'Stop',
+		'RunNode'
 	][bytecode]
 
 #combine all the programs in the provided array
-static func combine_programs(programs : Array = []):
-	var YarnProgram = load("res://addons/Wol/core/program/program.gd")
+static func combine_programs(programs = []):
+	var WolProgram = load('res://addons/Wol/core/program/program.gd')
 	if programs.size() == 0:
-		printerr("no programs to combine - you failure")
+		printerr('no programs to combine - you failure')
 		return
-	var p = YarnProgram.new()
+	var p = WolProgram.new()
 
 	for program in programs:
-		for nodeKey in program.yarnNodes.keys():
-			if p.yarnNodes.has(nodeKey):
-				printerr("Program with duplicate node names %s "% nodeKey)
+		for nodeKey in program.wolNodes.keys():
+			if p.wolNodes.has(nodeKey):
+				printerr('Program with duplicate node names %s '% nodeKey)
 				return
-			p.yarnNodes[nodeKey] = program.yarnNodes[nodeKey]
+			p.wolNodes[nodeKey] = program.wolNodes[nodeKey]
 
 	return p
 

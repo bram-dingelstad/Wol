@@ -14,4 +14,4 @@ func dump(program,library)->String:
 	return "InstructionInformation:NotImplemented"
 
 func _to_string():
-	return YarnGlobals.bytecode_name(operation) + ':' + operands as String
+	return WolGlobals.bytecode_name(operation) + ':' + operands as String
