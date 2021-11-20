@@ -28,6 +28,9 @@ custom_fonts/normal_font = ExtResource( 1 )
 text = "Here is where the dialogue will go.
 
 Run the scene in order to see how \"wol\" works."
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="VBoxContainer" type="VBoxContainer" parent="."]
 anchor_right = 1.0
@@ -45,4 +48,7 @@ margin_bottom = 66.0
 custom_fonts/font = ExtResource( 1 )
 text = "This is a dialogue option"
 
+[node name="Tween" type="Tween" parent="."]
+
 [connection signal="line" from="Wol" to="." method="_on_Wol_line"]
+[connection signal="options" from="Wol" to="." method="_on_Wol_options"]

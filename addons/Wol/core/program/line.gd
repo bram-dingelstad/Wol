@@ -1,16 +1,16 @@
 extends Object
+class_name WolLine
 
-var text : String
-var nodeName : String
-var lineNumber : int
-var fileName : String
-var implicit : bool
-var meta : Array = []
+var text = ''
+var nodeName = ''
+var lineNumber = -1
+var fileName = ''
+var implicit = false
+var meta = []
 
-func _init(text:String, nodeName:String, lineNumber:int, fileName:String, implicit:bool, meta:Array):
-    self.text = text
-    self.nodeName = nodeName
-    self.fileName = fileName
-    self.implicit = implicit
-    self.meta = meta
-
+func _init(text, nodeName, lineNumber, fileName, implicit, meta):
+	self.text = text
+	self.nodeName = nodeName
+	self.fileName = fileName
+	self.implicit = implicit
+	self.meta = meta

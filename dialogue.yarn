@@ -6,7 +6,7 @@ position: -1892,-1013
 <<load_situation The Revolver>>
 <<animation elevator door open>>
 
-Masami: Gina, this way!
+Masami: Gina, this way! #line:5d7a7c
 Gina: Patience! I’m coming.
 >Still, she didn’t pick up her pace and kept hesitantly looking around.<
 Masami: Everything should be fine, let’s just go. We won.
@@ -14,7 +14,7 @@ Masami: Unless you are planning on backstabbing me at the finish line, that is.
 Gina: How funny. You are not that special.
 Masami: Har har. Now start walking or I’ll carry you out the front door.
 Masami: I don’t want to give Monokuma the time to come up with a new death game for two while we are trying to get through the exit.
-Gina: …
+Gina: ...
 
 <<zoom to vault door>>
 
@@ -29,8 +29,8 @@ Masami: The reception desk?
 
 <<zoom to gun>>
 
-Masami: A paper and…
-Masami: … That’s a gun.
+Masami: A paper and...
+Masami: ... That’s a gun.
 Gina: A revolver, in fact. Such an old fashioned choice of firearm. Though, I appreciate the aesthetic. How pretty.
 Masami: I don’t like this. Why is it here?
 >I took the paper from the table and briskly unfolded it.<

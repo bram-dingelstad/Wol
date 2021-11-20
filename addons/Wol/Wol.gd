@@ -68,7 +68,9 @@ func set_path(_path):
 	path = _path
 
 func _handle_line(line):
-	call_deferred('emit_signal', 'line', line)
+	var id = line.id
+	var string = program.wolStrings[id]
+	call_deferred('emit_signal', 'line', string)
 	return WolGlobals.HandlerState.PauseExecution
 
 func _handle_command(command):

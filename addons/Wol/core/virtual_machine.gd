@@ -265,6 +265,7 @@ func run_instruction(instruction)->bool:
 			var name : String = instruction.operands[0].value
 			var loaded = _dialogue._variableStorage.get_value(name)
 			_state.push_value(loaded)
+
 		WolGlobals.ByteCode.StoreVariable:
 			#store top stack value to variable
 			var top = _state.peek_value()
@@ -298,13 +299,14 @@ func run_instruction(instruction)->bool:
 			# add an option to current state
 			var key = instruction.operands[0].value
 
-			var line  = Line.new(key, _program.wolStrings[key])
+			var line  = Line.new(key)
 
 			if instruction.operands.size() > 2:
 				pass #formated text options
 			
 			# line to show and node name
 			_state.currentOptions.append(SimpleEntry.new(line,instruction.operands[1].value))
+
 		WolGlobals.ByteCode.ShowOptions:
 			#show options - stop if none
 			if _state.currentOptions.size() == 0:

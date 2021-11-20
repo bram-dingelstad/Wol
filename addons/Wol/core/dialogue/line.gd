@@ -1,7 +1,8 @@
 extends Object
+# class_name DialogueLine
 
-var id : String
-var substitutions : Array = []#String
+var id = ''
+var substitutions = []
 
-func _init(id: String):
+func _init(id):
 	self.id = id
