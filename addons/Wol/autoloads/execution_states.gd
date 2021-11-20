@@ -1,7 +1,5 @@
 extends Node
 
-#VM Execution States
-
 enum ExecutionState {
 	Stopped,
 	Running,
@@ -152,7 +150,7 @@ enum ExpressionType {
 }
 
 
-enum StatementTypes j{
+enum StatementTypes {
 	CustomCommand,
 	ShortcutOptionGroup,
 	Block,

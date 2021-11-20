@@ -36,14 +36,13 @@ func _init(dialogue):
 	self._dialogue = dialogue
 	_state = VmState.new()
 
-
 func set_program(program):
 	_program = program
 
 #set the node to run
 #return true if successeful false if no node
 #of that name found
-func set_node(name:String)->bool:
+func set_node(name:String) -> bool:
 	if _program == null || _program.wolNodes.size() == 0:
 		printerr("Could not load %s : no nodes loaded" % name)
 		return false
@@ -160,17 +159,18 @@ func find_label_instruction(label:String)->int:
 func run_instruction(instruction)->bool:
 	match instruction.operation:
 		WolGlobals.ByteCode.Label:
-			#do nothing woooo!
 			pass
+
 		WolGlobals.ByteCode.JumpTo:
 			#jump to named label
 			_state .programCounter = find_label_instruction(instruction.operands[0].value)-1
+
 		WolGlobals.ByteCode.RunLine:
 			#look up string from string table
 			#pass it to client as line
 			var key = instruction.operands[0].value
 
-			var line = Line.new(key, _program.wolStrings[key])
+			var line = Line.new(key)
 
 			#the second operand is the expression count
 			# of format function
@@ -183,7 +183,6 @@ func run_instruction(instruction)->bool:
 			if pause == WolGlobals.HandlerState.PauseExecution:
 				executionState = WolGlobals.ExecutionState.Suspended
 			
-
 		WolGlobals.ByteCode.RunCommand:
 			var commandText : String = instruction.operands[0].value
 
@@ -196,13 +195,14 @@ func run_instruction(instruction)->bool:
 			if pause == WolGlobals.HandlerState.PauseExecution:
 				executionState = WolGlobals.ExecutionState.Suspended
 
-				
 		WolGlobals.ByteCode.PushString:
 			#push String var to stack
 			_state.push_value(instruction.operands[0].value)
+
 		WolGlobals.ByteCode.PushNumber:
 			#push number to stack
 			_state.push_value(instruction.operands[0].value)
+
 		WolGlobals.ByteCode.PushBool:
 			#push boolean to stack
 			_state.push_value(instruction.operands[0].value)
@@ -220,9 +220,11 @@ func run_instruction(instruction)->bool:
 			#jump to label whose name is on the stack
 			var dest : String = _state.peek_value().as_string()
 			_state.programCounter = find_label_instruction(dest)-1
+
 		WolGlobals.ByteCode.Pop:
 			#pop value from stack
 			_state.pop_value()
+
 		WolGlobals.ByteCode.CallFunc:
 			#call function with params on stack
 			#push any return value to stack
@@ -257,7 +259,6 @@ func run_instruction(instruction)->bool:
 
 			if function.returnsValue:
 				_state.push_value(result)
-			pass
 
 		WolGlobals.ByteCode.PushVariable:
 			#get content of variable and push to stack
@@ -326,7 +327,6 @@ func run_instruction(instruction)->bool:
 			#when user makes selection
 
 			optionsHandler.call_func(choices)
-			pass
 		_:
 			#bytecode messed up woopsise
 			executionState = WolGlobals.ExecutionState.Stopped

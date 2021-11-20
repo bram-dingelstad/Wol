@@ -7,14 +7,14 @@ signal options(options)
 signal command(command)
 signal node_completed(node)
 
-signal running
+signal started
 signal finished
 
-const WolCompiler = preload("res://addons/Wol/core/compiler/compiler.gd")
-const WolDialogue = preload("res://addons/Wol/core/dialogue.gd")
+const WolCompiler = preload('res://addons/Wol/core/compiler/compiler.gd')
+const WolDialogue = preload('res://addons/Wol/core/dialogue.gd')
 
-export(String, FILE, "*.wol") var path setget set_path
-export(String) var start_node = "Start"
+export(String, FILE, '*.wol,*.yarn') var path setget set_path
+export(String) var start_node = 'Start'
 export(bool) var auto_start = false
 export(NodePath) var variable_storage_path
 
@@ -50,12 +50,12 @@ func init_dialogue():
 	if existing_state:
 		dialogue._visitedNodeCount = existing_state
 
-	dialogue.get_vm().lineHandler = funcref(self, "_handle_line")
-	dialogue.get_vm().optionsHandler = funcref(self, "_handle_options")
-	dialogue.get_vm().commandHandler = funcref(self, "_handle_command")
-	dialogue.get_vm().nodeCompleteHandler = funcref(self, "_handle_node_complete")
-	dialogue.get_vm().dialogueCompleteHandler = funcref(self, "_handle_dialogue_complete")
-	dialogue.get_vm().nodeStartHandler = funcref(self, "_handle_node_start")
+	dialogue.get_vm().lineHandler = funcref(self, '_handle_line')
+	dialogue.get_vm().optionsHandler = funcref(self, '_handle_options')
+	dialogue.get_vm().commandHandler = funcref(self, '_handle_command')
+	dialogue.get_vm().nodeCompleteHandler = funcref(self, '_handle_node_complete')
+	dialogue.get_vm().dialogueCompleteHandler = funcref(self, '_handle_dialogue_complete')
+	dialogue.get_vm().nodeStartHandler = funcref(self, '_handle_node_start')
 
 	dialogue.set_program(program)
 
@@ -73,10 +73,14 @@ func _handle_line(line):
 
 func _handle_command(command):
 	call_deferred('emit_signal', 'command', command)
-	return WolGlobals.HandlerState.PauseExecution
+
+	if get_signal_connection_list('command').size() > 0:
+		return WolGlobals.HandlerState.PauseExecution
+	else:
+		return WolGlobals.HandlerState.ContinueExecution
 
 func _handle_options(options):
-	emit_signal('options', options)
+	call_deferred('emit_signal' ,'options', options)
 	return WolGlobals.HandlerState.PauseExecution
 
 func _handle_dialogue_complete():
@@ -111,7 +115,7 @@ func start(node = start_node):
 		return
 
 	init_dialogue()
-	emit_signal('running')
+	emit_signal('started')
 
 	running = true
 	dialogue.set_node(node)

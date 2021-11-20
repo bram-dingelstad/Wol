@@ -1,8 +1,8 @@
 extends Object
 
 const Lexer = preload("res://addons/Wol/core/compiler/lexer.gd")
-const LineInfo = preload("res://addons/Wol/core/program/wol_line.gd")
-const WolNode = preload("res://addons/Wol/core/program/wol_node.gd")
+const LineInfo = preload("res://addons/Wol/core/program/line.gd")
+const WolNode = preload("res://addons/Wol/core/program/node.gd")
 const Instruction = preload("res://addons/Wol/core/program/instruction.gd")
 const WolProgram = preload("res://addons/Wol/core/program/program.gd")
 const Operand = preload("res://addons/Wol/core/program/operand.gd")
