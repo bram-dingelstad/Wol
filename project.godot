@@ -38,7 +38,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="YarnSpinner"
+config/name="Wol"
 run/main_scene="res://Dialogue.tscn"
 config/icon="res://icon.png"
 

@@ -19,13 +19,13 @@ export(String, FILE, '*.wol,*.yarn') var path setget set_path
 export(String) var start_node = 'Start'
 export(bool) var auto_start = false
 export(NodePath) var variable_storage_path
+export var auto_show_options = true
 
 onready var variable_storage = get_node(variable_storage_path)
 
 var program
 
 var dialogue
-var running = false
 
 func _ready():
 	if Engine.editor_hint:
@@ -62,18 +62,21 @@ func init_dialogue():
 	dialogue.set_program(program)
 
 func set_path(_path):
-	var file = File.new()
-	file.open(_path, File.READ)
-	var source = file.get_as_text()
-	file.close()
-	program = WolCompiler.compile_string(source, _path)
+	if not Engine.editor_hint:
+		var file = File.new()
+		file.open(_path, File.READ)
+		var source = file.get_as_text()
+		file.close()
+		program = WolCompiler.compile_string(source, _path)
 	path = _path
 
 func _handle_line(line):
-	var id = line.id
-	var string = program.strings[id]
-	call_deferred('emit_signal', 'line', string)
-	return Constants.HandlerState.PauseExecution
+	call_deferred('emit_signal', 'line', line)
+	if auto_show_options \
+			and dialogue.get_vm().get_next_instruction().operation == Constants.ByteCode.AddOption:
+		return Constants.HandlerState.ContinueExecution
+	else:
+		return Constants.HandlerState.PauseExecution
 
 func _handle_command(command):
 	call_deferred('emit_signal', 'command', command)
@@ -84,16 +87,14 @@ func _handle_command(command):
 		return Constants.HandlerState.ContinueExecution
 
 func _handle_options(options):
-	call_deferred('emit_signal' ,'options', options)
+	call_deferred('emit_signal', 'options', options)
 	return Constants.HandlerState.PauseExecution
 
 func _handle_dialogue_complete():
 	emit_signal('finished')
-	running = false
 
 func _handle_node_start(node):
 	emit_signal('node_started', node)
-	print('node started')
 	dialogue.resume()
 
 	if !dialogue._visitedNodeCount.has(node):
@@ -101,28 +102,23 @@ func _handle_node_start(node):
 	else:
 		dialogue._visitedNodeCount[node] += 1
 
-	print(dialogue._visitedNodeCount)
-
 func _handle_node_complete(node):
 	emit_signal('node_completed', node)
-	running = false
 	return Constants.HandlerState.ContinueExecution
 
 func select_option(id):
 	dialogue.get_vm().set_selected_option(id)
+	resume()
 
 func pause():
 	dialogue.call_deferred('pause')
 
 func start(node = start_node):
-	if running:
-		return
-
 	init_dialogue()
 	emit_signal('started')
 
-	running = true
 	dialogue.set_node(node)
+	dialogue.start()
 
 func resume():
 	dialogue.call_deferred('resume')

@@ -72,6 +72,7 @@ static func compile_string(source: String, filename: String):
 					var value : String = result.get_string('value')
 
 					if field == 'title':
+						assert(not ' ' in value, 'No space allowed in title "%s", correct to "%s"' % [value, value.replace(' ','')])
 						title = value
 
 			if(line_number >= source_lines.size() || source_lines[line_number] == '---'):
@@ -83,7 +84,7 @@ static func compile_string(source: String, filename: String):
 		#past header
 		var body_lines : PoolStringArray = []
 		
-		while line_number < source_lines.size() && source_lines[line_number]!='===':
+		while line_number < source_lines.size() and source_lines[line_number]!='===':
 			body_lines.append(source_lines[line_number])
 			line_number+=1
 
@@ -91,10 +92,9 @@ static func compile_string(source: String, filename: String):
 
 		body = body_lines.join('\n')
 		var lexer = Lexer.new()
+		var tokens = lexer.tokenize(body, title, filename)
 
-		var tokens : Array = lexer.tokenize(body)
-		var parser = Parser.new(tokens)
-
+		var parser = Parser.new(tokens, title)
 		var parser_node = parser.parse_node()
 
 		parser_node.name = title
@@ -150,7 +150,7 @@ func compile_node(program, parsed_node):
 
 			if dangling_options:
 				emit(Constants.ByteCode.ShowOptions, node_compiled)
-				emit(Constants.ByteCode.Run_node, node_compiled)
+				emit(Constants.ByteCode.RunNode, node_compiled)
 			else:
 				emit(Constants.ByteCode.Stop, node_compiled)
 
@@ -269,11 +269,15 @@ func generate_shortcut_group(node,shortcut_group):
 		if option.condition != null :
 			endof_clause = register_label('conditional_%s'%option_count)
 			generate_expression(node,option.condition)
-			emit(Constants.ByteCode.Jump_if_false,node,[Program.Operand.new(endof_clause)])
+			emit(Constants.ByteCode.JumpIfFalse, node, [Program.Operand.new(endof_clause)])
 
-		var label_line_id : String  = ''#no tag TODO: ADD TAG SUPPORT
-		var label_string_id : String = register_string(option.label,node.node_name,
-			label_line_id,option.line_number,[])
+		var label_line_id = '' #TODO: Add tag support
+		var label_string_id = register_string(
+			option.label,
+			node.name,
+			label_line_id,option.line_number,
+			[]
+		)
 		
 		emit(Constants.ByteCode.AddOption,node,[Program.Operand.new(label_string_id),Program.Operand.new(op_destination)])
 
@@ -293,7 +297,7 @@ func generate_shortcut_group(node,shortcut_group):
 
 		if option.node != null :
 			generate_block(node,option.node.statements)
-		emit(Constants.ByteCode.Jump_to,node,[Program.Operand.new(end)])
+		emit(Constants.ByteCode.JumpTo,node,[Program.Operand.new(end)])
 		option_count+=1
 
 	#end of option group
@@ -323,10 +327,10 @@ func generate_if(node,if_statement):
 
 		if clause.expression!=null:	
 			generate_expression(node,clause.expression)
-			emit(Constants.ByteCode.Jump_if_false,node,[Program.Operand.new(end_clause)])
+			emit(Constants.ByteCode.JumpIfFalse,node,[Program.Operand.new(end_clause)])
 		
 		generate_block(node,clause.statements)
-		emit(Constants.ByteCode.Jump_to,node,[Program.Operand.new(endif)])
+		emit(Constants.ByteCode.JumpTo,node,[Program.Operand.new(endif)])
 
 		if clause.expression!=null:
 			emit(Constants.ByteCode.Label,node,[Program.Operand.new(end_clause)])
@@ -348,7 +352,7 @@ func generate_option(node,option):
 		emit(Constants.ByteCode.RunNode,node,[Program.Operand.new(destination)])
 	else :
 		var line_iD : String = ''#tags not supported TODO: ADD TAG SUPPORT
-		var string_iD = register_string(option.label,node.node_name,line_iD,option.line_number,[])
+		var string_iD = register_string(option.label,node.name,line_iD,option.line_number,[])
 
 		emit(Constants.ByteCode.AddOption,node,[Program.Operand.new(string_iD),Program.Operand.new(destination)])
 
@@ -357,13 +361,13 @@ func generate_option(node,option):
 func generate_assignment(node,assignment):
 	# print('generating assign')
 	#assignment
-	if assignment.operation == Constants.TokenType.Equal_to_or_assign:
+	if assignment.operation == Constants.TokenType.EqualToOrAssign:
 		#evaluate the expression to a value for the stack
 		generate_expression(node,assignment.value)
 	else :
 		#this is combined op
 		#get value of var
-		emit(Constants.ByteCode.Push_variable,node,[assignment.destination])
+		emit(Constants.ByteCode.PushVariable,node,[assignment.destination])
 
 		#evaluate the expression and push value to stack
 		generate_expression(node,assignment.value)
@@ -371,16 +375,16 @@ func generate_assignment(node,assignment):
 		#stack contains oldvalue and result
 
 		match assignment.operation:
-			Constants.TokenType.Add_assign:
+			Constants.TokenType.AddAssign:
 				emit(Constants.ByteCode.CallFunc,node,
 					[Program.Operand.new(Constants.token_type_name(Constants.TokenType.Add))])
-			Constants.TokenType.Minus_assign:
+			Constants.TokenType.MinusAssign:
 				emit(Constants.ByteCode.CallFunc,node,
 					[Program.Operand.new(Constants.token_type_name(Constants.TokenType.Minus))])
-			Constants.TokenType.Multiply_assign:
+			Constants.TokenType.MultiplyAssign:
 				emit(Constants.ByteCode.CallFunc,node,
 					[Program.Operand.new(Constants.token_type_name(Constants.TokenType.MultiplyAssign))])
-			Constants.TokenType.Divide_assign:
+			Constants.TokenType.DivideAssign:
 				emit(Constants.ByteCode.CallFunc,node,
 					[Program.Operand.new(Constants.token_type_name(Constants.TokenType.DivideAssign))])
 			_:
@@ -388,7 +392,7 @@ func generate_assignment(node,assignment):
 
 	#stack contains destination value
 	#store the top of the stack in variable
-	emit(Constants.ByteCode.Store_variable,node,[Program.Operand.new(assignment.destination)])
+	emit(Constants.ByteCode.StoreVariable,node,[Program.Operand.new(assignment.destination)])
 
 	#clean stack
 	emit(Constants.ByteCode.Pop,node)
@@ -399,9 +403,9 @@ func generate_expression(node,expression):
 	# print('generating expression')
 	#expression = value || func call
 	match expression.type:
-		Constants.Expression_type.Value:
+		Constants.ExpressionType.Value:
 			generate_value(node,expression.value)
-		Constants.Expression_type.Function_call:
+		Constants.ExpressionType.FunctionCall:
 			#eval all parameters
 			for param in expression.params:
 				generate_expression(node,param)
@@ -422,8 +426,8 @@ func generate_value(node,value):
 		Constants.ValueType.Number:
 			emit(Constants.ByteCode.PushNumber,node,[Program.Operand.new(value.value.as_number())])
 		Constants.ValueType.Str:
-			var id : String = register_string(value.value.as_string(),
-				node.node_name,'',value.line_number,[])
+			var id = register_string(value.value.as_string(),
+				node.name,'',value.line_number,[])
 			emit(Constants.ByteCode.PushString,node,[Program.Operand.new(id)])
 		Constants.ValueType.Boolean:
 			emit(Constants.ByteCode.PushBool,node,[Program.Operand.new(value.value.as_bool())])

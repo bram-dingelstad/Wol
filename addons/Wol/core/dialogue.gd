@@ -1,7 +1,6 @@
 extends Node
 
 const DEFAULT_START = 'Start'
-const FMF_PLACEHOLDE = '<VALUE PLACEHOLDER>'
 
 const Constants = preload('res://addons/Wol/core/constants.gd')
 const StandardLibrary = preload('res://addons/Wol/core/libraries/standard.gd')
@@ -11,24 +10,19 @@ const Value = preload('res://addons/Wol/core/value.gd')
 
 var _variableStorage
 
-var _debugLog
-var _errLog
-
 var _program
 var library
 
-var _vm : VirtualMachine
+var _vm
 
-var _visitedNodeCount : Dictionary = {}
+var _visitedNodeCount = {}
 
-var executionComplete : bool
+var executionComplete
 
 func _init(variableStorage):
 	_variableStorage = variableStorage
 	_vm = VirtualMachine.new(self)
 	library = WolLibrary.new()
-	_debugLog = funcref(self, 'dlog')
-	_errLog = funcref(self, 'elog')
 	executionComplete = false
 
 	# import the standard library
@@ -41,13 +35,6 @@ func _init(variableStorage):
 	#add function to lib that gets the node visit count
 	library.register_function('visit_count', -1, funcref(self, 'node_visit_count'), true)
 
-
-func dlog(message:String):
-	print('YARN_DEBUG : %s' % message)
-
-func elog(message:String):
-	print('YARN_ERROR : %s' % message)
-
 func is_active():
 	return get_exec_state() != Constants.ExecutionState.Stopped
 
@@ -55,15 +42,19 @@ func is_active():
 func get_exec_state():
 	return _vm.executionState
 
-func set_selected_option(option:int):
+func set_selected_option(option):
 	_vm.set_selected_option(option)
 
-func set_node(name:String = DEFAULT_START):
+func set_node(name = DEFAULT_START):
 	_vm.set_node(name)
 
+func start():
+	if _vm.executionState == Constants.ExecutionState.Stopped:
+		_vm.resume()
+
 func resume():
-	if _vm.executionState == Constants.ExecutionState.Running:
-		print('BLOCKED')
+	if _vm.executionState == Constants.ExecutionState.Running \
+			or _vm.executionState == Constants.ExecutionState.Stopped:
 		return
 	_vm.resume()
 
@@ -81,12 +72,10 @@ func current_node():
 
 func get_node_id(name):
 	if _program.nodes.size() == 0:
-		_errLog.call_func('No nodes loaded')
 		return ''
 	if _program.nodes.has(name):
 		return 'id:'+name
 	else:
-		_errLog.call_func('No node named [%s] exists' % name)
 		return ''
 
 func unloadAll(clear_visited:bool = true):
@@ -116,7 +105,7 @@ func is_node_visited(node = _vm.current_node_name()):
 
 func node_visit_count(node = _vm.current_node_name()):
 	if node is Value:
-		node = _program.wolStrings[node.value()].text
+		node = _program.strings[node.value()].text
 
 	var visitCount : int = 0
 	if _visitedNodeCount.has(node):

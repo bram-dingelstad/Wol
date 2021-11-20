@@ -22,6 +22,22 @@ class Line:
 		self.implicit = implicit
 		self.meta = meta
 
+class Option:
+	var line
+	var id = -1
+	var destination = ''
+
+	func _init(line, id, destination):
+		self.line = line
+		self.id = id
+		self.destination = destination
+
+class Command:
+	var command = ''
+
+	func _init(command):
+		self.command = command
+
 class WolNode:
 	var name = ''
 	var instructions = []

@@ -35,50 +35,50 @@ func _init():
 
 func create_states():
 	var patterns : Dictionary = {}
-	patterns[Constants.TokenType.Text] = '.*'
+	patterns[Constants.TokenType.Text] = ['.*', 'any text']
 
-	patterns[Constants.TokenType.Number] = '\\-?[0-9]+(\\.[0-9+])?'
-	patterns[Constants.TokenType.Str] = '\'([^\'\\\\]*(?:\\.[^\'\\\\]*)*)\''
-	patterns[Constants.TokenType.TagMarker] = '\\#'
-	patterns[Constants.TokenType.LeftParen] = '\\('
-	patterns[Constants.TokenType.RightParen] =  '\\)'
-	patterns[Constants.TokenType.EqualTo] = '(==|is(?!\\w)|eq(?!\\w))'
-	patterns[Constants.TokenType.EqualToOrAssign] = '(=|to(?!\\w))'
-	patterns[Constants.TokenType.NotEqualTo] = '(\\!=|neq(?!\\w))'
-	patterns[Constants.TokenType.GreaterThanOrEqualTo] = '(\\>=|gte(?!\\w))'
-	patterns[Constants.TokenType.GreaterThan] = '(\\>|gt(?!\\w))'
-	patterns[Constants.TokenType.LessThanOrEqualTo] = '(\\<=|lte(?!\\w))'
-	patterns[Constants.TokenType.LessThan] = '(\\<|lt(?!\\w))'
-	patterns[Constants.TokenType.AddAssign] =  '\\+='
-	patterns[Constants.TokenType.MinusAssign] = '\\-='
-	patterns[Constants.TokenType.MultiplyAssign] = '\\*='
-	patterns[Constants.TokenType.DivideAssign] = '\\/='
-	patterns[Constants.TokenType.Add] = '\\+'
-	patterns[Constants.TokenType.Minus] = '\\-'
-	patterns[Constants.TokenType.Multiply] = '\\*'
-	patterns[Constants.TokenType.Divide] = '\\/'
-	patterns[Constants.TokenType.Modulo] = '\\%'
-	patterns[Constants.TokenType.And] = '(\\&\\&|and(?!\\w))'
-	patterns[Constants.TokenType.Or] = '(\\|\\||or(?!\\w))'
-	patterns[Constants.TokenType.Xor] = '(\\^|xor(?!\\w))'
-	patterns[Constants.TokenType.Not] = '(\\!|not(?!\\w))'
-	patterns[Constants.TokenType.Variable] = '\\$([A-Za-z0-9_\\.])+'
-	patterns[Constants.TokenType.Comma] = '\\,'
-	patterns[Constants.TokenType.TrueToken] = 'true(?!\\w)'
-	patterns[Constants.TokenType.FalseToken] = 'false(?!\\w)'
-	patterns[Constants.TokenType.NullToken] = 'null(?!\\w)'
-	patterns[Constants.TokenType.BeginCommand] = '\\<\\<'
-	patterns[Constants.TokenType.EndCommand] = '\\>\\>'
-	patterns[Constants.TokenType.OptionStart] = '\\[\\['
-	patterns[Constants.TokenType.OptionEnd] = '\\]\\]'
-	patterns[Constants.TokenType.OptionDelimit] = '\\|'
-	patterns[Constants.TokenType.Identifier] = '[a-zA-Z0-9_:\\.]+'
-	patterns[Constants.TokenType.IfToken] = 'if(?!\\w)'
-	patterns[Constants.TokenType.ElseToken] = 'else(?!\\w)'
-	patterns[Constants.TokenType.ElseIf] = 'elseif(?!\\w)'
-	patterns[Constants.TokenType.EndIf] = 'endif(?!\\w)'
-	patterns[Constants.TokenType.Set] = 'set(?!\\w)'
-	patterns[Constants.TokenType.ShortcutOption] = '\\-\\>\\s*'
+	patterns[Constants.TokenType.Number] = ['\\-?[0-9]+(\\.[0-9+])?', 'any number']
+	patterns[Constants.TokenType.Str] = ['\'([^\'\\\\]*(?:\\.[^\'\\\\]*)*)\'', 'any text']
+	patterns[Constants.TokenType.TagMarker] = ['\\#', 'a tag #']
+	patterns[Constants.TokenType.LeftParen] = ['\\(', 'left parenthesis (']
+	patterns[Constants.TokenType.RightParen] =  ['\\)', 'right parenthesis )']
+	patterns[Constants.TokenType.EqualTo] = ['(==|is(?!\\w)|eq(?!\\w))', '"=", "is" or "eq"']
+	patterns[Constants.TokenType.EqualToOrAssign] = ['(=|to(?!\\w))', 'equal to "=" or assign "="']
+	patterns[Constants.TokenType.NotEqualTo] = ['(\\!=|neq(?!\\w))', '"!=" or "neq"']
+	patterns[Constants.TokenType.GreaterThanOrEqualTo] = ['(\\>=|gte(?!\\w))', '">=" or "gte"']
+	patterns[Constants.TokenType.GreaterThan] = ['(\\>|gt(?!\\w))', '">" or "gt"']
+	patterns[Constants.TokenType.LessThanOrEqualTo] = ['(\\<=|lte(?!\\w))', '"<=" or "lte"']
+	patterns[Constants.TokenType.LessThan] = ['(\\<|lt(?!\\w))', '"<" or "lt"']
+	patterns[Constants.TokenType.AddAssign] =  ['\\+=', '"+="']
+	patterns[Constants.TokenType.MinusAssign] = ['\\-=', '"-="']
+	patterns[Constants.TokenType.MultiplyAssign] = ['\\*=', '"*="']
+	patterns[Constants.TokenType.DivideAssign] = ['\\/=', '"/="']
+	patterns[Constants.TokenType.Add] = ['\\+', '"+"']
+	patterns[Constants.TokenType.Minus] = ['\\-', '"-"']
+	patterns[Constants.TokenType.Multiply] = ['\\*', '"*"']
+	patterns[Constants.TokenType.Divide] = ['\\/', '"/"']
+	patterns[Constants.TokenType.Modulo] = ['\\%', '"%"']
+	patterns[Constants.TokenType.And] = ['(\\&\\&|and(?!\\w))', '"&&" or "and"']
+	patterns[Constants.TokenType.Or] = ['(\\|\\||or(?!\\w))', '"||" or "or"']
+	patterns[Constants.TokenType.Xor] = ['(\\^|xor(?!\\w))', '"^" or "xor"']
+	patterns[Constants.TokenType.Not] = ['(\\!|not(?!\\w))', '"!" or "not"']
+	patterns[Constants.TokenType.Variable] = ['\\$([A-Za-z0-9_\\.])+', 'any variable']
+	patterns[Constants.TokenType.Comma] = ['\\,', '","']
+	patterns[Constants.TokenType.TrueToken] = ['true(?!\\w)', '"true"']
+	patterns[Constants.TokenType.FalseToken] = ['false(?!\\w)', '"false"']
+	patterns[Constants.TokenType.NullToken] = ['null(?!\\w)', '"null"']
+	patterns[Constants.TokenType.BeginCommand] = ['\\<\\<', 'beginning of a command "<<"']
+	patterns[Constants.TokenType.EndCommand] = ['\\>\\>', 'ending of a command ">>"']
+	patterns[Constants.TokenType.OptionStart] = ['\\[\\[', 'start of an option "[["']
+	patterns[Constants.TokenType.OptionEnd] = ['\\]\\]', 'end of an option "]]"']
+	patterns[Constants.TokenType.OptionDelimit] = ['\\|', 'middle of an option "|"']
+	patterns[Constants.TokenType.Identifier] = ['[a-zA-Z0-9_:\\.]+', 'any reference to another node']
+	patterns[Constants.TokenType.IfToken] = ['if(?!\\w)', '"if"']
+	patterns[Constants.TokenType.ElseToken] = ['else(?!\\w)', '"else"']
+	patterns[Constants.TokenType.ElseIf] = ['elseif(?!\\w)', '"elseif"']
+	patterns[Constants.TokenType.EndIf] = ['endif(?!\\w)', '"endif"']
+	patterns[Constants.TokenType.Set] = ['set(?!\\w)', '"set"']
+	patterns[Constants.TokenType.ShortcutOption] = ['\\-\\>\\s*', '"->"']
 
 	#compound states
 	var shortcut_option : String= SHORTCUT + DASH + OPTION
@@ -173,10 +173,7 @@ func create_states():
 	for stateKey in _states.keys():
 		_states[stateKey].stateName = stateKey
 
-	pass
-
-func tokenize(text:String)->Array:
-	
+func tokenize(text, title, filename):
 	_indentStack.clear()
 	_indentStack.push_front(IntBoolPair.new(0,false))
 	_shouldTrackIndent = false
@@ -191,17 +188,20 @@ func tokenize(text:String)->Array:
 	var line_number : int = 1
 
 	for line in lines:
-		tokens+=tokenize_line(line,line_number)
-		line_number+=1
+		tokens += tokenize_line(line, line_number, title, filename)
+		line_number += 1
 
-	var endOfInput : Token = Token.new(Constants.TokenType.EndOfInput,_currentState,line_number,0)
+	var endOfInput = Token.new(
+		Constants.TokenType.EndOfInput,
+		_currentState,
+		line_number,
+		0
+	)
 	tokens.append(endOfInput)
-
-	# print(tokens)
 
 	return tokens
 
-func tokenize_line(line:String, line_number : int)->Array:
+func tokenize_line(line, line_number, title, filename):
 	var tokenStack : Array = []
 
 	var freshLine = line.replace('\t','    ').replace('\r','')
@@ -214,7 +214,13 @@ func tokenize_line(line:String, line_number : int)->Array:
 		#we add an indenation token to record indent level
 		_indentStack.push_front(IntBoolPair.new(indentation,true))
 
-		var indent : Token = Token.new(Constants.TokenType.Indent,_currentState,line_number,prevIndentation.key)
+		var indent : Token = Token.new(
+			Constants.TokenType.Indent,
+			_currentState,
+			filename,
+			line_number,
+			prevIndentation.key
+		)
 		indent.value = '%*s' % [indentation - prevIndentation.key,'']
 
 		_shouldTrackIndent = false
@@ -246,7 +252,7 @@ func tokenize_line(line:String, line_number : int)->Array:
 		var matched : bool = false
 
 		for rule in _currentState.rules:
-			var found : RegExMatch = rule.regex.search(freshLine, column)
+			var found = rule.regex.search(freshLine, column)
 			
 			if !found:
 				continue
@@ -273,9 +279,9 @@ func tokenize_line(line:String, line_number : int)->Array:
 				#
 				
 				column = startIndex
-				var endIndex : int = found.get_start() + found.get_string().length()
+				var end_index = found.get_start() + found.get_string().length()
 
-				tokenText = freshLine.substr(startIndex,endIndex-startIndex)
+				tokenText = freshLine.substr(startIndex, end_index - startIndex)
 			
 			else:
 				tokenText = found.get_string()
@@ -284,36 +290,51 @@ func tokenize_line(line:String, line_number : int)->Array:
 
 			#pre-proccess string
 			if rule.tokenType == Constants.TokenType.Str:
-				tokenText = tokenText.substr(1,tokenText.length() - 2)
+				tokenText = tokenText.substr(1, tokenText.length() - 2)
 				tokenText = tokenText.replace('\\\\', '\\')
 				tokenText = tokenText.replace('\\\'','\'')
 
-			var token : Token = Token.new(rule.tokenType,_currentState,line_number,column,tokenText)
+			var token = Token.new(
+				rule.tokenType,
+				_currentState,
+				filename,
+				line_number,
+				column,
+				tokenText
+			)
 			token.delimitsText = rule.delimitsText
 
 			tokenStack.push_front(token)
 
-			if rule.enterState != null && rule.enterState.length() > 0:
-
-				if !_states.has(rule.enterState):
-					printerr('State[%s] not known - line(%s) col(%s)'%[rule.enterState,line_number,column])
+			if rule.enterState != null and rule.enterState.length() > 0:
+				if not _states.has(rule.enterState):
+					printerr('State[%s] not known - line(%s) col(%s)' % [rule.enterState, line_number, column])
 					return []
 				
 				enter_state(_states[rule.enterState])
 
 				if _shouldTrackIndent:
 					if _indentStack.front().key < indentation:
-						_indentStack.append(IntBoolPair.new(indentation,false))
+						_indentStack.append(IntBoolPair.new(indentation, false))
 			
 			matched = true
 			break
 
-		if !matched:
-			# TODO: Send out some helpful messages
-			printerr('expectedTokens [%s] - line(%s) col(%s)'%['refineErrors.Lexer.tokenize_line',line_number,column])
-			return []
+		if not matched:
+			var rules = []
+			for rule in _currentState.rules:
+				rules.append('"%s" (%s)' % [Constants.token_type_name(rule.tokenType), rule.human_readable_identifier])
 
-		var lastWhiteSpace : RegExMatch = whitespace.search(line,column)
+			var error_data = [
+				PoolStringArray(rules).join(', ') if rules.size() == 1 else PoolStringArray(rules.slice(0, rules.size() - 2)).join(', ') + ' or %s' % rules[-1],
+				filename,
+				title,
+				line_number,
+				column
+			]
+			assert(false, 'Expected %s in file %s in node "%s" on line #%d (column #%d)' % error_data)
+
+		var lastWhiteSpace = whitespace.search(line, column)
 		if lastWhiteSpace:
 			column += lastWhiteSpace.get_string().length()
 		
@@ -339,20 +360,22 @@ func enter_state(state:LexerState):
 		_shouldTrackIndent = true
 
 class Token:
-	var type : int
-	var value : String
+	var type = -1
+	var value = ''
 
-	var line_number : int
-	var column : int
-	var text : String
+	var filename = ''
+	var line_number = -1
+	var column = -1
+	var text = ''
 
-	var delimitsText : bool= false
-	var paramCount : int
-	var lexerState : String
+	var delimitsText = false
+	var paramCount = -1
+	var lexerState = ''
 
-	func _init(type:int,state: LexerState, line_number:int = -1,column:int = -1,value:String =''):
+	func _init(type, state, filename, line_number = -1, column = -1, value = ''):
 		self.type = type
 		self.lexerState = state.stateName
+		self.filename = filename
 		self.line_number = line_number
 		self.column = column
 		self.value = value
@@ -360,7 +383,6 @@ class Token:
 	func _to_string():
 		return '%s (%s) at %s:%s (state: %s)' % [Constants.token_type_name(type),value,line_number,column,lexerState]
 	
-
 class LexerState:
 
 	var stateName : String
@@ -372,9 +394,9 @@ class LexerState:
 		self.patterns = patterns
 
 	func add_transition(type : int, state : String = '',delimitText : bool = false)->Rule:
-		var pattern = '\\G%s' % patterns[type]
+		var pattern = '\\G%s' % patterns[type][0]
 		# print('pattern = %s' % pattern)
-		var rule = Rule.new(type,pattern,state,delimitText)
+		var rule = Rule.new(type, pattern, patterns[type][1], state, delimitText)
 		rules.append(rule)
 		return rule
 	
@@ -409,16 +431,18 @@ class Rule:
 	var tokenType : int
 	var isTextRule : bool
 	var delimitsText : bool
+	var human_readable_identifier = ''
 
-	func _init(type : int , regex : String, enterState : String, delimitsText:bool):
+	func _init(type : int , regex : String, human_readable_identifier, enterState : String, delimitsText:bool):
 		self.tokenType = type
 		self.regex = RegEx.new()
 		self.regex.compile(regex)
+		self.human_readable_identifier = human_readable_identifier
 		self.enterState = enterState
 		self.delimitsText = delimitsText
 
 	func _to_string():
-		return '[Rule : %s - %s]' % [Constants.token_type_name(tokenType),regex]
+		return '[Rule : %s (%s) - %s]' % [Constants.token_type_name(tokenType), human_readable_identifier, regex]
 
 class IntBoolPair:
 	var key : int

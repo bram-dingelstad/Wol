@@ -50,5 +50,6 @@ text = "This is a dialogue option"
 
 [node name="Tween" type="Tween" parent="."]
 
+[connection signal="finished" from="Wol" to="." method="_on_Wol_finished"]
 [connection signal="line" from="Wol" to="." method="_on_Wol_line"]
 [connection signal="options" from="Wol" to="." method="_on_Wol_options"]

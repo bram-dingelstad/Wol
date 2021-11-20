@@ -1,15 +1,7 @@
 extends Node
 
 const Constants = preload('res://addons/Wol/core/constants.gd')
-
-var FunctionInfo = load('res://addons/Wol/core/function_info.gd')
 var Value = load('res://addons/Wol/core/value.gd')
-var WolProgram = load('res://addons/Wol/core/program/program.gd')
-var WolNode = load('res://addons/Wol/core/program/wol_node.gd')
-var Instruction = load('res://addons/Wol/core/program/instruction.gd')
-var Line = load('res://addons/Wol/core/dialogue/line.gd')
-var Command = load('res://addons/Wol/core/dialogue/command.gd')
-var Option = load('res://addons/Wol/core/dialogue/option.gd')
 
 const EXECUTION_COMPLETE : String = 'execution_complete_command'
 
@@ -54,14 +46,11 @@ func set_node(name:String) -> bool:
 		printerr('No node named %s has been loaded' % name)
 		return false
 
-	_dialogue.dlog('Running node %s' % name)
-
 	_currentNode = _program.nodes[name]
 	reset()
 	_state.currentNodeName = name
 	nodeStartHandler.call_func(name)
 	return true
-
 
 func current_node_name()->String:
 	return _currentNode.nodeName
@@ -86,8 +75,8 @@ func set_selected_option(id):
 		printerr('Unable to select option when dialogue not waiting for option')
 		return false
 
-	if id < 0 || id >= _state.currentOptions.size():
-		printerr('%d is not a valid option '%id)
+	if id < 0 or id >= _state.currentOptions.size():
+		printerr('%d is not a valid option ' % id)
 		return false
 
 	var destination = _state.currentOptions[id].value
@@ -99,39 +88,38 @@ func set_selected_option(id):
 	
 	return true
 
-func has_options()->bool:
-	return _state.currentOptions.size() > 0
-
 func reset():
 	_state = VmState.new()
 
-#continue execution
-func resume()->bool:
-	if _currentNode == null :
+func get_next_instruction():
+	return null if _currentNode.instructions.size() - 1 <= _state.programCounter else _currentNode.instructions[_state.programCounter + 1]
+
+func resume():
+	if _currentNode == null:
 		printerr('Cannot run dialogue with no node selected')
 		return false
+
 	if executionState == Constants.ExecutionState.WaitingForOption:
 		printerr('Cannot run while waiting for option')
 		return false
 	
-	if lineHandler == null :
+	if lineHandler == null:
 		printerr('Cannot run without a lineHandler')
 		return false
 	
-	if optionsHandler == null :
+	if optionsHandler == null:
 		printerr('Cannot run without an optionsHandler')	
 		return false
 
-	if commandHandler == null :
+	if commandHandler == null:
 		printerr('Cannot run without an commandHandler')	
 		return false
-	if nodeStartHandler == null :
+	if nodeStartHandler == null:
 		printerr('Cannot run without a nodeStartHandler')	
 		return false
-	if nodeCompleteHandler == null :
+	if nodeCompleteHandler == null:
 		printerr('Cannot run without an nodeCompleteHandler')	
 		return false
-
 
 	executionState = Constants.ExecutionState.Running
 	
@@ -140,14 +128,13 @@ func resume()->bool:
 		var currentInstruction = _currentNode.instructions[_state.programCounter]
 
 		run_instruction(currentInstruction)
-		_state.programCounter+=1
+		_state.programCounter += 1
 
 		if _state.programCounter >= _currentNode.instructions.size():
 			nodeCompleteHandler.call_func(_currentNode.nodeName)
 			executionState = Constants.ExecutionState.Stopped
 			reset()
 			dialogueCompleteHandler.call_func()
-			_dialogue.dlog('Run Complete')
 
 	return true
 
@@ -170,8 +157,8 @@ func run_instruction(instruction)->bool:
 			#look up string from string table
 			#pass it to client as line
 			var key = instruction.operands[0].value
-
-			var line = Line.new(key)
+			
+			var line = _program.strings[key]
 
 			#the second operand is the expression count
 			# of format function
@@ -180,7 +167,6 @@ func run_instruction(instruction)->bool:
 
 			var pause : int = lineHandler.call_func(line)
 			
-
 			if pause == Constants.HandlerState.PauseExecution:
 				executionState = Constants.ExecutionState.Suspended
 			
@@ -190,7 +176,7 @@ func run_instruction(instruction)->bool:
 			if instruction.operands.size() > 1:
 				pass#add format function
 
-			var command = Command.new(commandText)
+			var command = Program.Command.new(commandText)
 
 			var pause = commandHandler.call_func(command) as int
 			if pause == Constants.HandlerState.PauseExecution:
@@ -275,7 +261,7 @@ func run_instruction(instruction)->bool:
 				
 		Constants.ByteCode.Stop:
 			#stop execution and repost it
-			nodeCompleteHandler.call_func(_currentNode.nodeName)
+			nodeCompleteHandler.call_func(_currentNode.name)
 			dialogueCompleteHandler.call_func()
 			executionState = Constants.ExecutionState.Stopped
 			reset()
@@ -290,7 +276,7 @@ func run_instruction(instruction)->bool:
 			else :
 				name = instruction.operands[0].value
 
-			var pause = nodeCompleteHandler.call_func(_currentNode.nodeName)
+			var pause = nodeCompleteHandler.call_func(_currentNode.name)
 			set_node(name)
 			_state.programCounter-=1
 			if pause == Constants.HandlerState.PauseExecution:
@@ -300,13 +286,13 @@ func run_instruction(instruction)->bool:
 			# add an option to current state
 			var key = instruction.operands[0].value
 
-			var line  = Line.new(key)
+			var line = _program.strings[key]
 
 			if instruction.operands.size() > 2:
 				pass #formated text options
 			
 			# line to show and node name
-			_state.currentOptions.append(SimpleEntry.new(line,instruction.operands[1].value))
+			_state.currentOptions.append(SimpleEntry.new(line, instruction.operands[1].value))
 
 		Constants.ByteCode.ShowOptions:
 			#show options - stop if none
@@ -320,7 +306,7 @@ func run_instruction(instruction)->bool:
 			var choices : Array = []#Option
 			for optionIndex in range(_state.currentOptions.size()):
 				var option : SimpleEntry = _state.currentOptions[optionIndex]
-				choices.append(Option.new(option.key, optionIndex, option.value))
+				choices.append(Program.Option.new(option.key, optionIndex, option.value))
 
 			#we cant continue until option chosen
 			executionState = Constants.ExecutionState.WaitingForOption
@@ -334,7 +320,7 @@ func run_instruction(instruction)->bool:
 			#bytecode messed up woopsise
 			executionState = Constants.ExecutionState.Stopped
 			reset()
-			printerr('Unknown Bytecode %s '%instruction.operation)
+			printerr('Unknown Bytecode %s' % instruction.operation)
 			return false
 
 	return true
@@ -353,7 +339,6 @@ class VmState:
 		else:
 			stack.push_back(Value.new(value))
 
-
 	func pop_value():
 		return stack.pop_back()
 
@@ -365,8 +350,8 @@ class VmState:
 
 class SimpleEntry:
 	var key
-	var value : String
+	var value
 
-	func _init(key,value:String):
+	func _init(key, value):
 		self.key = key
 		self.value = value

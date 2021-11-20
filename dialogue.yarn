@@ -1,78 +1,41 @@
 title: Start
 tags: 
 colorID: 0
-position: -1892,-1013
+position: 0, 0
 ---
-<<load_situation The Revolver>>
-<<animation elevator door open>>
+<<a_custom_command>>
+<<command_with multiple arguments>>
 
-Masami: Gina, this way! #line:5d7a7c
-Gina: Patience! I’m coming.
->Still, she didn’t pick up her pace and kept hesitantly looking around.<
-Masami: Everything should be fine, let’s just go. We won.
-Masami: Unless you are planning on backstabbing me at the finish line, that is.
-Gina: How funny. You are not that special.
-Masami: Har har. Now start walking or I’ll carry you out the front door.
-Masami: I don’t want to give Monokuma the time to come up with a new death game for two while we are trying to get through the exit.
-Gina: ...
+// remove "to" to trigger error
+<<set $direction to 'this'>>
+<<set $one to 1>>
 
-<<zoom to vault door>>
+// Implement inline expressions 
+Bob: Theresa, {$direction} way! #line:5d7a7c
+Theresa: Did you know one + one equals {$one + $one}?
+Bob: You wanna go somewhere?
 
-Masami: Wait, the vault door… It’s not open.
-Gina: So it seems.
-Masami: But that doesn’t make sense! So far we have opened one lock per two deceased. All seven locks should be open by now.
->In desperation I tried the vault handle. I wasn’t exceptionally strong, but I doubted even a weightlifter could open this door whether it was held shut by one or dozen locks.<
-Gina: Rather than using your energy by tearing at the 700kg door-
-Masami: I wasn’t trying to brute force it.
-Gina: Anyway, I would suggest you spare a glance at the reception desk. It appears the staff has given us one last gift.
-Masami: The reception desk?
-
-<<zoom to gun>>
-
-Masami: A paper and...
-Masami: ... That’s a gun.
-Gina: A revolver, in fact. Such an old fashioned choice of firearm. Though, I appreciate the aesthetic. How pretty.
-Masami: I don’t like this. Why is it here?
->I took the paper from the table and briskly unfolded it.<
-- Congratulations on reaching the final part of the game!-
-- Unfortunately, no one remembers a silver medalist.-
-- Let’s round up the game with a match of our favorite luck game! Russian roulette should be simple enough.-
-- Now then, ladies first!-
--Staff-
-Masami: Russian roulette… Are you kidding me?
-Masami: This can’t be part of the game. This wasn’t in the rules!
-Masami: I know the winning condition hasn’t been met but-
-Gina: It’s rigged.
-Masami: What?
->Gina had picked up the revolver from the table and without better judgement, opened the cylinder for inspection.<
-Gina: It’s rigged.
-Masami: ... “Ladies first.”
-Masami: The cylinder is full, isn't it?
->Gina let out a tired sigh. Her shoulders slumping heavily from disappointment.<
-Gina: I got so far.
-Gina: I don’t know what led me to believe the outcome would be any different.
-Gina: This is such a waste of resources as well.
-Masami: Gina, put the revolver down. If the game is rigged, you don’t have to play. The rules won’t matter then.
-Gina: Let it rest.
-Gina: Like any of it matters.
-Masami: What do you mean?
->She didn’t answer.<
->Instead, she absentmindedly fiddled with the cylinder before locking it in place.<
->Then she spun the cylinder for the hell of it before raising the revolver’s barrel against her very own temple.<
->She looked resigned. Though I couldn’t help but notice the slight glint of fear in her eyes.<
->None of us wanted to die.<
-Masami: Gina, please.
-Gina: Congratulations.
-Masami: Gina!
-<<sound revolver_bang>>
-<<fade_out>>
-
-[[Waking up]]
+[[Go to the store|TheStore]]
+[[Lets stay here and talk|Talk]]
 ===
-title: Waking up
+title: TheStore
 tags: 
 colorID: 0
-position: -1527,-881
+position: 0, 200
 ---
-You: *waking up noices*
+Clerk: Welcome to the store.
+Clerk: Can I help you with anything?
+[[Go home|Start]]
+===
+title: Talk
+tags: 
+colorID: 0
+position: 0, 400
+---
+Bob: So how are you really?
+Theresa: I'm good!
+Bob: Do you want to continue talking?
+-> Yes
+    [[Start]]
+-> No
 ===

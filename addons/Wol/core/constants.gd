@@ -198,3 +198,9 @@ static func bytecode_name(bytecode):
 		'Stop',
 		'RunNode'
 	][bytecode]
+
+static func token_name(type):
+	for key in TokenType.keys():
+		if TokenType[key] == type:
+			return key					
+	return ''
