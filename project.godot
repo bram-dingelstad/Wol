@@ -8,6 +8,28 @@
 
 config_version=4
 
+_global_script_classes=[ {
+"base": "Object",
+"class": "Compiler",
+"language": "GDScript",
+"path": "res://addons/Wol/core/compiler/compiler.gd"
+}, {
+"base": "Node",
+"class": "Wol",
+"language": "GDScript",
+"path": "res://addons/Wol/Wol.gd"
+}, {
+"base": "Object",
+"class": "WolProgram",
+"language": "GDScript",
+"path": "res://addons/Wol/core/program.gd"
+} ]
+_global_script_class_icons={
+"Compiler": "",
+"Wol": "",
+"WolProgram": ""
+}
+
 [application]
 
 config/name="YarnSpinner"

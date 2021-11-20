@@ -1,12 +1,8 @@
 extends Object
+class_name Compiler
 
 const Lexer = preload("res://addons/Wol/core/compiler/lexer.gd")
-const LineInfo = preload("res://addons/Wol/core/program/line.gd")
-const WolNode = preload("res://addons/Wol/core/program/node.gd")
-const Instruction = preload("res://addons/Wol/core/program/instruction.gd")
-const WolProgram = preload("res://addons/Wol/core/program/program.gd")
-const Operand = preload("res://addons/Wol/core/program/operand.gd")
-
+const Program = preload("res://addons/Wol/core/program.gd")
 
 #patterns
 const INVALIDTITLENAME = "[\\[<>\\]{}\\|:\\s#\\$]"
@@ -23,19 +19,19 @@ var _errors : int
 var _lastError : int
 
 #-----Class vars
-var _currentNode : WolNode
+var _currentNode : Program.WolNode
 var _rawText : bool
 var _fileName : String
 var _containsImplicitStringTags : bool
 var _labelCount : int = 0
 
-#<String, LineInfo>
+#<String, Program.Line>
 var _stringTable : Dictionary = {}
 var _stringCount : int = 0
 #<int, WolGlobals.TokenType>
 var _tokens : Dictionary = {}
 
-static func compile_string(source: String, filename: String) -> WolProgram:
+static func compile_string(source: String, filename: String):
 	var Parser = load("res://addons/Wol/core/compiler/parser.gd")
 	var Compiler = load("res://addons/Wol/core/compiler/compiler.gd")
 
@@ -107,25 +103,25 @@ static func compile_string(source: String, filename: String) -> WolProgram:
 
 	#--- End parsing nodes---
 
-	var program = WolProgram.new()
+	var program = Program.new()
 
 	#compile nodes
 	for node in parsedNodes:
 		compiler.compile_node(program, node)
 
 	for key in compiler._stringTable:
-		program.wolStrings[key] = compiler._stringTable[key]
+		program.strings[key] = compiler._stringTable[key]
 
 	return program
 
-func compile_node(program:WolProgram,parsedNode)->void:
-	if program.wolNodes.has(parsedNode.name):
+func compile_node(program, parsedNode):
+	if program.nodes.has(parsedNode.name):
 		emit_error(DUPLICATE_NODES_IN_PROGRAM)
 		printerr("Duplicate node in program: %s" % parsedNode.name)
 	else:
-		var nodeCompiled : WolNode = WolNode.new()
+		var nodeCompiled = Program.WolNode.new()
 
-		nodeCompiled.nodeName = parsedNode.name
+		nodeCompiled.name = parsedNode.name
 		nodeCompiled.tags = parsedNode.tags
 
 		#raw text
@@ -135,7 +131,7 @@ func compile_node(program:WolProgram,parsedNode)->void:
 		else:
 			#compile node
 			var startLabel : String = register_label()
-			emit(WolGlobals.ByteCode.Label,nodeCompiled,[Operand.new(startLabel)])
+			emit(WolGlobals.ByteCode.Label,nodeCompiled,[Program.Operand.new(startLabel)])
 
 			for statement in parsedNode.statements:
 				generate_statement(nodeCompiled,statement)
@@ -158,7 +154,7 @@ func compile_node(program:WolProgram,parsedNode)->void:
 				emit(WolGlobals.ByteCode.Stop, nodeCompiled)
 
 			
-		program.wolNodes[nodeCompiled.nodeName] = nodeCompiled
+		program.nodes[nodeCompiled.name] = nodeCompiled
 
 func register_string(text:String,nodeName:String,id:String="",lineNumber:int=-1,tags:Array=[])->String:
 	var lineIdUsed : String
@@ -179,7 +175,7 @@ func register_string(text:String,nodeName:String,id:String="",lineNumber:int=-1,
 		lineIdUsed = id
 		implicit = false
 
-	var stringInfo : LineInfo = LineInfo.new(text,nodeName,lineNumber,_fileName,implicit,tags)
+	var stringInfo = Program.Line.new(text,nodeName,lineNumber,_fileName,implicit,tags)
 	#add to string table and return id
 	self._stringTable[lineIdUsed] = stringInfo
 
@@ -189,17 +185,18 @@ func register_label(comment:String="")->String:
 	_labelCount+=1
 	return  "L%s%s" %[ _labelCount , comment]
 
-func emit(bytecode,node:WolNode=_currentNode,operands:Array=[]):
-	var instruction : Instruction = Instruction.new(null)
+func emit(bytecode, node = _currentNode, operands = []):
+	var instruction = Program.Instruction.new(null)
 	instruction.operation = bytecode
 	instruction.operands = operands
-	# print("emitting instruction to %s"%node.nodeName)
 
-	if(node == null):
+	if node == null:
 		printerr("trying to emit to null node with byteCode: %s" % bytecode)
-		return;
+		return
+
 	node.instructions.append(instruction)
-	if bytecode == WolGlobals.ByteCode.Label :
+
+	if bytecode == WolGlobals.ByteCode.Label:
 		#add to label table
 		node.labels[instruction.operands[0].value] = node.instructions.size()-1
 
@@ -246,13 +243,13 @@ func generate_custom_command(node,command):
 		if commandString == "stop":
 			emit(WolGlobals.ByteCode.Stop,node)
 		else :
-			emit(WolGlobals.ByteCode.RunCommand,node,[Operand.new(commandString)])
+			emit(WolGlobals.ByteCode.RunCommand,node,[Program.Operand.new(commandString)])
 
 #compile instructions for linetags and use them
 # \#line:number
 func generate_line(node,statement,line:String):
-	var num : String = register_string(line,node.nodeName,"",statement.lineNumber,[]);
-	emit(WolGlobals.ByteCode.RunLine,node,[Operand.new(num)])
+	var num : String = register_string(line, node.name, "", statement.lineNumber, []);
+	emit(WolGlobals.ByteCode.RunLine, node, [Program.Operand.new(num)])
 
 func generate_shortcut_group(node,shortcutGroup):
 	# print("generating shortcutoptopn group")
@@ -271,16 +268,16 @@ func generate_shortcut_group(node,shortcutGroup):
 		if option.condition != null :
 			endofClause = register_label("conditional_%s"%optionCount)
 			generate_expression(node,option.condition)
-			emit(WolGlobals.ByteCode.JumpIfFalse,node,[Operand.new(endofClause)])
+			emit(WolGlobals.ByteCode.JumpIfFalse,node,[Program.Operand.new(endofClause)])
 
 		var labelLineId : String  = ""#no tag TODO: ADD TAG SUPPORT
 		var labelStringId : String = register_string(option.label,node.nodeName,
 			labelLineId,option.lineNumber,[])
 		
-		emit(WolGlobals.ByteCode.AddOption,node,[Operand.new(labelStringId),Operand.new(opDestination)])
+		emit(WolGlobals.ByteCode.AddOption,node,[Program.Operand.new(labelStringId),Program.Operand.new(opDestination)])
 
 		if option.condition != null :
-			emit(WolGlobals.ByteCode.Label,node,[Operand.new(endofClause)])
+			emit(WolGlobals.ByteCode.Label,node,[Program.Operand.new(endofClause)])
 			emit(WolGlobals.ByteCode.Pop,node)
 
 		optionCount+=1
@@ -291,15 +288,15 @@ func generate_shortcut_group(node,shortcutGroup):
 	optionCount = 0
 
 	for option in shortcutGroup.options:
-		emit(WolGlobals.ByteCode.Label,node,[Operand.new(labels[optionCount])])
+		emit(WolGlobals.ByteCode.Label,node,[Program.Operand.new(labels[optionCount])])
 
 		if option.node != null :
 			generate_block(node,option.node.statements)
-		emit(WolGlobals.ByteCode.JumpTo,node,[Operand.new(end)])
+		emit(WolGlobals.ByteCode.JumpTo,node,[Program.Operand.new(end)])
 		optionCount+=1
 
 	#end of option group
-	emit(WolGlobals.ByteCode.Label,node,[Operand.new(end)])
+	emit(WolGlobals.ByteCode.Label,node,[Program.Operand.new(end)])
 	#clean up
 	emit(WolGlobals.ByteCode.Pop,node)
 
@@ -325,19 +322,19 @@ func generate_if(node,ifStatement):
 
 		if clause.expression!=null:	
 			generate_expression(node,clause.expression)
-			emit(WolGlobals.ByteCode.JumpIfFalse,node,[Operand.new(endClause)])
+			emit(WolGlobals.ByteCode.JumpIfFalse,node,[Program.Operand.new(endClause)])
 		
 		generate_block(node,clause.statements)
-		emit(WolGlobals.ByteCode.JumpTo,node,[Operand.new(endif)])
+		emit(WolGlobals.ByteCode.JumpTo,node,[Program.Operand.new(endif)])
 
 		if clause.expression!=null:
-			emit(WolGlobals.ByteCode.Label,node,[Operand.new(endClause)])
+			emit(WolGlobals.ByteCode.Label,node,[Program.Operand.new(endClause)])
 
 		if clause.expression!=null:
 			emit(WolGlobals.ByteCode.Pop)
 
 		
-	emit(WolGlobals.ByteCode.Label,node,[Operand.new(endif)])
+	emit(WolGlobals.ByteCode.Label,node,[Program.Operand.new(endif)])
 
 
 #compile instructions for options
@@ -347,12 +344,12 @@ func generate_option(node,option):
 
 	if option.label == null || option.label.empty():
 		#jump to another node
-		emit(WolGlobals.ByteCode.RunNode,node,[Operand.new(destination)])
+		emit(WolGlobals.ByteCode.RunNode,node,[Program.Operand.new(destination)])
 	else :
 		var lineID : String = ""#tags not supported TODO: ADD TAG SUPPORT
 		var stringID = register_string(option.label,node.nodeName,lineID,option.lineNumber,[])
 
-		emit(WolGlobals.ByteCode.AddOption,node,[Operand.new(stringID),Operand.new(destination)])
+		emit(WolGlobals.ByteCode.AddOption,node,[Program.Operand.new(stringID),Program.Operand.new(destination)])
 
 
 #compile instructions for assigning values
@@ -375,22 +372,22 @@ func generate_assignment(node,assignment):
 		match assignment.operation:
 			WolGlobals.TokenType.AddAssign:
 				emit(WolGlobals.ByteCode.CallFunc,node,
-					[Operand.new(WolGlobals.token_type_name(WolGlobals.TokenType.Add))])
+					[Program.Operand.new(WolGlobals.token_type_name(WolGlobals.TokenType.Add))])
 			WolGlobals.TokenType.MinusAssign:
 				emit(WolGlobals.ByteCode.CallFunc,node,
-					[Operand.new(WolGlobals.token_type_name(WolGlobals.TokenType.Minus))])
+					[Program.Operand.new(WolGlobals.token_type_name(WolGlobals.TokenType.Minus))])
 			WolGlobals.TokenType.MultiplyAssign:
 				emit(WolGlobals.ByteCode.CallFunc,node,
-					[Operand.new(WolGlobals.token_type_name(WolGlobals.TokenType.MultiplyAssign))])
+					[Program.Operand.new(WolGlobals.token_type_name(WolGlobals.TokenType.MultiplyAssign))])
 			WolGlobals.TokenType.DivideAssign:
 				emit(WolGlobals.ByteCode.CallFunc,node,
-					[Operand.new(WolGlobals.token_type_name(WolGlobals.TokenType.DivideAssign))])
+					[Program.Operand.new(WolGlobals.token_type_name(WolGlobals.TokenType.DivideAssign))])
 			_:
 				printerr("Unable to generate assignment")
 
 	#stack contains destination value
 	#store the top of the stack in variable
-	emit(WolGlobals.ByteCode.StoreVariable,node,[Operand.new(assignment.destination)])
+	emit(WolGlobals.ByteCode.StoreVariable,node,[Program.Operand.new(assignment.destination)])
 
 	#clean stack
 	emit(WolGlobals.ByteCode.Pop,node)
@@ -409,10 +406,10 @@ func generate_expression(node,expression):
 				generate_expression(node,param)
 			
 			#put the num of of params to stack
-			emit(WolGlobals.ByteCode.PushNumber,node,[Operand.new(expression.params.size())])
+			emit(WolGlobals.ByteCode.PushNumber,node,[Program.Operand.new(expression.params.size())])
 
 			#call function
-			emit(WolGlobals.ByteCode.CallFunc,node,[Operand.new(expression.function)])
+			emit(WolGlobals.ByteCode.CallFunc,node,[Program.Operand.new(expression.function)])
 		_:
 			printerr("no expression")
 
@@ -422,15 +419,15 @@ func generate_value(node,value):
 	#push value to stack
 	match value.value.type:
 		WolGlobals.ValueType.Number:
-			emit(WolGlobals.ByteCode.PushNumber,node,[Operand.new(value.value.as_number())])
+			emit(WolGlobals.ByteCode.PushNumber,node,[Program.Operand.new(value.value.as_number())])
 		WolGlobals.ValueType.Str:
 			var id : String = register_string(value.value.as_string(),
 				node.nodeName,"",value.lineNumber,[])
-			emit(WolGlobals.ByteCode.PushString,node,[Operand.new(id)])
+			emit(WolGlobals.ByteCode.PushString,node,[Program.Operand.new(id)])
 		WolGlobals.ValueType.Boolean:
-			emit(WolGlobals.ByteCode.PushBool,node,[Operand.new(value.value.as_bool())])
+			emit(WolGlobals.ByteCode.PushBool,node,[Program.Operand.new(value.value.as_bool())])
 		WolGlobals.ValueType.Variable:
-			emit(WolGlobals.ByteCode.PushVariable,node,[Operand.new(value.value.variable)])
+			emit(WolGlobals.ByteCode.PushVariable,node,[Program.Operand.new(value.value.variable)])
 		WolGlobals.ValueType.Nullean:
 			emit(WolGlobals.ByteCode.PushNull,node)
 		_:

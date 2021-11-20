@@ -1,4 +1,5 @@
 extends Node
+
 var WolGlobals = load("res://addons/Wol/autoloads/execution_states.gd")
 
 var FunctionInfo = load("res://addons/Wol/core/function_info.gd")
@@ -43,11 +44,11 @@ func set_program(program):
 #return true if successeful false if no node
 #of that name found
 func set_node(name:String) -> bool:
-	if _program == null || _program.wolNodes.size() == 0:
+	if _program == null || _program.nodes.size() == 0:
 		printerr("Could not load %s : no nodes loaded" % name)
 		return false
 	
-	if !_program.wolNodes.has(name):
+	if !_program.nodes.has(name):
 		executionState = WolGlobals.ExecutionState.Stopped
 		reset()
 		printerr("No node named %s has been loaded" % name)
@@ -55,7 +56,7 @@ func set_node(name:String) -> bool:
 
 	_dialogue.dlog("Running node %s" % name)
 
-	_currentNode = _program.wolNodes[name]
+	_currentNode = _program.nodes[name]
 	reset()
 	_state.currentNodeName = name
 	nodeStartHandler.call_func(name)

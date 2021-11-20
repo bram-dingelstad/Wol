@@ -7,7 +7,6 @@ const StandardLibrary = preload("res://addons/Wol/core/libraries/standard.gd")
 const VirtualMachine = preload("res://addons/Wol/core/virtual_machine.gd")
 const WolLibrary = preload("res://addons/Wol/core/library.gd")
 const Value = preload("res://addons/Wol/core/value.gd")
-const WolProgram = preload("res://addons/Wol/core/program/program.gd")
 
 var _variableStorage
 
@@ -74,7 +73,7 @@ func stop():
 	_vm.stop()
 
 func get_all_nodes():
-	return _program.wolNodes.keys()
+	return _program.nodes.keys()
 
 func current_node():
 	return _vm.get_current()

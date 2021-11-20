@@ -210,21 +210,3 @@ func bytecode_name(bytecode):
 		'Stop',
 		'RunNode'
 	][bytecode]
-
-#combine all the programs in the provided array
-static func combine_programs(programs = []):
-	var WolProgram = load('res://addons/Wol/core/program/program.gd')
-	if programs.size() == 0:
-		printerr('no programs to combine - you failure')
-		return
-	var p = WolProgram.new()
-
-	for program in programs:
-		for nodeKey in program.wolNodes.keys():
-			if p.wolNodes.has(nodeKey):
-				printerr('Program with duplicate node names %s '% nodeKey)
-				return
-			p.wolNodes[nodeKey] = program.wolNodes[nodeKey]
-
-	return p
-

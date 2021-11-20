@@ -1,5 +1,6 @@
 tool
 extends Node
+class_name Wol
 
 signal node_started(node)
 signal line(line)
@@ -69,7 +70,7 @@ func set_path(_path):
 
 func _handle_line(line):
 	var id = line.id
-	var string = program.wolStrings[id]
+	var string = program.strings[id]
 	call_deferred('emit_signal', 'line', string)
 	return WolGlobals.HandlerState.PauseExecution
 
