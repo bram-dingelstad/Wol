@@ -37,7 +37,7 @@ config/icon="res://icon.png"
 
 [autoload]
 
-WolGlobals="*res://addons/Wol/autoloads/execution_states.gd"
+WolGlobals="*res://addons/Wol/core/constants.gd"
 
 [editor_plugins]
 

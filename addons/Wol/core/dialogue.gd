@@ -1,12 +1,13 @@
 extends Node
 
-const DEFAULT_START = "Start"
-const FMF_PLACEHOLDE = "<VALUE PLACEHOLDER>"
+const DEFAULT_START = 'Start'
+const FMF_PLACEHOLDE = '<VALUE PLACEHOLDER>'
 
-const StandardLibrary = preload("res://addons/Wol/core/libraries/standard.gd")
-const VirtualMachine = preload("res://addons/Wol/core/virtual_machine.gd")
-const WolLibrary = preload("res://addons/Wol/core/library.gd")
-const Value = preload("res://addons/Wol/core/value.gd")
+const Constants = preload('res://addons/Wol/core/constants.gd')
+const StandardLibrary = preload('res://addons/Wol/core/libraries/standard.gd')
+const VirtualMachine = preload('res://addons/Wol/core/virtual_machine.gd')
+const WolLibrary = preload('res://addons/Wol/core/library.gd')
+const Value = preload('res://addons/Wol/core/value.gd')
 
 var _variableStorage
 
@@ -26,8 +27,8 @@ func _init(variableStorage):
 	_variableStorage = variableStorage
 	_vm = VirtualMachine.new(self)
 	library = WolLibrary.new()
-	_debugLog = funcref(self, "dlog")
-	_errLog = funcref(self, "elog")
+	_debugLog = funcref(self, 'dlog')
+	_errLog = funcref(self, 'elog')
 	executionComplete = false
 
 	# import the standard library
@@ -35,20 +36,20 @@ func _init(variableStorage):
 	library.import_library(StandardLibrary.new())#FIX
 	
 	#add a function to lib that checks if node is visited
-	library.register_function("visited", -1, funcref(self, "is_node_visited"), true)
+	library.register_function('visited', -1, funcref(self, 'is_node_visited'), true)
 	
 	#add function to lib that gets the node visit count
-	library.register_function("visit_count", -1, funcref(self, "node_visit_count"), true)
+	library.register_function('visit_count', -1, funcref(self, 'node_visit_count'), true)
 
 
 func dlog(message:String):
-	print("YARN_DEBUG : %s" % message)
+	print('YARN_DEBUG : %s' % message)
 
 func elog(message:String):
-	print("YARN_ERROR : %s" % message)
+	print('YARN_ERROR : %s' % message)
 
 func is_active():
-	return get_exec_state() != WolGlobals.ExecutionState.Stopped
+	return get_exec_state() != Constants.ExecutionState.Stopped
 
 #gets the current execution state of the virtual machine
 func get_exec_state():
@@ -61,7 +62,7 @@ func set_node(name:String = DEFAULT_START):
 	_vm.set_node(name)
 
 func resume():
-	if _vm.executionState == WolGlobals.ExecutionState.Running:
+	if _vm.executionState == Constants.ExecutionState.Running:
 		print('BLOCKED')
 		return
 	_vm.resume()
@@ -80,13 +81,13 @@ func current_node():
 
 func get_node_id(name):
 	if _program.nodes.size() == 0:
-		_errLog.call_func("No nodes loaded")
-		return ""
+		_errLog.call_func('No nodes loaded')
+		return ''
 	if _program.nodes.has(name):
-		return "id:"+name
+		return 'id:'+name
 	else:
-		_errLog.call_func("No node named [%s] exists" % name)
-		return ""
+		_errLog.call_func('No node named [%s] exists' % name)
+		return ''
 
 func unloadAll(clear_visited:bool = true):
 	if clear_visited :
@@ -122,7 +123,7 @@ func node_visit_count(node = _vm.current_node_name()):
 		visitCount = _visitedNodeCount[node]
 
 
-	print("visit count for %s is %d" % [node, visitCount])
+	print('visit count for %s is %d' % [node, visitCount])
 
 	return visitCount
 

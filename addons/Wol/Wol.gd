@@ -11,6 +11,7 @@ signal node_completed(node)
 signal started
 signal finished
 
+const Constants = preload('res://addons/Wol/core/constants.gd')
 const WolCompiler = preload('res://addons/Wol/core/compiler/compiler.gd')
 const WolDialogue = preload('res://addons/Wol/core/dialogue.gd')
 
@@ -72,19 +73,19 @@ func _handle_line(line):
 	var id = line.id
 	var string = program.strings[id]
 	call_deferred('emit_signal', 'line', string)
-	return WolGlobals.HandlerState.PauseExecution
+	return Constants.HandlerState.PauseExecution
 
 func _handle_command(command):
 	call_deferred('emit_signal', 'command', command)
 
 	if get_signal_connection_list('command').size() > 0:
-		return WolGlobals.HandlerState.PauseExecution
+		return Constants.HandlerState.PauseExecution
 	else:
-		return WolGlobals.HandlerState.ContinueExecution
+		return Constants.HandlerState.ContinueExecution
 
 func _handle_options(options):
 	call_deferred('emit_signal' ,'options', options)
-	return WolGlobals.HandlerState.PauseExecution
+	return Constants.HandlerState.PauseExecution
 
 func _handle_dialogue_complete():
 	emit_signal('finished')
@@ -105,7 +106,7 @@ func _handle_node_start(node):
 func _handle_node_complete(node):
 	emit_signal('node_completed', node)
 	running = false
-	return WolGlobals.HandlerState.ContinueExecution
+	return Constants.HandlerState.ContinueExecution
 
 func select_option(id):
 	dialogue.get_vm().set_selected_option(id)

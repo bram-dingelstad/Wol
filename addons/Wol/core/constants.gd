@@ -1,4 +1,5 @@
-extends Node
+extends Object
+class_name Constants
 
 enum ExecutionState {
 	Stopped,
@@ -189,7 +190,7 @@ func token_name(type)->String:
 			return key					
 	return string
 
-func bytecode_name(bytecode):
+static func bytecode_name(bytecode):
 	return [
 		'Label',
 		'JumpTo',

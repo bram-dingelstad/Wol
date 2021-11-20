@@ -1,6 +1,8 @@
 extends Object
 class_name WolProgram
 
+const Constants = preload('res://addons/Wol/core/constants.gd')
+
 var name = ''
 var strings = {}
 var nodes = {}
@@ -120,5 +122,5 @@ class Instruction:
 		return "InstructionInformation:NotImplemented"
 
 	func _to_string():
-		return WolGlobals.bytecode_name(operation) + ':' + operands as String
+		return Constants.bytecode_name(operation) + ':' + operands as String
 
