@@ -188,20 +188,20 @@ func tokenize(text:String)->Array:
 	var lines : PoolStringArray = text.split(LINE_SEPARATOR)
 	lines.append('')
 
-	var lineNumber : int = 1
+	var line_number : int = 1
 
 	for line in lines:
-		tokens+=tokenize_line(line,lineNumber)
-		lineNumber+=1
+		tokens+=tokenize_line(line,line_number)
+		line_number+=1
 
-	var endOfInput : Token = Token.new(Constants.TokenType.EndOfInput,_currentState,lineNumber,0)
+	var endOfInput : Token = Token.new(Constants.TokenType.EndOfInput,_currentState,line_number,0)
 	tokens.append(endOfInput)
 
 	# print(tokens)
 
 	return tokens
 
-func tokenize_line(line:String, lineNumber : int)->Array:
+func tokenize_line(line:String, line_number : int)->Array:
 	var tokenStack : Array = []
 
 	var freshLine = line.replace('\t','    ').replace('\r','')
@@ -214,7 +214,7 @@ func tokenize_line(line:String, lineNumber : int)->Array:
 		#we add an indenation token to record indent level
 		_indentStack.push_front(IntBoolPair.new(indentation,true))
 
-		var indent : Token = Token.new(Constants.TokenType.Indent,_currentState,lineNumber,prevIndentation.key)
+		var indent : Token = Token.new(Constants.TokenType.Indent,_currentState,line_number,prevIndentation.key)
 		indent.value = '%*s' % [indentation - prevIndentation.key,'']
 
 		_shouldTrackIndent = false
@@ -226,7 +226,7 @@ func tokenize_line(line:String, lineNumber : int)->Array:
 		while indentation < _indentStack.front().key:
 			var top : IntBoolPair = _indentStack.pop_front()
 			if top.value:
-				var deIndent : Token = Token.new(Constants.TokenType.Dedent,_currentState,lineNumber,0)
+				var deIndent : Token = Token.new(Constants.TokenType.Dedent,_currentState,line_number,0)
 				tokenStack.push_front(deIndent)
 	
 	
@@ -288,7 +288,7 @@ func tokenize_line(line:String, lineNumber : int)->Array:
 				tokenText = tokenText.replace('\\\\', '\\')
 				tokenText = tokenText.replace('\\\'','\'')
 
-			var token : Token = Token.new(rule.tokenType,_currentState,lineNumber,column,tokenText)
+			var token : Token = Token.new(rule.tokenType,_currentState,line_number,column,tokenText)
 			token.delimitsText = rule.delimitsText
 
 			tokenStack.push_front(token)
@@ -296,7 +296,7 @@ func tokenize_line(line:String, lineNumber : int)->Array:
 			if rule.enterState != null && rule.enterState.length() > 0:
 
 				if !_states.has(rule.enterState):
-					printerr('State[%s] not known - line(%s) col(%s)'%[rule.enterState,lineNumber,column])
+					printerr('State[%s] not known - line(%s) col(%s)'%[rule.enterState,line_number,column])
 					return []
 				
 				enter_state(_states[rule.enterState])
@@ -310,7 +310,7 @@ func tokenize_line(line:String, lineNumber : int)->Array:
 
 		if !matched:
 			# TODO: Send out some helpful messages
-			printerr('expectedTokens [%s] - line(%s) col(%s)'%['refineErrors.Lexer.tokenize_line',lineNumber,column])
+			printerr('expectedTokens [%s] - line(%s) col(%s)'%['refineErrors.Lexer.tokenize_line',line_number,column])
 			return []
 
 		var lastWhiteSpace : RegExMatch = whitespace.search(line,column)
@@ -342,7 +342,7 @@ class Token:
 	var type : int
 	var value : String
 
-	var lineNumber : int
+	var line_number : int
 	var column : int
 	var text : String
 
@@ -350,15 +350,15 @@ class Token:
 	var paramCount : int
 	var lexerState : String
 
-	func _init(type:int,state: LexerState, lineNumber:int = -1,column:int = -1,value:String =''):
+	func _init(type:int,state: LexerState, line_number:int = -1,column:int = -1,value:String =''):
 		self.type = type
 		self.lexerState = state.stateName
-		self.lineNumber = lineNumber
+		self.line_number = line_number
 		self.column = column
 		self.value = value
 
 	func _to_string():
-		return '%s (%s) at %s:%s (state: %s)' % [Constants.token_type_name(type),value,lineNumber,column,lexerState]
+		return '%s (%s) at %s:%s (state: %s)' % [Constants.token_type_name(type),value,line_number,column,lexerState]
 	
 
 class LexerState:

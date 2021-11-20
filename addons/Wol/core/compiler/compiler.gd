@@ -17,18 +17,18 @@ const DUPLICATE_NODES_IN_PROGRAM = 0x08
 const ERR_COMPILATION_FAILED = 0x10
 
 var _errors : int
-var _lastError : int
+var _last_error : int
 
 #-----Class vars
-var _currentNode : Program.WolNode
-var _rawText : bool
-var _fileName : String
-var _containsImplicitStringTags : bool
-var _labelCount : int = 0
+var _current_node : Program.WolNode
+var _raw_text : bool
+var _file_name : String
+var _contains_implicit_string_tags : bool
+var _label_count : int = 0
 
 #<String, Program.Line>
-var _stringTable : Dictionary = {}
-var _stringCount : int = 0
+var _string_table : Dictionary = {}
+var _string_count : int = 0
 #<int, Constants.TokenType>
 var _tokens : Dictionary = {}
 
@@ -37,36 +37,36 @@ static func compile_string(source: String, filename: String):
 	var Compiler = load('res://addons/Wol/core/compiler/compiler.gd')
 
 	var compiler = Compiler.new()
-	compiler._fileName = filename
+	compiler._file_name = filename
 
 	#--------------Nodes
-	var headerSep : RegEx = RegEx.new()
-	headerSep.compile('---(\r\n|\r|\n)')
-	var headerProperty : RegEx = RegEx.new()
-	headerProperty.compile('(?<field>.*): *(?<value>.*)')
+	var header_sep : RegEx = RegEx.new()
+	header_sep.compile('---(\r\n|\r|\n)')
+	var header_property : RegEx = RegEx.new()
+	header_property.compile('(?<field>.*): *(?<value>.*)')
 
-	assert(not not headerSep.search(source), 'No headers found')
+	assert(not not header_sep.search(source), 'No headers found')
 	
-	var lineNumber: int = 0
+	var line_number: int = 0
 	
-	var sourceLines : Array = source.split('\n',false)
-	for i in range(sourceLines.size()):
-		sourceLines[i] = sourceLines[i].strip_edges(false,true)
+	var source_lines : Array = source.split('\n',false)
+	for i in range(source_lines.size()):
+		source_lines[i] = source_lines[i].strip_edges(false,true)
 
-	var parsedNodes : Array = []
+	var parsed_nodes : Array = []
 	
-	while lineNumber < sourceLines.size():
+	while line_number < source_lines.size():
 		
 		var title : String
 		var body : String
 
 		#get title
 		while true:
-			var line : String = sourceLines[lineNumber]
-			lineNumber+=1
+			var line : String = source_lines[line_number]
+			line_number+=1
 			
 			if !line.empty():
-				var result = headerProperty.search(line)
+				var result = header_property.search(line)
 				if result != null :
 					var field : String = result.get_string('field')
 					var value : String = result.get_string('value')
@@ -74,125 +74,125 @@ static func compile_string(source: String, filename: String):
 					if field == 'title':
 						title = value
 
-			if(lineNumber >= sourceLines.size() || sourceLines[lineNumber] == '---'):
+			if(line_number >= source_lines.size() || source_lines[line_number] == '---'):
 				break
 
 		
-		lineNumber+=1
+		line_number+=1
 
 		#past header
-		var bodyLines : PoolStringArray = []
+		var body_lines : PoolStringArray = []
 		
-		while lineNumber < sourceLines.size() && sourceLines[lineNumber]!='===':
-			bodyLines.append(sourceLines[lineNumber])
-			lineNumber+=1
+		while line_number < source_lines.size() && source_lines[line_number]!='===':
+			body_lines.append(source_lines[line_number])
+			line_number+=1
 
-		lineNumber+=1
+		line_number+=1
 
-		body = bodyLines.join('\n')
+		body = body_lines.join('\n')
 		var lexer = Lexer.new()
 
 		var tokens : Array = lexer.tokenize(body)
 		var parser = Parser.new(tokens)
 
-		var parserNode = parser.parse_node()
+		var parser_node = parser.parse_node()
 
-		parserNode.name = title
-		parsedNodes.append(parserNode)
-		while lineNumber < sourceLines.size() && sourceLines[lineNumber].empty():
-			lineNumber+=1
+		parser_node.name = title
+		parsed_nodes.append(parser_node)
+		while line_number < source_lines.size() && source_lines[line_number].empty():
+			line_number+=1
 
 	#--- End parsing nodes---
 
 	var program = Program.new()
 
 	#compile nodes
-	for node in parsedNodes:
+	for node in parsed_nodes:
 		compiler.compile_node(program, node)
 
-	for key in compiler._stringTable:
-		program.strings[key] = compiler._stringTable[key]
+	for key in compiler._string_table:
+		program.strings[key] = compiler._string_table[key]
 
 	return program
 
-func compile_node(program, parsedNode):
-	if program.nodes.has(parsedNode.name):
+func compile_node(program, parsed_node):
+	if program.nodes.has(parsed_node.name):
 		emit_error(DUPLICATE_NODES_IN_PROGRAM)
-		printerr('Duplicate node in program: %s' % parsedNode.name)
+		printerr('Duplicate node in program: %s' % parsed_node.name)
 	else:
-		var nodeCompiled = Program.WolNode.new()
+		var node_compiled = Program.WolNode.new()
 
-		nodeCompiled.name = parsedNode.name
-		nodeCompiled.tags = parsedNode.tags
+		node_compiled.name = parsed_node.name
+		node_compiled.tags = parsed_node.tags
 
 		#raw text
-		if parsedNode.source != null && !parsedNode.source.empty():
-			nodeCompiled.sourceId = register_string(parsedNode.source,parsedNode.name,
-			'line:'+parsedNode.name, 0, [])
+		if parsed_node.source != null && !parsed_node.source.empty():
+			node_compiled.source_id = register_string(parsed_node.source,parsed_node.name,
+			'line:'+parsed_node.name, 0, [])
 		else:
 			#compile node
-			var startLabel : String = register_label()
-			emit(Constants.ByteCode.Label,nodeCompiled,[Program.Operand.new(startLabel)])
+			var start_label : String = register_label()
+			emit(Constants.ByteCode.Label,node_compiled,[Program.Operand.new(start_label)])
 
-			for statement in parsedNode.statements:
-				generate_statement(nodeCompiled,statement)
+			for statement in parsed_node.statements:
+				generate_statement(node_compiled,statement)
 
 			
 			#add options
 			#todo: add parser flag
 
-			var danglingOptions = false
-			for instruction in nodeCompiled.instructions :
+			var dangling_options = false
+			for instruction in node_compiled.instructions :
 				if instruction.operation == Constants.ByteCode.AddOption:
-					danglingOptions = true
+					dangling_options = true
 				if instruction.operation == Constants.ByteCode.ShowOptions:
-					danglingOptions = false
+					dangling_options = false
 
-			if danglingOptions:
-				emit(Constants.ByteCode.ShowOptions, nodeCompiled)
-				emit(Constants.ByteCode.RunNode, nodeCompiled)
+			if dangling_options:
+				emit(Constants.ByteCode.ShowOptions, node_compiled)
+				emit(Constants.ByteCode.Run_node, node_compiled)
 			else:
-				emit(Constants.ByteCode.Stop, nodeCompiled)
+				emit(Constants.ByteCode.Stop, node_compiled)
 
 			
-		program.nodes[nodeCompiled.name] = nodeCompiled
+		program.nodes[node_compiled.name] = node_compiled
 
-func register_string(text:String,nodeName:String,id:String='',lineNumber:int=-1,tags:Array=[])->String:
-	var lineIdUsed : String
+func register_string(text:String,node_name:String,id:String='',line_number:int=-1,tags:Array=[])->String:
+	var line_id_used : String
 
 	var implicit : bool
 
 	if id.empty():
-		lineIdUsed = '%s-%s-%d' % [self._fileName,nodeName,self._stringCount]
-		self._stringCount+=1
+		line_id_used = '%s-%s-%d' % [self._file_name,node_name,self._string_count]
+		self._string_count+=1
 
 		#use this when we generate implicit tags
 		#they are not saved and are generated
 		#aka dummy tags that change on each compilation
-		_containsImplicitStringTags = true
+		_contains_implicit_string_tags = true
 
 		implicit = true
 	else :
-		lineIdUsed = id
+		line_id_used = id
 		implicit = false
 
-	var stringInfo = Program.Line.new(text,nodeName,lineNumber,_fileName,implicit,tags)
+	var string_info = Program.Line.new(text,node_name,line_number,_file_name,implicit,tags)
 	#add to string table and return id
-	self._stringTable[lineIdUsed] = stringInfo
+	self._string_table[line_id_used] = string_info
 
-	return lineIdUsed
+	return line_id_used
 
 func register_label(comment:String='')->String:
-	_labelCount+=1
-	return  'L%s%s' %[ _labelCount , comment]
+	_label_count+=1
+	return  'L%s%s' %[ _label_count , comment]
 
-func emit(bytecode, node = _currentNode, operands = []):
+func emit(bytecode, node = _current_node, operands = []):
 	var instruction = Program.Instruction.new(null)
 	instruction.operation = bytecode
 	instruction.operands = operands
 
 	if node == null:
-		printerr('trying to emit to null node with byteCode: %s' % bytecode)
+		printerr('trying to emit to null node with byte_code: %s' % bytecode)
 		return
 
 	node.instructions.append(instruction)
@@ -240,61 +240,61 @@ func generate_custom_command(node,command):
 	if command.expression != null:
 		generate_expression(node,command.expression)
 	else:
-		var commandString = command.client_command
-		if commandString == 'stop':
+		var command_string = command.client_command
+		if command_string == 'stop':
 			emit(Constants.ByteCode.Stop,node)
 		else :
-			emit(Constants.ByteCode.RunCommand,node,[Program.Operand.new(commandString)])
+			emit(Constants.ByteCode.RunCommand,node,[Program.Operand.new(command_string)])
 
 #compile instructions for linetags and use them
 # \#line:number
 func generate_line(node,statement,line:String):
-	var num : String = register_string(line, node.name, '', statement.lineNumber, []);
+	var num : String = register_string(line, node.name, '', statement.line_number, []);
 	emit(Constants.ByteCode.RunLine, node, [Program.Operand.new(num)])
 
-func generate_shortcut_group(node,shortcutGroup):
+func generate_shortcut_group(node,shortcut_group):
 	# print('generating shortcutoptopn group')
 	var end : String = register_label('group_end')
 
 	var labels : Array = []#String
 
-	var optionCount : int = 0
+	var option_count : int = 0
 
-	for option in shortcutGroup.options:
-		var opDestination : String = register_label('option_%s'%[optionCount+1])
-		labels.append(opDestination)
+	for option in shortcut_group.options:
+		var op_destination : String = register_label('option_%s'%[option_count+1])
+		labels.append(op_destination)
 
-		var endofClause : String = ''
+		var endof_clause : String = ''
 
 		if option.condition != null :
-			endofClause = register_label('conditional_%s'%optionCount)
+			endof_clause = register_label('conditional_%s'%option_count)
 			generate_expression(node,option.condition)
-			emit(Constants.ByteCode.JumpIfFalse,node,[Program.Operand.new(endofClause)])
+			emit(Constants.ByteCode.Jump_if_false,node,[Program.Operand.new(endof_clause)])
 
-		var labelLineId : String  = ''#no tag TODO: ADD TAG SUPPORT
-		var labelStringId : String = register_string(option.label,node.nodeName,
-			labelLineId,option.lineNumber,[])
+		var label_line_id : String  = ''#no tag TODO: ADD TAG SUPPORT
+		var label_string_id : String = register_string(option.label,node.node_name,
+			label_line_id,option.line_number,[])
 		
-		emit(Constants.ByteCode.AddOption,node,[Program.Operand.new(labelStringId),Program.Operand.new(opDestination)])
+		emit(Constants.ByteCode.AddOption,node,[Program.Operand.new(label_string_id),Program.Operand.new(op_destination)])
 
 		if option.condition != null :
-			emit(Constants.ByteCode.Label,node,[Program.Operand.new(endofClause)])
+			emit(Constants.ByteCode.Label,node,[Program.Operand.new(endof_clause)])
 			emit(Constants.ByteCode.Pop,node)
 
-		optionCount+=1
+		option_count+=1
 	
 	emit(Constants.ByteCode.ShowOptions,node)
 	emit(Constants.ByteCode.Jump,node)
 
-	optionCount = 0
+	option_count = 0
 
-	for option in shortcutGroup.options:
-		emit(Constants.ByteCode.Label,node,[Program.Operand.new(labels[optionCount])])
+	for option in shortcut_group.options:
+		emit(Constants.ByteCode.Label,node,[Program.Operand.new(labels[option_count])])
 
 		if option.node != null :
 			generate_block(node,option.node.statements)
-		emit(Constants.ByteCode.JumpTo,node,[Program.Operand.new(end)])
-		optionCount+=1
+		emit(Constants.ByteCode.Jump_to,node,[Program.Operand.new(end)])
+		option_count+=1
 
 	#end of option group
 	emit(Constants.ByteCode.Label,node,[Program.Operand.new(end)])
@@ -323,10 +323,10 @@ func generate_if(node,if_statement):
 
 		if clause.expression!=null:	
 			generate_expression(node,clause.expression)
-			emit(Constants.ByteCode.JumpIfFalse,node,[Program.Operand.new(end_clause)])
+			emit(Constants.ByteCode.Jump_if_false,node,[Program.Operand.new(end_clause)])
 		
 		generate_block(node,clause.statements)
-		emit(Constants.ByteCode.JumpTo,node,[Program.Operand.new(endif)])
+		emit(Constants.ByteCode.Jump_to,node,[Program.Operand.new(endif)])
 
 		if clause.expression!=null:
 			emit(Constants.ByteCode.Label,node,[Program.Operand.new(end_clause)])
@@ -347,23 +347,23 @@ func generate_option(node,option):
 		#jump to another node
 		emit(Constants.ByteCode.RunNode,node,[Program.Operand.new(destination)])
 	else :
-		var lineID : String = ''#tags not supported TODO: ADD TAG SUPPORT
-		var stringID = register_string(option.label,node.nodeName,lineID,option.lineNumber,[])
+		var line_iD : String = ''#tags not supported TODO: ADD TAG SUPPORT
+		var string_iD = register_string(option.label,node.node_name,line_iD,option.line_number,[])
 
-		emit(Constants.ByteCode.AddOption,node,[Program.Operand.new(stringID),Program.Operand.new(destination)])
+		emit(Constants.ByteCode.AddOption,node,[Program.Operand.new(string_iD),Program.Operand.new(destination)])
 
 
 #compile instructions for assigning values
 func generate_assignment(node,assignment):
 	# print('generating assign')
 	#assignment
-	if assignment.operation == Constants.TokenType.EqualToOrAssign:
+	if assignment.operation == Constants.TokenType.Equal_to_or_assign:
 		#evaluate the expression to a value for the stack
 		generate_expression(node,assignment.value)
 	else :
 		#this is combined op
 		#get value of var
-		emit(Constants.ByteCode.PushVariable,node,[assignment.destination])
+		emit(Constants.ByteCode.Push_variable,node,[assignment.destination])
 
 		#evaluate the expression and push value to stack
 		generate_expression(node,assignment.value)
@@ -371,16 +371,16 @@ func generate_assignment(node,assignment):
 		#stack contains oldvalue and result
 
 		match assignment.operation:
-			Constants.TokenType.AddAssign:
+			Constants.TokenType.Add_assign:
 				emit(Constants.ByteCode.CallFunc,node,
 					[Program.Operand.new(Constants.token_type_name(Constants.TokenType.Add))])
-			Constants.TokenType.MinusAssign:
+			Constants.TokenType.Minus_assign:
 				emit(Constants.ByteCode.CallFunc,node,
 					[Program.Operand.new(Constants.token_type_name(Constants.TokenType.Minus))])
-			Constants.TokenType.MultiplyAssign:
+			Constants.TokenType.Multiply_assign:
 				emit(Constants.ByteCode.CallFunc,node,
 					[Program.Operand.new(Constants.token_type_name(Constants.TokenType.MultiplyAssign))])
-			Constants.TokenType.DivideAssign:
+			Constants.TokenType.Divide_assign:
 				emit(Constants.ByteCode.CallFunc,node,
 					[Program.Operand.new(Constants.token_type_name(Constants.TokenType.DivideAssign))])
 			_:
@@ -388,7 +388,7 @@ func generate_assignment(node,assignment):
 
 	#stack contains destination value
 	#store the top of the stack in variable
-	emit(Constants.ByteCode.StoreVariable,node,[Program.Operand.new(assignment.destination)])
+	emit(Constants.ByteCode.Store_variable,node,[Program.Operand.new(assignment.destination)])
 
 	#clean stack
 	emit(Constants.ByteCode.Pop,node)
@@ -399,9 +399,9 @@ func generate_expression(node,expression):
 	# print('generating expression')
 	#expression = value || func call
 	match expression.type:
-		Constants.ExpressionType.Value:
+		Constants.Expression_type.Value:
 			generate_value(node,expression.value)
-		Constants.ExpressionType.FunctionCall:
+		Constants.Expression_type.Function_call:
 			#eval all parameters
 			for param in expression.params:
 				generate_expression(node,param)
@@ -423,7 +423,7 @@ func generate_value(node,value):
 			emit(Constants.ByteCode.PushNumber,node,[Program.Operand.new(value.value.as_number())])
 		Constants.ValueType.Str:
 			var id : String = register_string(value.value.as_string(),
-				node.nodeName,'',value.lineNumber,[])
+				node.node_name,'',value.line_number,[])
 			emit(Constants.ByteCode.PushString,node,[Program.Operand.new(id)])
 		Constants.ValueType.Boolean:
 			emit(Constants.ByteCode.PushBool,node,[Program.Operand.new(value.value.as_bool())])
@@ -434,27 +434,26 @@ func generate_value(node,value):
 		_:
 			printerr('Unrecognized valuenode type: %s' % value.value.type)
 
-
 #get the error flags
 func get_errors()->int:
 	return _errors
 
 #get the last error code reported
 func get_last_error()->int:
-	return _lastError
+	return _last_error
 
 func clear_errors()->void:
 	_errors = NO_ERROR
-	_lastError = NO_ERROR
+	_last_error = NO_ERROR
 
 func emit_error(error : int)->void:
-	_lastError = error
-	_errors |= _lastError
+	_last_error = error
+	_errors |= _last_error
 
 static func print_tokens(tokens:Array=[]):
 	var list : PoolStringArray = []
 	list.append('\n')
 	for token in tokens:
-		list.append('%s (%s line %s)\n'%[Constants.token_type_name(token.type),token.value,token.lineNumber])
+		list.append('%s (%s line %s)\n'%[Constants.token_type_name(token.type),token.value,token.line_number])
 	print('TOKENS:')
 	print(list.join(''))
