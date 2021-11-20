@@ -14,30 +14,33 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://addons/Wol/core/compiler/compiler.gd"
 }, {
+"base": "Object",
+"class": "Constants",
+"language": "GDScript",
+"path": "res://addons/Wol/core/constants.gd"
+}, {
+"base": "Object",
+"class": "Program",
+"language": "GDScript",
+"path": "res://addons/Wol/core/program.gd"
+}, {
 "base": "Node",
 "class": "Wol",
 "language": "GDScript",
 "path": "res://addons/Wol/Wol.gd"
-}, {
-"base": "Object",
-"class": "WolProgram",
-"language": "GDScript",
-"path": "res://addons/Wol/core/program.gd"
 } ]
 _global_script_class_icons={
 "Compiler": "",
-"Wol": "",
-"WolProgram": ""
+"Constants": "",
+"Program": "",
+"Wol": ""
 }
 
 [application]
 
 config/name="YarnSpinner"
+run/main_scene="res://Dialogue.tscn"
 config/icon="res://icon.png"
-
-[autoload]
-
-WolGlobals="*res://addons/Wol/core/constants.gd"
 
 [editor_plugins]
 

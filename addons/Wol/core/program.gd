@@ -1,5 +1,5 @@
 extends Object
-class_name WolProgram
+class_name Program
 
 const Constants = preload('res://addons/Wol/core/constants.gd')
 

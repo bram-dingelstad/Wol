@@ -216,15 +216,15 @@ func generate_statement(node,statement):
 	# print('generating statement')
 	match statement.type:
 		Constants.StatementTypes.CustomCommand:
-			generate_custom_command(node,statement.customCommand)
+			generate_custom_command(node,statement.custom_command)
 		Constants.StatementTypes.ShortcutOptionGroup:
-			generate_shortcut_group(node,statement.shortcutOptionGroup)
+			generate_shortcut_group(node,statement.shortcut_option_group)
 		Constants.StatementTypes.Block:
 			generate_block(node,statement.block.statements)
 		Constants.StatementTypes.IfStatement:
-			generate_if(node,statement.ifStatement)
+			generate_if(node,statement.if_statement)
 		Constants.StatementTypes.OptionStatement:
-			generate_option(node,statement.optionStatement)
+			generate_option(node,statement.option_statement)
 		Constants.StatementTypes.AssignmentStatement:
 			generate_assignment(node,statement.assignment)
 		Constants.StatementTypes.Line:
@@ -240,7 +240,7 @@ func generate_custom_command(node,command):
 	if command.expression != null:
 		generate_expression(node,command.expression)
 	else:
-		var commandString = command.clientCommand
+		var commandString = command.client_command
 		if commandString == 'stop':
 			emit(Constants.ByteCode.Stop,node)
 		else :
@@ -313,23 +313,23 @@ func generate_block(node,statements:Array=[]):
 	
 
 #compile if branching instructions
-func generate_if(node,ifStatement):
+func generate_if(node,if_statement):
 	# print('generating if')
 	#jump to label @ end of every clause
 	var endif : String = register_label('endif')
 
-	for clause in ifStatement.clauses:
-		var endClause : String = register_label('skip_clause')
+	for clause in if_statement.clauses:
+		var end_clause : String = register_label('skip_clause')
 
 		if clause.expression!=null:	
 			generate_expression(node,clause.expression)
-			emit(Constants.ByteCode.JumpIfFalse,node,[Program.Operand.new(endClause)])
+			emit(Constants.ByteCode.JumpIfFalse,node,[Program.Operand.new(end_clause)])
 		
 		generate_block(node,clause.statements)
 		emit(Constants.ByteCode.JumpTo,node,[Program.Operand.new(endif)])
 
 		if clause.expression!=null:
-			emit(Constants.ByteCode.Label,node,[Program.Operand.new(endClause)])
+			emit(Constants.ByteCode.Label,node,[Program.Operand.new(end_clause)])
 
 		if clause.expression!=null:
 			emit(Constants.ByteCode.Pop)
@@ -450,7 +450,6 @@ func clear_errors()->void:
 func emit_error(error : int)->void:
 	_lastError = error
 	_errors |= _lastError
-
 
 static func print_tokens(tokens:Array=[]):
 	var list : PoolStringArray = []

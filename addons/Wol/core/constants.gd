@@ -145,11 +145,9 @@ enum TokenType {
 	Text # a run of text until we hit other syntax
 }
 
-
 enum ExpressionType {
 	Value, FunctionCall
 }
-
 
 enum StatementTypes {
 	CustomCommand,
@@ -169,10 +167,7 @@ enum ValueType {
 	Nullean
 }
 
-func defaultValue(type):
-	pass
-
-static func token_type_name(value:int)->String:
+static func token_type_name(value):
 	for key in TokenType.keys():
 		if TokenType[key] == value:
 			return key
@@ -181,14 +176,6 @@ static func token_type_name(value:int)->String:
 static func merge_dir(target, patch):
 	for key in patch:
 		target[key] = patch[key]
-
-func token_name(type)->String:
-	var string : String = ''
-	
-	for key in TokenType.keys():
-		if TokenType[key] == type:
-			return key					
-	return string
 
 static func bytecode_name(bytecode):
 	return [

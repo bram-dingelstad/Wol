@@ -3,78 +3,78 @@ extends Object
 const Constants = preload('res://addons/Wol/core/constants.gd')
 const Lexer = preload('res://addons/Wol/core/compiler/lexer.gd')
 
-var _tokens : Array = []#token
+var _tokens = []
 
 func _init(tokens):
 	self._tokens = tokens
 	
-#how to handle operations
 enum Associativity {
-	Left,Right,None
+	Left,
+	Right,
+	None
 }
 
-func parse_node()->WolNode:
-	return WolNode.new('Start',null,self)
+func parse_node():
+	return WolNode.new('Start', null, self)
 
-func next_symbol_is(validTypes:Array)->bool:
+func next_symbol_is(valid_types):
 	var type = self._tokens.front().type
-	for validType in validTypes:
-		if type == validType:
+	for valid_type in valid_types:
+		if type == valid_type:
 			return true
 	return false
 
-#look ahead for `<<` and `else`
-func next_symbols_are(validTypes:Array)->bool:
-	var temp = []+_tokens
-	for type in validTypes:
-		if temp.pop_front().type != type:
+# NOTE:0 look ahead for `<<` and `else`
+func next_symbols_are(valid_types):
+	var temporary = [] + _tokens
+	for type in valid_types:
+		if temporary.pop_front().type != type:
 			return false
 	return true
 
-func expect_symbol(tokenTypes:Array = [])->Lexer.Token:
-	var t = self._tokens.pop_front() as Lexer.Token
-	var size = tokenTypes.size()
+func expect_symbol(token_types = []):
+	var token = _tokens.pop_front() as Lexer.Token
 	
-	if size == 0:
-		if t.type == Constants.TokenType.EndOfInput:
-			printerr('unexpected end of input')
+	if token_types.size() == 0:
+		if token.type == Constants.TokenType.EndOfInput:
+			printerr('Unexpected end of input.')
 			return null
-		return t
+		return token
 
-	for type in tokenTypes:
-		if t.type == type:
-			return t
+	for type in token_types:
+		if token.type == type:
+			return token
 	
-	printerr('unexpexted token: expected[ %s ] but got [ %s ]'% (tokenTypes+[t.type]))
-	return null
+	printerr('Unexpexted token: expected[ %s ] but got [ %s ]' % token_types + [token.type])
+	return
 
-static func tab(indentLevel : int , input : String,newLine : bool = true)->String:
-	return ('%*s| %s%s'% [indentLevel*2,'',input,('' if !newLine else '\n')])
+static func tab(indent_level, input, newline = true):
+	return '%*s| %s%s' % [indent_level * 2, '', input, '' if not newline else '\n']
 
-func tokens()->Array:
+func tokens():
 	return _tokens
 
 class ParseNode:
-	var parent : ParseNode
-	var lineNumber : int
-	var tags : Array#<String>
+	var parent
+	var lineNumber = -1
+	var tags = []
 
-	func _init(parent:ParseNode,parser):
+	func _init(parent, parser):
 		self.parent = parent
-		var tokens : Array = parser.tokens() as Array
+		var tokens = parser.tokens() as Array
 		if tokens.size() > 0:
 			lineNumber = tokens.front().lineNumber
 		else:
 			lineNumber = -1
 		tags = []
 
-	func tree_string(indentLevel : int)->String:
+	func tree_string(indent_level):
 		return 'NotImplemented'
 
-	func tags_to_string(indentLevel : int)->String:
+	func tags_to_string(indent_level):
 		return '%s' % 'TAGS<tags_to_string>NOTIMPLEMENTED'
 
-	func get_node_parent()->WolNode:
+	func get_node_parent():
 		var node = self
 		while node != null:
 			if node.has_method('wol_node'):
@@ -82,232 +82,215 @@ class ParseNode:
 			node = node.parent
 		return null
 
-	func tab(indentLevel : int , input : String,newLine : bool = true)->String:
-		return ('%*s| %s%s'% [indentLevel*2,'',input,('' if !newLine else '\n')])
-		
+	func tab(indent_level, input, newline = true):
+		return '%*s| %s%s' % [ indent_level * 2, '', input, '' if !newline else '\n']
 	
 	func set_parent(parent):
 		self.parent = parent
 
 #this is a Wol Node - contains all the text
 class WolNode extends ParseNode:
-
-	var name : String
-	var source : String
+	var name = ''
+	var source  = ''
 	
-	var editorNodeTags : Array =[]#tags defined in node header
-	var statements : Array = []# Statement
+	var editorNodeTags = []
+	var statements = []
 
-	func _init(name:String,parent:ParseNode,parser).(parent,parser):
-
+	func _init(name, parent, parser).(parent, parser):
 		self.name = name
-		while (parser.tokens().size() > 0 &&
-			  !parser.next_symbol_is([Constants.TokenType.Dedent,Constants.TokenType.EndOfInput])):
-			statements.append(Statement.new(self,parser))
-			#print(statements.size())
+		while parser.tokens().size() > 0 \
+				and not parser.next_symbol_is([Constants.TokenType.Dedent, Constants.TokenType.EndOfInput]):
+			statements.append(Statement.new(self, parser))
 
-	func wol_node():
-		pass
-
-	func tree_string(indentLevel : int)->String:
-		
-		var info : PoolStringArray = []
-
+	func tree_string(indent_level):
+		var info = []
 		for statement in statements:
-			info.append(statement.tree_string(indentLevel +1))
+			info.append(statement.tree_string(indent_level + 1))
 
-		#print('printing TREEEEEEEEEEEEE')
+		return PoolStringArray(info).join('')
 
-		return info.join('')
-	
-
+# TODO: Evaluate use
 class Header extends ParseNode:
 	pass
-
 
 class Statement extends ParseNode:
 	var Type = Constants.StatementTypes
 
-	var type : int
-	var block : Block
-	var ifStatement : IfStatement
-	var optionStatement : OptionStatement
-	var assignment : Assignment
-	var shortcutOptionGroup : ShortcutOptionGroup
-	var customCommand : CustomCommand
-	var line : String
+	var type = -1
+	var block
+	var if_statement
+	var option_statement
+	var assignment
+	var shortcut_option_group
+	var custom_command
+	var line = ''
 
-	func _init(parent:ParseNode,parser).(parent,parser):
-
+	func _init(parent, parser).(parent, parser):
 		if Block.can_parse(parser):
-			block  = Block.new(self,parser)
+			block  = Block.new(self, parser)
 			type = Type.Block
+
 		elif IfStatement.can_parse(parser):
-			ifStatement = IfStatement.new(self,parser)
+			if_statement = IfStatement.new(self, parser)
 			type = Type.IfStatement
+
 		elif OptionStatement.can_parse(parser):
-			optionStatement = OptionStatement.new(self,parser)
+			option_statement = OptionStatement.new(self, parser)
 			type = Type.OptionStatement
+
 		elif Assignment.can_parse(parser):
-			assignment = Assignment.new(self,parser)
+			assignment = Assignment.new(self, parser)
 			type = Type.AssignmentStatement
+
 		elif ShortcutOptionGroup.can_parse(parser):
-			shortcutOptionGroup = ShortcutOptionGroup.new(self,parser)
+			shortcut_option_group = ShortcutOptionGroup.new(self, parser)
 			type = Type.ShortcutOptionGroup
+
 		elif CustomCommand.can_parse(parser):
-			customCommand = CustomCommand.new(self,parser)
+			custom_command = CustomCommand.new(self, parser)
 			type = Type.CustomCommand
+
 		elif parser.next_symbol_is([Constants.TokenType.Text]):
 			line = parser.expect_symbol([Constants.TokenType.Text]).value
 			type = Type.Line
+
 		else:
-			printerr('expected a statement but got %s instead. (probably an inbalanced if statement)' % parser.tokens().front()._to_string())
+			printerr('Expected a statement but got %s instead. (probably an imbalanced if statement)' % parser.tokens().front()._to_string())
 		
-		
-		var tags : Array = []
+		var tags = []
 
 		while parser.next_symbol_is([Constants.TokenType.TagMarker]):
 			parser.expect_symbol([Constants.TokenType.TagMarker])
-			var tag : String = parser.expect_symbol([Constants.TokenType.Identifier]).value
+			var tag = parser.expect_symbol([Constants.TokenType.Identifier]).value
 			tags.append(tag)
 
-		if(tags.size()>0):
+		if tags.size() > 0:
 			self.tags = tags
 
-	func tree_string(indentLevel : int)->String:
-		var info : PoolStringArray = []
+	func tree_string(indent_level):
+		var info = []
 
-		match type :
+		match type:
 			Type.Block:
-				info.append(block.tree_string(indentLevel))
+				info.append(block.tree_string(indent_level))
 			Type.IfStatement:
-				info.append(ifStatement.tree_string(indentLevel))
+				info.append(if_statement.tree_string(indent_level))
 			Type.AssignmentStatement:
-				info.append(assignment.tree_string(indentLevel))
+				info.append(assignment.tree_string(indent_level))
 			Type.OptionStatement:
-				info.append(optionStatement.tree_string(indentLevel))
+				info.append(option_statement.tree_string(indent_level))
 			Type.ShortcutOptionGroup:
-				info.append(shortcutOptionGroup.tree_string(indentLevel))
+				info.append(shortcut_option_group.tree_string(indent_level))
 			Type.CustomCommand:
-				info.append(customCommand.tree_string(indentLevel))
+				info.append(custom_command.tree_string(indent_level))
 			Type.Line:
-				info.append(tab(indentLevel,'Line: %s'%line))
+				info.append(tab(indent_level, 'Line: %s' % line))
 			_:
-				printerr('cannot print statement')
+				printerr('Cannot print statement')
 
-		#print('statement --')
-		
-		return info.join('')
-		
-	
+		return PoolStringArray(info).join('')
 
 class CustomCommand extends ParseNode:
 
 	enum Type {
-		Expression,ClientCommand
+		Expression,
+		ClientCommand
 	}
 
-	var type : int
-	var expression : ExpressionNode
-	var clientCommand : String
+	var type = -1
+	var expression
+	var client_command
 
-	func _init(parent:ParseNode,parser).(parent,parser):
+	func _init(parent, parser).(parent, parser):
 		parser.expect_symbol([Constants.TokenType.BeginCommand])
 
-		var commandTokens = []
-		commandTokens.append(parser.expect_symbol())
+		var command_tokens = []
+		command_tokens.append(parser.expect_symbol())
 
-		while !parser.next_symbol_is([Constants.TokenType.EndCommand]):
-			commandTokens.append(parser.expect_symbol())
+		while not parser.next_symbol_is([Constants.TokenType.EndCommand]):
+			command_tokens.append(parser.expect_symbol())
 
 		parser.expect_symbol([Constants.TokenType.EndCommand])
 		
 		#if first token is identifier and second is leftt parenthesis
 		#evaluate as function
-		if (commandTokens.size() > 1 && commandTokens[0].type == Constants.TokenType.Identifier
-			&& commandTokens[1].type == Constants.TokenType.LeftParen):
-			var p = get_script().new(commandTokens,parser.library)
-			var expression : ExpressionNode = ExpressionNode.parse(self,p)
+		if (command_tokens.size() > 1 && command_tokens[0].type == Constants.TokenType.Identifier
+			&& command_tokens[1].type == Constants.TokenType.LeftParen):
+			var p = get_script().new(command_tokens, parser.library)
+			var expression = ExpressionNode.parse(self, p)
 			type = Type.Expression
 			self.expression = expression
 		else:
 			#otherwise evaluuate command
 			type = Type.ClientCommand
-			self.clientCommand = commandTokens[0].value
+			self.client_command = command_tokens[0].value
 	
-	func tree_string(indentLevel : int)->String:
+	func tree_string(indent_level):
 		match type:
 			Type.Expression:
-				return tab(indentLevel,'Expression: %s'% expression.tree_string(indentLevel+1))
+				return tab(indent_level,'Expression: %s'% expression.tree_string(indent_level+1))
 			Type.ClientCommand:
-				return tab(indentLevel,'Command: %s'%clientCommand)
+				return tab(indent_level,'Command: %s' % client_command)
 		return ''
 	
-	static func can_parse(parser)->bool:
-		return (parser.next_symbols_are([Constants.TokenType.BeginCommand,Constants.TokenType.Text])
-				|| parser.next_symbols_are([Constants.TokenType.BeginCommand,Constants.TokenType.Identifier]))
-
-
-	
-
+	static func can_parse(parser):
+		return (parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.Text])
+				or parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.Identifier]))
 		
 class ShortcutOptionGroup extends ParseNode:
-	
-	var options : Array = []#ShortcutOptions
+	var options = []
 
-	func _init(parent:ParseNode,parser).(parent,parser):
+	func _init(parent, parser).(parent, parser):
 
 		# parse options until there is no more
 		# expect one otherwise invalid
 
-		var sIndex : int = 1
-		options.append(ShortCutOption.new(sIndex, self, parser))
-		sIndex+=1
+		var index = 1
+		options.append(ShortCutOption.new(index, self, parser))
+		index += 1
 		while parser.next_symbol_is([Constants.TokenType.ShortcutOption]):
-			options.append(ShortCutOption.new(sIndex, self, parser))
-			sIndex+=1
+			options.append(ShortCutOption.new(index, self, parser))
+			index += 1
 
+	func tree_string(indent_level):
+		var info = []
 
-	func tree_string(indentLevel : int)->String:
-		var info : PoolStringArray = []
-
-		info.append(tab(indentLevel,'Shortcut Option Group{'))
+		info.append(tab(indent_level,'Shortcut Option Group{'))
 
 		for option in options:
-			info.append(option.tree_string(indentLevel+1))
+			info.append(option.tree_string(indent_level+1))
 
-		info.append(tab(indentLevel,'}'))
+		info.append(tab(indent_level,'}'))
 
-		return info.join('')
+		return PoolStringArray(info).join('')
 	
-	static func can_parse(parser)->bool:
+	static func can_parse(parser):
 		return parser.next_symbol_is([Constants.TokenType.ShortcutOption])
-	pass
 
 class ShortCutOption extends ParseNode:
+	var label = ''
+	var condition
+	var node
 
-	var label : String
-	var condition : ExpressionNode
-	var node : WolNode
-
-	func _init(index:int, parent:ParseNode, parser).(parent,parser):
+	func _init(index, parent, parser).(parent, parser):
 		parser.expect_symbol([Constants.TokenType.ShortcutOption])
 		label = parser.expect_symbol([Constants.TokenType.Text]).value
 
-		# parse the conditional << if $x >> when it exists
+		# NOTE: Parse the conditional << if $x >> when it exists
 
-		var tags : Array = []#string
-		while( parser.next_symbols_are([Constants.TokenType.BeginCommand,Constants.TokenType.IfToken])
-			|| parser.next_symbol_is([Constants.TokenType.TagMarker])):
+		var tags = []
+		while parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.IfToken]) \
+			or parser.next_symbol_is([Constants.TokenType.TagMarker]):
 			
 			if parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.IfToken]):
 				parser.expect_symbol([Constants.TokenType.BeginCommand])
 				parser.expect_symbol([Constants.TokenType.IfToken])
-				condition = ExpressionNode.parse(self,parser)
+				condition = ExpressionNode.parse(self, parser)
 				parser.expect_symbol([Constants.TokenType.EndCommand])
+
 			elif parser.next_symbol_is([Constants.TokenType.TagMarker]):
 				parser.expect_symbol([Constants.TokenType.TagMarker])
-				var tag : String = parser.expect_symbol([Constants.TokenType.Identifier]).value;
+				var tag = parser.expect_symbol([Constants.TokenType.Identifier]).value
 				tags.append(tag)
 
 		
@@ -316,80 +299,78 @@ class ShortCutOption extends ParseNode:
 
 		if parser.next_symbol_is([Constants.TokenType.Indent]):
 			parser.expect_symbol([Constants.TokenType.Indent])
-			node = WolNode.new('%s.%s' %[self.get_node_parent().name ,index], self,parser)
+			node = WolNode.new('%s.%s' %[self.get_node_parent().name , index], self, parser)
 			parser.expect_symbol([Constants.TokenType.Dedent])
 
 
-	func tree_string(indentLevel : int)->String:
-		var info : PoolStringArray = []
+	func tree_string(indent_level):
+		var info = []
 
-		info.append(tab(indentLevel,'Option \'%s\''%label))
+		info.append(tab(indent_level, 'Option \'%s\'' % label))
 
-		if condition != null :
-			info.append(tab(indentLevel+1,'(when:'))
-			info.append(condition.tree_string(indentLevel+2))
-			info.append(tab(indentLevel+1,'),'))
+		if condition != null:
+			info.append(tab(indent_level + 1, '(when:'))
+			info.append(condition.tree_string(indent_level + 2))
+			info.append(tab(indent_level + 1, '),'))
+
 		if node != null:
-			info.append(tab(indentLevel, '{'))
-			info.append(node.tree_string(indentLevel + 1));
-			info.append(tab(indentLevel, '}'));
+			info.append(tab(indent_level, '{'))
+			info.append(node.tree_string(indent_level + 1))
+			info.append(tab(indent_level, '}'))
 
-		return info.join('')
-
-	
+		return PoolStringArray(info).join('')
 	
 #Blocks are groups of statements with the same indent level
 class Block extends ParseNode:
 	
-	var statements : Array = []
+	var statements = []
 
-	func _init(parent:ParseNode, parser).(parent,parser):
+	func _init(parent, parser).(parent, parser):
 		#read indent
 		parser.expect_symbol([Constants.TokenType.Indent])
 
 		#keep reading statements until we hit a dedent
-		while !parser.next_symbol_is([Constants.TokenType.Dedent]):
+		while not parser.next_symbol_is([Constants.TokenType.Dedent]):
 			#parse all statements including nested blocks
-			statements.append(Statement.new(self,parser))
+			statements.append(Statement.new(self, parser))
 
 		#clean up dedent
 		parser.expect_symbol([Constants.TokenType.Dedent])
 	
 		
-	func tree_string(indentLevel : int)->String:
-		var info : PoolStringArray = []
+	func tree_string(indent_level):
+		var info = []
 
-		info.append(tab(indentLevel,'Block {'))
+		info.append(tab(indent_level, 'Block {'))
 
 		for statement in statements:
-			info.append(statement.tree_string(indentLevel+1))
+			info.append(statement.tree_string(indent_level + 1))
 
-		info.append(tab(indentLevel,'}'))
+		info.append(tab(indent_level, '}'))
 
-		return info.join('')
+		return PoolStringArray(info).join('')
 
-	static func can_parse(parser)->bool:
+	static func can_parse(parser):
 		return parser.next_symbol_is([Constants.TokenType.Indent])
 
-#Option Statements are links to other nodes
+# NOTE: Option Statements are links to other nodes
 class OptionStatement extends ParseNode:
-	
-	var destination : String
-	var label : String
+	var destination = ''
+	var label = ''
 
-	func _init(parent:ParseNode, parser).(parent,parser):
+	func _init(parent, parser).(parent, parser):
 
-		var strings : Array = []#string
+		var strings = []
 
-		#parse [[LABEL
+		# NOTE: parse [[LABEL
 		parser.expect_symbol([Constants.TokenType.OptionStart])
 		strings.append(parser.expect_symbol([Constants.TokenType.Text]).value)
 
-		#if there is a | get the next string
+		# NOTE: if there is a | get the next string
 		if parser.next_symbol_is([Constants.TokenType.OptionDelimit]):
 			parser.expect_symbol([Constants.TokenType.OptionDelimit])
-			var t = parser.expect_symbol([Constants.TokenType.Text,Constants.TokenType.Identifier])
-			#print('Token %s'%t.value)
+			var t = parser.expect_symbol([Constants.TokenType.Text, Constants.TokenType.Identifier])
+
 			strings.append(t.value as String)
 		
 		label = strings[0] if strings.size() > 1 else ''
@@ -397,74 +378,71 @@ class OptionStatement extends ParseNode:
 
 		parser.expect_symbol([Constants.TokenType.OptionEnd])
 
-	func tree_string(indentLevel : int)->String:
+	func tree_string(indent_level):
 		if label != null:
-			return tab(indentLevel,'Option: %s -> %s'%[label,destination])
+			return tab(indent_level,'Option: %s -> %s' % [label, destination])
 		else:
-			return tab(indentLevel,'Option: -> %s'%destination)
+			return tab(indent_level, 'Option: -> %s' % destination)
 
-	static func can_parse(parser)->bool:
+	static func can_parse(parser):
 		return parser.next_symbol_is([Constants.TokenType.OptionStart])
 
 class IfStatement extends ParseNode:
-	
-	var clauses : Array = []#Clauses
+	var clauses = []#
 
-	func _init(parent:ParseNode, parser).(parent,parser):
+	func _init(parent, parser).(parent, parser):
 		
 		#<<if Expression>>
-		var prime : Clause = Clause.new()
+		var prime = Clause.new()
 
 		parser.expect_symbol([Constants.TokenType.BeginCommand])
 		parser.expect_symbol([Constants.TokenType.IfToken])
-		prime.expression = ExpressionNode.parse(self,parser)
+		prime.expression = ExpressionNode.parse(self, parser)
 		parser.expect_symbol([Constants.TokenType.EndCommand])
 
 		#read statements until 'endif' or 'else' or 'else if'
-		var statements : Array = []#statement
-		while (!parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.EndIf])
-			&& !parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.ElseToken])
-			&& !parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.ElseIf])):
+		var statements = []#statement
+		while not parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.EndIf]) \
+				and not parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.ElseToken]) \
+				and not parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.ElseIf]):
 			
-			statements.append(Statement.new(self,parser))
+			statements.append(Statement.new(self, parser))
 
 			#ignore dedent
 			while parser.next_symbol_is([Constants.TokenType.Dedent]):
 				parser.expect_symbol([Constants.TokenType.Dedent])
 		
-		
 		prime.statements = statements
 		clauses.append(prime)
 
 		#handle all else if
-		while parser.next_symbols_are([Constants.TokenType.BeginCommand,Constants.TokenType.ElseIf]):
-			var clauseElif : Clause = Clause.new()
+		while parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.ElseIf]):
+			var clause_elif = Clause.new()
 
 			#parse condition syntax
 			parser.expect_symbol([Constants.TokenType.BeginCommand])
 			parser.expect_symbol([Constants.TokenType.ElseIf])
-			clauseElif.expression = ExpressionNode.parse(self,parser)
+			clause_elif.expression = ExpressionNode.parse(self, parser)
 			parser.expect_symbol([Constants.TokenType.EndCommand])
 
 
-			var elifStatements : Array = []#statement
-			while (!parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.EndIf])
-				&& !parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.ElseToken])
-				&& !parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.ElseIf])):
+			var elif_statements = []#statement
+			while not parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.EndIf]) \
+					and not parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.ElseToken]) \
+					and not parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.ElseIf]):
 				
-				elifStatements.append(Statement.new(self,parser))
+				elif_statements.append(Statement.new(self, parser))
 
 				#ignore dedent
 				while parser.next_symbol_is([Constants.TokenType.Dedent]):
 					parser.expect_symbol([Constants.TokenType.Dedent])
 			
-			
-			clauseElif.statements = statements
-			clauses.append(clauseElif)
+			clause_elif.statements = statements
+			clauses.append(clause_elif)
 		
 		#handle else if exists
 		if (parser.next_symbols_are([Constants.TokenType.BeginCommand,
-			Constants.TokenType.ElseToken,Constants.TokenType.EndCommand])):
+			Constants.TokenType.ElseToken, Constants.TokenType.EndCommand])):
 
 			#expect no expression - just <<else>>
 			parser.expect_symbol([Constants.TokenType.BeginCommand])
@@ -472,10 +450,10 @@ class IfStatement extends ParseNode:
 			parser.expect_symbol([Constants.TokenType.EndCommand])
 
 			#parse until hit endif
-			var clauseElse : Clause = Clause.new()
-			var elStatements : Array = []#statement
-			while !parser.next_symbols_are([Constants.TokenType.BeginCommand,Constants.TokenType.EndIf]):
-				elStatements.append(Statement.new(self,parser))
+			var clauseElse = Clause.new()
+			var elStatements = []#statement
+			while !parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.EndIf]):
+				elStatements.append(Statement.new(self, parser))
 
 			clauseElse.statements = elStatements
 			clauses.append(clauseElse)
@@ -484,53 +462,52 @@ class IfStatement extends ParseNode:
 			while parser.next_symbol_is([Constants.TokenType.Dedent]):
 				parser.expect_symbol([Constants.TokenType.Dedent])
 
-		
 		#finish
 		parser.expect_symbol([Constants.TokenType.BeginCommand])
 		parser.expect_symbol([Constants.TokenType.EndIf])
 		parser.expect_symbol([Constants.TokenType.EndCommand])
 
 
-	func tree_string(indentLevel : int)->String:
-		var info : PoolStringArray = []
-		var first : bool = true
+	func tree_string(indent_level):
+		var info = []
+		var first = true
 
 		for clause in clauses:
 			if first:
-				info.append(tab(indentLevel,'if:'))
+				info.append(tab(indent_level,'if:'))
 			elif clause.expression!=null:
-				info.append(tab(indentLevel,'Else If'))
+				info.append(tab(indent_level,'Else If'))
 			else:
-				info.append(tab(indentLevel,'Else:'))
+				info.append(tab(indent_level,'Else:'))
 
-			info.append(clause.tree_string(indentLevel +1))
+			info.append(clause.tree_string(indent_level +1))
 
 		return info.join('')
 
-	static func can_parse(parser)->bool:
-		return parser.next_symbols_are([Constants.TokenType.BeginCommand,Constants.TokenType.IfToken])
+	static func can_parse(parser):
+		return parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.IfToken])
 	pass
 
 class ValueNode extends ParseNode:
 	const Value = preload('res://addons/Wol/core/value.gd')
 	const Lexer = preload('res://addons/Wol/core/compiler/lexer.gd')
-	var value : Value
+	var value
 
-	func _init(parent:ParseNode, parser, token: Lexer.Token = null).(parent,parser):
+	func _init(parent, parser, token = null).(parent, parser):
 
-		var t : Lexer.Token = token
+		var t = token
 		if t == null :
 			parser.expect_symbol([Constants.TokenType.Number,
-		Constants.TokenType.Variable,Constants.TokenType.Str])
+		Constants.TokenType.Variable, Constants.TokenType.Str])
 		use_token(t)
 
 	#store value depending on type
-	func use_token(t:Lexer.Token):
-		match t.type:
+	func use_token(token):
+		match token.type:
 			Constants.TokenType.Number:
-				value = Value.new(float(t.value))
+				value = Value.new(float(token.value))
 			Constants.TokenType.Str:
-				value = Value.new(t.value)
+				value = Value.new(token.value)
 			Constants.TokenType.FalseToken:
 				value = Value.new(false)
 			Constants.TokenType.TrueToken:
@@ -538,14 +515,14 @@ class ValueNode extends ParseNode:
 			Constants.TokenType.Variable:
 				value = Value.new(null)
 				value.type = Constants.ValueType.Variable
-				value.variable = t.value
+				value.variable = token.value
 			Constants.TokenType.NullToken:
 				value = Value.new(null)
 			_:
-				printerr('%s, Invalid token type' % t.name)
+				printerr('%s, Invalid token type' % token.name)
 
-	func tree_string(indentLevel : int)->String:
-		return tab(indentLevel, '%s'%value.value())
+	func tree_string(indent_level):
+		return tab(indent_level, '%s' % value.value())
 
 		
 #Expressions encompass a wide range of things like:
@@ -553,16 +530,15 @@ class ValueNode extends ParseNode:
 # Identifiers
 # Values
 class ExpressionNode extends ParseNode:
-
 	var type
-	var value : ValueNode
-	var function : String
-	var params : Array = []#ExpressionNode
+	var value
+	var function
+	var params = []#ExpressionNode
 
-	func _init(parent:ParseNode,parser,value:ValueNode,function:String='',params:Array=[]).(parent,parser):
+	func _init(parent, parser, value, function = '', params = []).(parent, parser):
 
 		#no function - means value
-		if value!=null:
+		if value != null:
 			self.type = Constants.ExpressionType.Value
 			self.value = value
 		else:#function
@@ -571,33 +547,31 @@ class ExpressionNode extends ParseNode:
 			self.function = function
 			self.params = params
 	
-	func tree_string(indentLevel : int)->String:
-		var info : PoolStringArray = []
+	func tree_string(indent_level):
+		var info = []
 		match type:
 			Constants.ExpressionType.Value:
-				return value.tree_string(indentLevel)
+				return value.tree_string(indent_level)
 			Constants.ExpressionType.FunctionCall:
-				info.append(tab(indentLevel,'Func[%s - params(%s)]:{'%[function,params.size()]))
+				info.append(tab(indent_level,'Func[%s - params(%s)]:{'%[function, params.size()]))
 				for param in params:
 					#print('----> %s paramSize:%s'%[(function) , params.size()])
-					info.append(param.tree_string(indentLevel+1))
-				info.append(tab(indentLevel,'}'))
+					info.append(param.tree_string(indent_level+1))
+				info.append(tab(indent_level,'}'))
 
 		return info.join('')
 
 	#using Djikstra's shunting-yard algorithm to convert
 	#stream of expresions into postfix notaion, then
 	#build a tree of expressions
-	static func parse(parent:ParseNode,parser)->ExpressionNode:
-	
-
-		var rpn : Array = []#token
-		var opStack : Array = []#token
+	static func parse(parent, parser):
+		var rpn = []
+		var opStack = []
 			
 		#track params
-		var funcStack : Array = []#token
+		var funcStack = []
 		
-		var validTypes : Array = [
+		var validTypes = [
 			Constants.TokenType.Number,
 			Constants.TokenType.Variable,
 			Constants.TokenType.Str,
@@ -609,21 +583,21 @@ class ExpressionNode extends ParseNode:
 			Constants.TokenType.FalseToken,
 			Constants.TokenType.NullToken
 		]
-		validTypes+=Operator.op_types()
+		validTypes += Operator.op_types()
 		validTypes.invert()
 
-		var last #Token
+		var last
 
 		#read expression content
 		while parser.tokens().size() > 0 && parser.next_symbol_is(validTypes):
-			var next = parser.expect_symbol(validTypes) #lexer.Token
+			var next = parser.expect_symbol(validTypes)
 
-			if(	next.type == Constants.TokenType.Variable ||
-				next.type == Constants.TokenType.Number ||
-				next.type == Constants.TokenType.Str ||
-				next.type == Constants.TokenType.TrueToken ||
-				next.type == Constants.TokenType.FalseToken ||
-				next.type == Constants.TokenType.NullToken ):
+			if next.type == Constants.TokenType.Variable \
+					or next.type == Constants.TokenType.Number \
+					or next.type == Constants.TokenType.Str \
+					or next.type == Constants.TokenType.FalseToken \
+					or next.type == Constants.TokenType.TrueToken \
+					or next.type == Constants.TokenType.NullToken:
 				
 				#output primitives
 				rpn.append(next)
@@ -634,8 +608,8 @@ class ExpressionNode extends ParseNode:
 				#next token is parent - left
 				next = parser.expect_symbol([Constants.TokenType.LeftParen])
 				opStack.push_back(next)
-			elif next.type == Constants.TokenType.Comma:
 
+			elif next.type == Constants.TokenType.Comma:
 				#resolve sub expression before moving on
 				while opStack.back().type != Constants.TokenType.LeftParen:
 					var p = opStack.pop_back()
@@ -667,10 +641,10 @@ class ExpressionNode extends ParseNode:
 				#is only unary when the last token was a left paren,
 				#an operator, or its the first token.
 
-				if (next.type == Constants.TokenType.Minus):
-					if (last == null ||
-						 last.type == Constants.TokenType.LeftParen ||
-						 Operator.is_op(last.type)):
+				if next.type == Constants.TokenType.Minus:
+					if last == null \
+							or last.type == Constants.TokenType.LeftParen \
+							or Operator.is_op(last.type):
 						#unary minus
 						next.type = Constants.TokenType.UnaryMinus
 				
@@ -681,7 +655,7 @@ class ExpressionNode extends ParseNode:
 
 				
 				#operator precedence
-				while (ExpressionNode.is_apply_precedence(next.type,opStack)):
+				while (ExpressionNode.is_apply_precedence(next.type, opStack)):
 					var op = opStack.pop_back()
 					rpn.append(op)
 
@@ -724,85 +698,82 @@ class ExpressionNode extends ParseNode:
 
 		#build expression tree
 		var first = rpn.front()
-		var evalStack : Array = []#ExpressionNode
+		var evalStack = []#ExpressionNode
 
 		while rpn.size() > 0:
 			
 			var next = rpn.pop_front()
 			if Operator.is_op(next.type):
 				#operation
-				var info : OperatorInfo = Operator.op_info(next.type)
+				var info = Operator.op_info(next.type)
 
 				if evalStack.size() < info.arguments:
-					printerr('Error parsing : Not enough arguments for %s [ got %s expected - was %s]'%[Constants.token_type_name(next.type),evalStack.size(),info.arguments])
+					printerr('Error parsing : Not enough arguments for %s [ got %s expected - was %s]'%[Constants.token_type_name(next.type), evalStack.size(), info.arguments])
 
-				var params : Array = []#ExpressionNode
+				var params = []#ExpressionNode
 				for i in range(info.arguments):
 					params.append(evalStack.pop_back())
 
 				params.invert()
 
-				var function : String = get_func_name(next.type)
+				var function = get_func_name(next.type)
 
-				var expression : ExpressionNode = ExpressionNode.new(parent,parser,null,function,params)
+				var expression = ExpressionNode.new(parent, parser, null, function, params)
 				
 				evalStack.append(expression)
 
 			elif next.type == Constants.TokenType.Identifier:
 				#function call
 
-				var function : String = next.value
+				var function = next.value
 
-				var params : Array = []#ExpressionNode
+				var params = []#ExpressionNode
 				for i in range(next.paramCount):
 					
 					params.append(evalStack.pop_back())
 				
 				params.invert()
 
-				var expression : ExpressionNode = ExpressionNode.new(parent,parser,null,function,params)
+				var expression = ExpressionNode.new(parent, parser, null, function, params)
 	
 				evalStack.append(expression)
 			else: #raw value
-				var value : ValueNode = ValueNode.new(parent,parser,next)
-				var expression : ExpressionNode = ExpressionNode.new(parent,parser,value)
+				var value = ValueNode.new(parent, parser, next)
+				var expression = ExpressionNode.new(parent, parser, value)
 				evalStack.append(expression)
 
 		
 		#we should have a single root expression left
 		#if more then we failed ---- NANI
 		if evalStack.size() != 1:
-			printerr('[%s] Error parsing expression (stack did not reduce correctly )'%first.name)
+			printerr('[%s] Error parsing expression (stack did not reduce correctly )' % first.name)
 
 		
 
 		return evalStack.pop_back()
 
-	# static func can_parse(parser)->bool:
-	# 	return false
-
-	static func get_func_name(type)->String:
-		var string : String = ''
+	static func get_func_name(type):
+		var string = ''
 		
 		for key in Constants.TokenType.keys():
 			if Constants.TokenType[key] == type:
 				return key					
 		return string
 
-	static func is_apply_precedence(type,operatorStack:Array)->bool:
+	static func is_apply_precedence(type, operatorStack):
 		if operatorStack.size() == 0:
 			return false
 		
-		if !Operator.is_op(type):
+		if not Operator.is_op(type):
 			printerr('Unable to parse expression!')
 		
 		var second = operatorStack.back().type
 
-		if !Operator.is_op(second):
+		if not Operator.is_op(second):
 			return false
 		
-		var firstInfo : OperatorInfo = Operator.op_info(type)
-		var secondInfo : OperatorInfo = Operator.op_info(second)
+		var firstInfo = Operator.op_info(type)
+		var secondInfo = Operator.op_info(second)
 
 		if (firstInfo.associativity == Associativity.Left &&
 			firstInfo.precedence <= secondInfo.precedence):
@@ -816,34 +787,34 @@ class ExpressionNode extends ParseNode:
 
 class Assignment extends ParseNode:
 
-	var destination : String
-	var value : ExpressionNode
+	var destination
+	var value
 	var operation
 
-	func _init(parent:ParseNode,parser).(parent,parser):
+	func _init(parent, parser).(parent, parser):
 		parser.expect_symbol([Constants.TokenType.BeginCommand])
 		parser.expect_symbol([Constants.TokenType.Set])
 		destination = parser.expect_symbol([Constants.TokenType.Variable]).value
 		operation = parser.expect_symbol(Assignment.valid_ops()).type
-		value = ExpressionNode.parse(self,parser)
+		value = ExpressionNode.parse(self, parser)
 		parser.expect_symbol([Constants.TokenType.EndCommand])
 
-	func tree_string(indentLevel : int)->String:
-		var info : PoolStringArray = []
-		info.append(tab(indentLevel,'set:'))
-		info.append(tab(indentLevel+1,destination))
-		info.append(tab(indentLevel+1,Constants.token_type_name(operation)))
-		info.append(value.tree_string(indentLevel+1))
+	func tree_string(indent_level):
+		var info = []
+		info.append(tab(indent_level,'set:'))
+		info.append(tab(indent_level+1, destination))
+		info.append(tab(indent_level+1, Constants.token_type_name(operation)))
+		info.append(value.tree_string(indent_level+1))
 		return info.join('')
 
 		
-	static func can_parse(parser)->bool:
+	static func can_parse(parser):
 		return parser.next_symbols_are([
 			Constants.TokenType.BeginCommand,
 			Constants.TokenType.Set
 		])
 
-	static func valid_ops()->Array:
+	static func valid_ops():
 		return [
 			Constants.TokenType.EqualToOrAssign,
 			Constants.TokenType.AddAssign,
@@ -856,20 +827,20 @@ class Operator extends ParseNode:
 
 	var opType
 
-	func _init(parent:ParseNode,parser,opType=null).(parent,parser):
+	func _init(parent, parser, opType=null).(parent, parser):
 
 		if opType == null :
 			self.opType = parser.expect_symbol(Operator.op_types()).type
 		else:
 			self.opType = opType
 
-	func tree_string(indentLevel : int)->String:
-		var info : PoolStringArray = []
-		info.append(tab(indentLevel,opType))
+	func tree_string(indent_level):
+		var info = []
+		info.append(tab(indent_level, opType))
 		return info.join('')
 
-	static func op_info(op)->OperatorInfo:
-		if !Operator.is_op(op) :
+	static func op_info(op):
+		if not Operator.is_op(op) :
 			printerr('%s is not a valid operator' % op.name)
 
 		#determine associativity and operands
@@ -878,29 +849,29 @@ class Operator extends ParseNode:
 
 		match op:
 			TokenType.Not, TokenType.UnaryMinus:
-				return OperatorInfo.new(Associativity.Right,30,1)
-			TokenType.Multiply,TokenType.Divide,TokenType.Modulo:
-				return OperatorInfo.new(Associativity.Left,20,2)
-			TokenType.Add,TokenType.Minus:
-				return OperatorInfo.new(Associativity.Left,15,2)
-			TokenType.GreaterThan,TokenType.LessThan,TokenType.GreaterThanOrEqualTo,TokenType.LessThanOrEqualTo:
-				return OperatorInfo.new(Associativity.Left,10,2)
-			TokenType.EqualTo,TokenType.EqualToOrAssign,TokenType.NotEqualTo:
-				return OperatorInfo.new(Associativity.Left,5,2)
+				return OperatorInfo.new(Associativity.Right, 30, 1)
+			TokenType.Multiply, TokenType.Divide, TokenType.Modulo:
+				return OperatorInfo.new(Associativity.Left, 20, 2)
+			TokenType.Add, TokenType.Minus:
+				return OperatorInfo.new(Associativity.Left, 15, 2)
+			TokenType.GreaterThan, TokenType.LessThan, TokenType.GreaterThanOrEqualTo, TokenType.LessThanOrEqualTo:
+				return OperatorInfo.new(Associativity.Left, 10, 2)
+			TokenType.EqualTo, TokenType.EqualToOrAssign, TokenType.NotEqualTo:
+				return OperatorInfo.new(Associativity.Left, 5, 2)
 			TokenType.And:
-				return OperatorInfo.new(Associativity.Left,4,2)
+				return OperatorInfo.new(Associativity.Left, 4, 2)
 			TokenType.Or:
-				return OperatorInfo.new(Associativity.Left,3,2)
+				return OperatorInfo.new(Associativity.Left, 3, 2)
 			TokenType.Xor:
-				return OperatorInfo.new(Associativity.Left,2,2)
+				return OperatorInfo.new(Associativity.Left, 2, 2)
 			_:
 				printerr('Unknown operator: %s' % op.name)
 		return null
 
-	static func is_op(type)->bool:
+	static func is_op(type):
 		return type in op_types()
 
-	static func op_types()->Array:
+	static func op_types():
 		return [
 			Constants.TokenType.Not,
 			Constants.TokenType.UnaryMinus,
@@ -928,33 +899,34 @@ class Operator extends ParseNode:
 
 class OperatorInfo:
 	var associativity
-	var precedence : int
-	var arguments : int
+	var precedence = -1
+	var arguments = -1
 
-	func _init(associativity,precedence:int,arguments:int):
+	func _init(associativity, precedence, arguments):
 		self.associativity = associativity
 		self.precedence = precedence
 		self.arguments = arguments
 
-
 class Clause:
-	var expression : ExpressionNode
-	var statements : Array = [] #Statement
+	var expression
+	var statements = [] #Statement
 
-	func _init(expression:ExpressionNode = null, statements : Array = []):
+	func _init(expression = null, statements = []):
 		self.expression = expression
 		self.statements = statements
 
-	func tree_string(indentLevel : int)->String:
-		var info : PoolStringArray = []
-		if expression!=null:
-			info.append(expression.tree_string(indentLevel))
-		info.append(tab(indentLevel,'{'))
+	func tree_string(indent_level):
+		var info = []
+
+		if expression != null:
+			info.append(expression.tree_string(indent_level))
+		info.append(tab(indent_level, '{'))
+
 		for statement in statements:
-			info.append(statement.tree_string(indentLevel+1))
+			info.append(statement.tree_string(indent_level + 1))
 
-		info.append(tab(indentLevel,'}'))
-		return info.join('')
+		info.append(tab(indent_level,'}'))
+		return PoolStringArray(info).join('')
 
-	func tab(indentLevel : int , input : String,newLine : bool = true)->String:
-		return ('%*s| %s%s'% [indentLevel*2,'',input,('' if !newLine else '\n')])
+	func tab(indent_level, input, newline = true):
+		return '%*s| %s%s' % [indent_level * 2, '', input, '' if !newline else '\n']
