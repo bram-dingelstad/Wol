@@ -1,7 +1,6 @@
 extends Object
-class_name Lexer
 
-const Constants = preload('res://addons/Wol/core/constants.gd')
+const Constants = preload('res://addons/Wol/core/Constants.gd')
 
 const LINE_COMENT = '//'
 const FORWARD_SLASH = '/'

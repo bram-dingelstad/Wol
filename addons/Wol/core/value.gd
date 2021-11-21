@@ -1,6 +1,6 @@
 extends Object
 
-const Constants = preload('res://addons/Wol/core/constants.gd')
+const Constants = preload('res://addons/Wol/core/Constants.gd')
 
 const NULL_STRING = 'null'
 const FALSE_STRING = 'false'

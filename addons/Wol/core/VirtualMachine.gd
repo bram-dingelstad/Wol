@@ -1,7 +1,7 @@
 extends Node
 
-const Constants = preload('res://addons/Wol/core/constants.gd')
-const Value = preload('res://addons/Wol/core/value.gd')
+const Constants = preload('res://addons/Wol/core/Constants.gd')
+const Value = preload('res://addons/Wol/core/Value.gd')
 
 # Function references to handlers
 var line_handler

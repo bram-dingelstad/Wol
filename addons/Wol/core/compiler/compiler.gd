@@ -1,10 +1,9 @@
 extends Object
-class_name Compiler
 
-const Constants = preload('res://addons/Wol/core/constants.gd')
-const Lexer = preload('res://addons/Wol/core/compiler/lexer.gd')
-const Program = preload('res://addons/Wol/core/program.gd')
-const Parser = preload('res://addons/Wol/core/compiler/parser.gd')
+const Constants = preload('res://addons/Wol/core/Constants.gd')
+const Lexer = preload('res://addons/Wol/core/compiler/Lexer.gd')
+const Program = preload('res://addons/Wol/core/Program.gd')
+const Parser = preload('res://addons/Wol/core/compiler/Parser.gd')
 
 const INVALID_TITLE = '[\\[<>\\]{}\\|:\\s#\\$]'
 

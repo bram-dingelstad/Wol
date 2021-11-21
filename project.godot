@@ -12,22 +12,17 @@ _global_script_classes=[ {
 "base": "Object",
 "class": "Compiler",
 "language": "GDScript",
-"path": "res://addons/Wol/core/compiler/compiler.gd"
-}, {
-"base": "Object",
-"class": "Constants",
-"language": "GDScript",
-"path": "res://addons/Wol/core/constants.gd"
+"path": "res://addons/Wol/core/compiler/Compiler.gd"
 }, {
 "base": "Object",
 "class": "Lexer",
 "language": "GDScript",
-"path": "res://addons/Wol/core/compiler/lexer.gd"
+"path": "res://addons/Wol/core/compiler/Lexer.gd"
 }, {
 "base": "Object",
 "class": "Program",
 "language": "GDScript",
-"path": "res://addons/Wol/core/program.gd"
+"path": "res://addons/Wol/core/Program.gd"
 }, {
 "base": "Node",
 "class": "Wol",
@@ -36,7 +31,6 @@ _global_script_classes=[ {
 } ]
 _global_script_class_icons={
 "Compiler": "",
-"Constants": "",
 "Lexer": "",
 "Program": "",
 "Wol": ""

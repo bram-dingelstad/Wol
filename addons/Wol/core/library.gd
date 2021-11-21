@@ -1,7 +1,7 @@
 extends Object
 
-const FunctionInfo = preload('res://addons/Wol/core/function_info.gd')
-const Constants = preload('res://addons/Wol/core/constants.gd')
+const FunctionInfo = preload('res://addons/Wol/core/FunctionInfo.gd')
+const Constants = preload('res://addons/Wol/core/Constants.gd')
 
 var functions = {}
 var virtual_machine

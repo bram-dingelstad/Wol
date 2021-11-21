@@ -9,6 +9,5 @@ func _enter_tree():
 		load('res://addons/Wol/assets/icon.png')
 	)
 
-
 func _exit_tree():
 	remove_custom_type('Wol')

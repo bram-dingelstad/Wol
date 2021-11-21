@@ -1,6 +1,6 @@
-extends 'res://addons/Wol/core/library.gd'
+extends 'res://addons/Wol/core/Library.gd'
 
-const Value = preload('res://addons/Wol/core/value.gd')
+const Value = preload('res://addons/Wol/core/Value.gd')
 
 func _init():
 	register_function('Add', 2, funcref(self, 'add'), true)

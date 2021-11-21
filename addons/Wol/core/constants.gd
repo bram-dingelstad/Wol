@@ -1,5 +1,4 @@
 extends Object
-class_name Constants
 
 enum ExecutionState {
 	Stopped,

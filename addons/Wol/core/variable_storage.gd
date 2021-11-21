@@ -2,7 +2,7 @@ extends Node
 
 signal values_changed
 
-const Value = preload("res://addons/Wol/core/value.gd")
+const Value = preload("res://addons/Wol/core/Value.gd")
 
 var variables = {}
 

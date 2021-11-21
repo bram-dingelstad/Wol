@@ -16,10 +16,10 @@ signal command(command)
 signal started
 signal finished
 
-const Constants = preload('res://addons/Wol/core/constants.gd')
-const WolCompiler = preload('res://addons/Wol/core/compiler/compiler.gd')
-const WolLibrary = preload('res://addons/Wol/core/library.gd')
-const VirtualMachine = preload('res://addons/Wol/core/virtual_machine.gd')
+const Constants = preload('res://addons/Wol/core/Constants.gd')
+const WolCompiler = preload('res://addons/Wol/core/compiler/Compiler.gd')
+const WolLibrary = preload('res://addons/Wol/core/Library.gd')
+const VirtualMachine = preload('res://addons/Wol/core/VirtualMachine.gd')
 const StandardLibrary = preload('res://addons/Wol/core/StandardLibrary.gd')
 
 export(String, FILE, '*.wol,*.yarn') var path setget set_path

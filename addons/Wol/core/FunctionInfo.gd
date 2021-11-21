@@ -1,5 +1,5 @@
 extends Object
-var Value : GDScript = load("res://addons/Wol/core/value.gd")
+var Value : GDScript = load("res://addons/Wol/core/Value.gd")
 
 var name = ''
 # NOTE: -1 means variable arguments

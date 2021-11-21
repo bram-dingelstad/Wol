@@ -1,7 +1,8 @@
 extends Object
 
-const Constants = preload('res://addons/Wol/core/constants.gd')
-const Lexer = preload('res://addons/Wol/core/compiler/lexer.gd')
+const Constants = preload('res://addons/Wol/core/Constants.gd')
+const Lexer = preload('res://addons/Wol/core/compiler/Lexer.gd')
+const Value = preload('res://addons/Wol/core/Value.gd')
 
 var tokens = []
 var title = ''
@@ -505,8 +506,6 @@ class IfStatement extends ParseNode:
 	pass
 
 class ValueNode extends ParseNode:
-	const Value = preload('res://addons/Wol/core/value.gd')
-	const Lexer = preload('res://addons/Wol/core/compiler/lexer.gd')
 	var value
 
 	func _init(parent, parser, token = null).(parent, parser):

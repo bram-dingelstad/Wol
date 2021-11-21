@@ -1,7 +1,6 @@
 extends Object
-class_name Program
 
-const Constants = preload('res://addons/Wol/core/constants.gd')
+const Constants = preload('res://addons/Wol/core/Constants.gd')
 
 var name = ''
 var strings = {}
