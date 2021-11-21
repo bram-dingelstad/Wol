@@ -1,28 +1,24 @@
 extends Object
 
-const FunctionInfo = preload("res://addons/Wol/core/function_info.gd")
+const FunctionInfo = preload('res://addons/Wol/core/function_info.gd')
 const Constants = preload('res://addons/Wol/core/constants.gd')
 
-var functions : Dictionary = {}# String , FunctionInfo
+var functions = {}
+var virtual_machine
 
-func get_function(name:String)->FunctionInfo:
+func get_function(name):
 	if functions.has(name):
 		return functions[name]
 	else :
-		printerr("Invalid Function: %s"% name)
-		return null
+		printerr('Invalid Function: %s'% name)
+		return
 
-func import_library(other)->void:
-	Constants.merge_dir(functions,other.functions)
+func import_library(other):
+	Constants.merge_dir(functions, other.functions)
 
-func register_function(name: String, paramCount: int, function: FuncRef, returnsValue: bool):
-	var functionInfo: FunctionInfo = FunctionInfo.new(name, paramCount, function, returnsValue)
+func register_function(name, parameter_count, function, returns_value):
+	var functionInfo = FunctionInfo.new(name, parameter_count, function, returns_value)
 	functions[name] = functionInfo
 
-func deregister_function(name: String):
-	if !functions.erase(name):
-		pass
-
-
-
-
+func deregister_function(name):
+	functions.erase(name)

@@ -18,7 +18,9 @@ signal finished
 
 const Constants = preload('res://addons/Wol/core/constants.gd')
 const WolCompiler = preload('res://addons/Wol/core/compiler/compiler.gd')
-const WolDialogue = preload('res://addons/Wol/core/dialogue.gd')
+const WolLibrary = preload('res://addons/Wol/core/library.gd')
+const VirtualMachine = preload('res://addons/Wol/core/virtual_machine.gd')
+const StandardLibrary = preload('res://addons/Wol/core/StandardLibrary.gd')
 
 export(String, FILE, '*.wol,*.yarn') var path setget set_path
 export(String) var start_node = 'Start'
@@ -28,13 +30,17 @@ export var auto_show_options = true
 
 onready var variable_storage = get_node(variable_storage_path)
 
-var program
-
-var dialogue
+var virtual_machine
 
 func _ready():
 	if Engine.editor_hint:
 		return
+	
+	var libraries = WolLibrary.new()
+	libraries.import_library(StandardLibrary.new())
+	virtual_machine = VirtualMachine.new(self, libraries)
+
+	set_path(path)
 
 	if not variable_storage:
 		variable_storage = Node.new()
@@ -45,43 +51,22 @@ func _ready():
 	if auto_start:
 		start()
 
-func init_dialogue():
-	# FIXME: Move visited count to variable storage
-	var existing_state
-	if dialogue != null:
-		existing_state = dialogue._visitedNodeCount
-
-	dialogue = WolDialogue.new(variable_storage)
-
-	# FIXME: Remove these lines
-	if existing_state:
-		dialogue._visitedNodeCount = existing_state
-
-	dialogue.get_vm().lineHandler = funcref(self, '_handle_line')
-	dialogue.get_vm().optionsHandler = funcref(self, '_handle_options')
-	dialogue.get_vm().commandHandler = funcref(self, '_handle_command')
-	dialogue.get_vm().nodeCompleteHandler = funcref(self, '_handle_node_complete')
-	dialogue.get_vm().dialogueCompleteHandler = funcref(self, '_handle_dialogue_complete')
-	dialogue.get_vm().nodeStartHandler = funcref(self, '_handle_node_start')
-
-	dialogue.set_program(program)
-
 func set_path(_path):
 	path = _path
 
-	if not Engine.editor_hint:
+	if not Engine.editor_hint and virtual_machine:
 		var compiler = WolCompiler.new(path)
-		program = compiler.compile()
+		virtual_machine.program = compiler.compile()
 
-func _handle_line(line):
+func _on_line(line):
 	call_deferred('emit_signal', 'line', line)
 	if auto_show_options \
-			and dialogue.get_vm().get_next_instruction().operation == Constants.ByteCode.AddOption:
+			and virtual_machine.get_next_instruction().operation == Constants.ByteCode.AddOption:
 		return Constants.HandlerState.ContinueExecution
 	else:
 		return Constants.HandlerState.PauseExecution
 
-func _handle_command(command):
+func _on_command(command):
 	call_deferred('emit_signal', 'command', command)
 
 	if get_signal_connection_list('command').size() > 0:
@@ -89,39 +74,33 @@ func _handle_command(command):
 	else:
 		return Constants.HandlerState.ContinueExecution
 
-func _handle_options(options):
+func _on_options(options):
 	call_deferred('emit_signal', 'options', options)
 	return Constants.HandlerState.PauseExecution
 
-func _handle_dialogue_complete():
+func _on_dialogue_finished():
 	emit_signal('finished')
 
-func _handle_node_start(node):
+func _on_node_start(node):
 	emit_signal('node_started', node)
-	dialogue.resume()
+	resume()
 
-	if !dialogue._visitedNodeCount.has(node):
-		dialogue._visitedNodeCount[node] = 1
-	else:
-		dialogue._visitedNodeCount[node] += 1
-
-func _handle_node_complete(node):
+func _on_node_finished(node):
 	emit_signal('node_finished', node)
 	return Constants.HandlerState.ContinueExecution
 
 func select_option(id):
-	dialogue.get_vm().set_selected_option(id)
+	virtual_machine.set_selected_option(id)
 	resume()
 
 func pause():
-	dialogue.call_deferred('pause')
+	virtual_machine.call_deferred('pause')
 
 func start(node = start_node):
-	init_dialogue()
 	emit_signal('started')
 
-	dialogue.set_node(node)
-	dialogue.start()
+	virtual_machine.set_node(node)
+	virtual_machine.resume()
 
 func resume():
-	dialogue.call_deferred('resume')
+	virtual_machine.call_deferred('resume')

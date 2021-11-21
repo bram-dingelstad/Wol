@@ -8,48 +8,62 @@ const EXECUTION_COMPLETE : String = 'execution_complete_command'
 var NULL_VALUE = Value.new(null)
 
 # Function references to handlers
-var lineHandler
-var optionsHandler
-var commandHandler
-var nodeStartHandler
-var nodeCompleteHandler
-var dialogueCompleteHandler
+var line_handler
+var options_handler
+var command_handler
+var node_start_handler
+var node_finished_handler
+var dialogue_finished_handler
 
-var _dialogue
-var _program
+var dialogue
+var libraries
+var program
 var _state
 
 var _currentNode
 
-var executionState = Constants.ExecutionState.Stopped
+var execution_state = Constants.ExecutionState.Stopped
 
 var string_table = {}
 
-func _init(dialogue):
-	self._dialogue = dialogue
-	_state = VmState.new()
+func _init(_dialogue, _libraries):
+	dialogue = _dialogue
+	libraries = _libraries
+	libraries.virtual_machine = self
 
-func set_program(program):
-	_program = program
+	line_handler = funcref(dialogue, '_on_line')
+	options_handler = funcref(dialogue, '_on_options')
+	command_handler = funcref(dialogue, '_on_command')
+	node_start_handler = funcref(dialogue, '_on_node_start')
+	node_finished_handler = funcref(dialogue, '_on_node_finished')
+	dialogue_finished_handler = funcref(dialogue, '_on_dialogue_finished')
+
+	assert(line_handler.is_valid(), 'Cannot run without a line handler (_on_line)')
+	assert(options_handler.is_valid(), 'Cannot run without a options handler (_on_options)')
+	assert(command_handler.is_valid(), 'Cannot run without a command handler (_on_command)')
+	assert(node_start_handler.is_valid(), 'Cannot run without a node start handler (_on_node_start)')
+	assert(node_finished_handler.is_valid(), 'Cannot run without a node finished handler (_on_node_finished)')
+
+	_state = VmState.new()
 
 #set the node to run
 #return true if successeful false if no node
 #of that name found
-func set_node(name:String) -> bool:
-	if _program == null || _program.nodes.size() == 0:
+func set_node(name):
+	if program == null || program.nodes.size() == 0:
 		printerr('Could not load %s : no nodes loaded' % name)
 		return false
 	
-	if !_program.nodes.has(name):
-		executionState = Constants.ExecutionState.Stopped
+	if !program.nodes.has(name):
+		execution_state = Constants.ExecutionState.Stopped
 		reset()
 		printerr('No node named %s has been loaded' % name)
 		return false
 
-	_currentNode = _program.nodes[name]
+	_currentNode = program.nodes[name]
 	reset()
 	_state.currentNodeName = name
-	nodeStartHandler.call_func(name)
+	node_start_handler.call_func(name)
 	return true
 
 func current_node_name()->String:
@@ -59,11 +73,11 @@ func current_node():
 	return _currentNode
 
 func pause():
-	executionState = Constants.ExecutionState.Suspended
+	execution_state = Constants.ExecutionState.Suspended
 
 #stop exectuion
 func stop():
-	executionState = Constants.ExecutionState.Stopped
+	execution_state = Constants.ExecutionState.Stopped
 	reset()
 	_currentNode = null
 
@@ -71,7 +85,7 @@ func stop():
 #resume execution if waiting for result
 #return false if error
 func set_selected_option(id):
-	if executionState != Constants.ExecutionState.WaitingForOption:
+	if execution_state != Constants.ExecutionState.WaitingForOption:
 		printerr('Unable to select option when dialogue not waiting for option')
 		return false
 
@@ -84,7 +98,7 @@ func set_selected_option(id):
 	_state.currentOptions.clear()
 
 	#no longer waiting for option
-	executionState = Constants.ExecutionState.Suspended
+	execution_state = Constants.ExecutionState.Suspended
 	
 	return true
 
@@ -99,42 +113,26 @@ func resume():
 		printerr('Cannot run dialogue with no node selected')
 		return false
 
-	if executionState == Constants.ExecutionState.WaitingForOption:
+	if execution_state == Constants.ExecutionState.WaitingForOption:
 		printerr('Cannot run while waiting for option')
 		return false
 	
-	if lineHandler == null:
-		printerr('Cannot run without a lineHandler')
-		return false
 	
-	if optionsHandler == null:
-		printerr('Cannot run without an optionsHandler')	
-		return false
 
-	if commandHandler == null:
-		printerr('Cannot run without an commandHandler')	
-		return false
-	if nodeStartHandler == null:
-		printerr('Cannot run without a nodeStartHandler')	
-		return false
-	if nodeCompleteHandler == null:
-		printerr('Cannot run without an nodeCompleteHandler')	
-		return false
-
-	executionState = Constants.ExecutionState.Running
+	execution_state = Constants.ExecutionState.Running
 	
 	#execute instruction until something cool happens
-	while executionState == Constants.ExecutionState.Running:
+	while execution_state == Constants.ExecutionState.Running:
 		var currentInstruction = _currentNode.instructions[_state.programCounter]
 
 		run_instruction(currentInstruction)
 		_state.programCounter += 1
 
 		if _state.programCounter >= _currentNode.instructions.size():
-			nodeCompleteHandler.call_func(_currentNode.nodeName)
-			executionState = Constants.ExecutionState.Stopped
+			node_finished_handler.call_func(_currentNode.nodeName)
+			execution_state = Constants.ExecutionState.Stopped
 			reset()
-			dialogueCompleteHandler.call_func()
+			dialogue_finished_handler.call_func()
 
 	return true
 
@@ -158,17 +156,17 @@ func run_instruction(instruction)->bool:
 			#pass it to client as line
 			var key = instruction.operands[0].value
 			
-			var line = _program.strings[key]
+			var line = program.strings[key]
 
 			#the second operand is the expression count
 			# of format function
 			if instruction.operands.size() > 1:
 				pass#add format function support
 
-			var pause : int = lineHandler.call_func(line)
+			var pause = line_handler.call_func(line)
 			
 			if pause == Constants.HandlerState.PauseExecution:
-				executionState = Constants.ExecutionState.Suspended
+				execution_state = Constants.ExecutionState.Suspended
 			
 		Constants.ByteCode.RunCommand:
 			var commandText : String = instruction.operands[0].value
@@ -178,9 +176,9 @@ func run_instruction(instruction)->bool:
 
 			var command = Program.Command.new(commandText)
 
-			var pause = commandHandler.call_func(command) as int
+			var pause = command_handler.call_func(command) as int
 			if pause == Constants.HandlerState.PauseExecution:
-				executionState = Constants.ExecutionState.Suspended
+				execution_state = Constants.ExecutionState.Suspended
 
 		Constants.ByteCode.PushString:
 			#push String var to stack
@@ -217,7 +215,7 @@ func run_instruction(instruction)->bool:
 			#push any return value to stack
 			var functionName : String = instruction.operands[0].value
 
-			var function = _dialogue.library.get_function(functionName)
+			var function = libraries.get_function(functionName)
 
 			var expected_parameter_count : int = function.paramCount
 			var actual_parameter_count : int = _state.pop_value().as_number()
@@ -250,20 +248,21 @@ func run_instruction(instruction)->bool:
 		Constants.ByteCode.PushVariable:
 			#get content of variable and push to stack
 			var name : String = instruction.operands[0].value
-			var loaded = _dialogue._variableStorage.get_value(name)
+			# TODO: Reimplement variable storage
+			var loaded = dialogue.variable_storage.get_value(name)
 			_state.push_value(loaded)
 
 		Constants.ByteCode.StoreVariable:
 			#store top stack value to variable
 			var top = _state.peek_value()
 			var destination : String = instruction.operands[0].value
-			_dialogue._variableStorage.set_value(destination,top)
+			dialogue.variable_storage.set_value(destination,top)
 				
 		Constants.ByteCode.Stop:
 			#stop execution and repost it
-			nodeCompleteHandler.call_func(_currentNode.name)
-			dialogueCompleteHandler.call_func()
-			executionState = Constants.ExecutionState.Stopped
+			node_finished_handler.call_func(_currentNode.name)
+			dialogue_finished_handler.call_func()
+			execution_state = Constants.ExecutionState.Stopped
 			reset()
 
 		Constants.ByteCode.RunNode:
@@ -276,17 +275,17 @@ func run_instruction(instruction)->bool:
 			else :
 				name = instruction.operands[0].value
 
-			var pause = nodeCompleteHandler.call_func(_currentNode.name)
+			var pause = node_finished_handler.call_func(_currentNode.name)
 			set_node(name)
 			_state.programCounter-=1
 			if pause == Constants.HandlerState.PauseExecution:
-				executionState = Constants.ExecutionState.Suspended
+				execution_state = Constants.ExecutionState.Suspended
 
 		Constants.ByteCode.AddOption:
 			# add an option to current state
 			var key = instruction.operands[0].value
 
-			var line = _program.strings[key]
+			var line = program.strings[key]
 
 			if instruction.operands.size() > 2:
 				pass #formated text options
@@ -297,9 +296,9 @@ func run_instruction(instruction)->bool:
 		Constants.ByteCode.ShowOptions:
 			#show options - stop if none
 			if _state.currentOptions.size() == 0:
-				executionState = Constants.ExecutionState.Stopped
+				execution_state = Constants.ExecutionState.Stopped
 				reset()
-				dialogueCompleteHandler.call_func()
+				dialogue_finished_handler.call_func()
 				return false
 
 			#present list of options
@@ -309,16 +308,15 @@ func run_instruction(instruction)->bool:
 				choices.append(Program.Option.new(option.key, optionIndex, option.value))
 
 			#we cant continue until option chosen
-			executionState = Constants.ExecutionState.WaitingForOption
+			execution_state = Constants.ExecutionState.WaitingForOption
 
 			#pass the options to the client
 			#delegate for them to call
 			#when user makes selection
 
-			optionsHandler.call_func(choices)
+			options_handler.call_func(choices)
 		_:
-			#bytecode messed up woopsise
-			executionState = Constants.ExecutionState.Stopped
+			execution_state = Constants.ExecutionState.Stopped
 			reset()
 			printerr('Unknown Bytecode %s' % instruction.operation)
 			return false
