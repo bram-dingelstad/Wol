@@ -14,10 +14,10 @@ var variable = ''
 var boolean = false
 
 func _init(value = NANI):
-	if typeof(value) == TYPE_OBJECT && value.get_script() == self.get_script():
+	if typeof(value) == TYPE_OBJECT and value.get_script() == get_script():
 		if value.type == Constants.ValueType.Variable:
-			self.type = value.type
-			self.variable = value.variable
+			type = value.type
+			variable = value.variable
 	else:
 		set_value(value)
 
@@ -57,12 +57,12 @@ func as_number():
 	return .0
 
 func set_value(value):
-	if value == null || (typeof(value) == TYPE_STRING && value == NANI):
+	if value == null or (typeof(value) == TYPE_STRING and value == NANI):
 		type = Constants.ValueType.Nullean
 		return
 
 	match typeof(value):
-		TYPE_INT,TYPE_REAL:
+		TYPE_INT, TYPE_REAL:
 			type = Constants.ValueType.Number
 			number = value
 		TYPE_STRING:
@@ -72,76 +72,66 @@ func set_value(value):
 			type = Constants.ValueType.Boolean
 			boolean = value
 
-#operations >>
-
-#addition
 func add(other):
-	if self.type == Constants.ValueType.Str || other.type == Constants.ValueType.Str:
-		return get_script().new('%s%s'%[self.value(),other.value()])
-	if self.type == Constants.ValueType.Number && other.type == Constants.ValueType.Number:
-		return get_script().new(self.number + other.number)
+	if type == Constants.ValueType.Str or other.type == Constants.ValueType.Str:
+		return get_script().new('%s%s'%[value(),other.value()])
+	if type == Constants.ValueType.Number and other.type == Constants.ValueType.Number:
+		return get_script().new(number + other.number)
 	return null
 
-func equals(other)->bool:
-	if other.get_script() != self.get_script():
+func equals(other):
+	if other.get_script() != get_script():
 		return false
-	if other.value() != self.value():
+	if other.value() != value():
 		return false
-	return true #refine this
+	# TODO: Add more equality cases
+	return true
 
-#subtract
 func sub(other):
-	if self.type == Constants.ValueType.Str || other.type == Constants.ValueType.Str:
+	if type == Constants.ValueType.Str or other.type == Constants.ValueType.Str:
 		return get_script().new(str(value()).replace(str(other.value()),''))
-	if self.type == Constants.ValueType.Number && other.type == Constants.ValueType.Number:
-		return get_script().new(self.number - other.number)
+	if type == Constants.ValueType.Number and other.type == Constants.ValueType.Number:
+		return get_script().new(number - other.number)
 	return null
 
-#multiply
 func mult(other):
-	if self.type == Constants.ValueType.Number && other.type == Constants.ValueType.Number:
-		return get_script().new(self.number * other.number)
+	if type == Constants.ValueType.Number and other.type == Constants.ValueType.Number:
+		return get_script().new(number * other.number)
 	return null
 
-#division
 func div(other):
-	if self.type == Constants.ValueType.Number && other.type == Constants.ValueType.Number:
-		return get_script().new(self.number / other.number)
+	if type == Constants.ValueType.Number and other.type == Constants.ValueType.Number:
+		return get_script().new(number / other.number)
 	return null
 
-#modulus
 func mod(other):
-	if self.type == Constants.ValueType.Number && other.type == Constants.ValueType.Number:
-		return get_script().new(self.number % other.number)
+	if type == Constants.ValueType.Number and other.type == Constants.ValueType.Number:
+		return get_script().new(number % other.number)
 	return null
 
 func negative():
-	if self.type == Constants.ValueType.Number:
-		return get_script().new(-self.number)
+	if type == Constants.ValueType.Number:
+		return get_script().new(-number)
 	return null
 
-#greater than other
-func greater(other)->bool:
-	if self.type == Constants.ValueType.Number && other.type == Constants.ValueType.Number:
-		return self.number > other.number
+func greater(other):
+	if type == Constants.ValueType.Number and other.type == Constants.ValueType.Number:
+		return number > other.number
 	return false
 
-#less than other
-func less(other)->bool:
-	if self.type == Constants.ValueType.Number && other.type == Constants.ValueType.Number:
-		return self.number < other.number
+func less(other):
+	if type == Constants.ValueType.Number and other.type == Constants.ValueType.Number:
+		return number < other.number
 	return false
 
-#greater than or equal to other
-func geq(other)->bool:
-	if self.type == Constants.ValueType.Number && other.type == Constants.ValueType.Number:
-		return self.number > other.number || self.equals(other)
+func geq(other):
+	if type == Constants.ValueType.Number and other.type == Constants.ValueType.Number:
+		return number > other.number or equals(other)
 	return false
 
-#lesser than or equal to other
-func leq(other)->bool:
-	if self.type == Constants.ValueType.Number && other.type == Constants.ValueType.Number:
-		return self.number < other.number || self.equals(other)
+func leq(other):
+	if type == Constants.ValueType.Number and other.type == Constants.ValueType.Number:
+		return number < other.number or equals(other)
 	return false
 
 func _to_string():

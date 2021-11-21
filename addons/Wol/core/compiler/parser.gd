@@ -246,9 +246,9 @@ class CustomCommand extends ParseNode:
 	func tree_string(indent_level):
 		match type:
 			Type.Expression:
-				return tab(indent_level,'Expression: %s'% expression.tree_string(indent_level+1))
+				return tab(indent_level, 'Expression: %s' % expression.tree_string(indent_level+1))
 			Type.ClientCommand:
-				return tab(indent_level,'Command: %s' % client_command)
+				return tab(indent_level, 'Command: %s' % client_command)
 		return ''
 	
 	static func can_parse(parser):
@@ -273,12 +273,12 @@ class ShortcutOptionGroup extends ParseNode:
 	func tree_string(indent_level):
 		var info = []
 
-		info.append(tab(indent_level,'Shortcut Option Group{'))
+		info.append(tab(indent_level, 'Shortcut Option Group{'))
 
 		for option in options:
 			info.append(option.tree_string(indent_level+1))
 
-		info.append(tab(indent_level,'}'))
+		info.append(tab(indent_level, '}'))
 
 		return PoolStringArray(info).join('')
 	
@@ -295,7 +295,6 @@ class ShortCutOption extends ParseNode:
 		label = parser.expect_symbol([Constants.TokenType.Text]).value
 
 		# NOTE: Parse the conditional << if $x >> when it exists
-
 		var tags = []
 		while parser.next_symbols_are([Constants.TokenType.BeginCommand, Constants.TokenType.IfToken]) \
 			or parser.next_symbol_is([Constants.TokenType.TagMarker]):
@@ -397,7 +396,7 @@ class OptionStatement extends ParseNode:
 
 	func tree_string(indent_level):
 		if label != null:
-			return tab(indent_level,'Option: %s -> %s' % [label, destination])
+			return tab(indent_level, 'Option: %s -> %s' % [label, destination])
 		else:
 			return tab(indent_level, 'Option: -> %s' % destination)
 
@@ -491,11 +490,11 @@ class IfStatement extends ParseNode:
 
 		for clause in clauses:
 			if first:
-				info.append(tab(indent_level,'if:'))
+				info.append(tab(indent_level, 'if:'))
 			elif clause.expression!=null:
-				info.append(tab(indent_level,'Else If'))
+				info.append(tab(indent_level, 'Else If'))
 			else:
-				info.append(tab(indent_level,'Else:'))
+				info.append(tab(indent_level, 'Else:'))
 
 			info.append(clause.tree_string(indent_level +1))
 
@@ -562,10 +561,10 @@ class ExpressionNode extends ParseNode:
 				return value.tree_string(indent_level)
 
 			Constants.ExpressionType.FunctionCall:
-				info.append(tab(indent_level,'Func[%s - parameters(%s)]:{'%[function, parameters.size()]))
+				info.append(tab(indent_level, 'Func[%s - parameters(%s)]:{'%[function, parameters.size()]))
 				for param in parameters:
 					info.append(param.tree_string(indent_level+1))
-				info.append(tab(indent_level,'}'))
+				info.append(tab(indent_level, '}'))
 
 		return info.join('')
 
@@ -799,10 +798,10 @@ class Assignment extends ParseNode:
 
 	func tree_string(indent_level):
 		var info = []
-		info.append(tab(indent_level,'set:'))
-		info.append(tab(indent_level+1, destination))
-		info.append(tab(indent_level+1, Constants.token_type_name(operation)))
-		info.append(value.tree_string(indent_level+1))
+		info.append(tab(indent_level, 'set:'))
+		info.append(tab(indent_level + 1, destination))
+		info.append(tab(indent_level + 1, Constants.token_type_name(operation)))
+		info.append(value.tree_string(indent_level + 1))
 		return info.join('')
 
 		
@@ -892,7 +891,6 @@ class Operator extends ParseNode:
 			Constants.TokenType.Xor
 		]
 
-
 class OperatorInfo:
 	var associativity
 	var precedence = -1
@@ -921,7 +919,7 @@ class Clause:
 		for statement in statements:
 			info.append(statement.tree_string(indent_level + 1))
 
-		info.append(tab(indent_level,'}'))
+		info.append(tab(indent_level, '}'))
 		return PoolStringArray(info).join('')
 
 	func tab(indent_level, input, newline = true):

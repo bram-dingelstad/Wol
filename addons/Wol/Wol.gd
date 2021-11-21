@@ -16,19 +16,18 @@ signal command(command)
 signal started
 signal finished
 
+export(String, FILE, '*.wol,*.yarn') var path setget set_path
+export(String) var start_node = 'Start'
+export(bool) var auto_start = false
+export var auto_show_options = true
+
+export(Dictionary) var variable_storage = {}
+
 const Constants = preload('res://addons/Wol/core/Constants.gd')
 const WolCompiler = preload('res://addons/Wol/core/compiler/Compiler.gd')
 const WolLibrary = preload('res://addons/Wol/core/Library.gd')
 const VirtualMachine = preload('res://addons/Wol/core/VirtualMachine.gd')
 const StandardLibrary = preload('res://addons/Wol/core/StandardLibrary.gd')
-
-export(String, FILE, '*.wol,*.yarn') var path setget set_path
-export(String) var start_node = 'Start'
-export(bool) var auto_start = false
-export(NodePath) var variable_storage_path
-export var auto_show_options = true
-
-onready var variable_storage = get_node(variable_storage_path)
 
 var virtual_machine
 
@@ -41,12 +40,6 @@ func _ready():
 	virtual_machine = VirtualMachine.new(self, libraries)
 
 	set_path(path)
-
-	if not variable_storage:
-		variable_storage = Node.new()
-		variable_storage.name = 'VariableStorage'
-		variable_storage.set_script(load('res://addons/Wol/core/variable_storage.gd'))
-		add_child(variable_storage)
 
 	if auto_start:
 		start()

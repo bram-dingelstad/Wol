@@ -215,14 +215,15 @@ func run_instruction(instruction):
 
 		Constants.ByteCode.PushVariable:
 			var name = instruction.operands[0].value
-			var loaded = dialogue.variable_storage.get_value(name)
-			state.push_value(loaded)
+			var godot_value = dialogue.variable_storage[name]
+			var value = Value.new(godot_value)
+			state.push_value(value)
 
 		Constants.ByteCode.StoreVariable:
-			var top = state.peek_value()
-			var destination = instruction.operands[0].value
-			dialogue.variable_storage.set_value(destination, top)
-				
+			var value = state.peek_value()
+			var name = instruction.operands[0].value.replace('$', '')
+			dialogue.variable_storage[name] = value.value()
+
 		Constants.ByteCode.Stop:
 			node_finished_handler.call_func(current_node.name)
 			dialogue_finished_handler.call_func()
