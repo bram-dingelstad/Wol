@@ -99,7 +99,7 @@ func start(node = start_node):
 	emit_signal('started')
 
 	virtual_machine.set_node(node)
-	virtual_machine.resume()
+	virtual_machine.start()
 
 func resume():
 	virtual_machine.call_deferred('resume')

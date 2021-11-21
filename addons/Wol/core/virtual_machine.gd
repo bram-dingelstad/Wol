@@ -95,6 +95,11 @@ func get_next_instruction():
 		return current_node.instructions[state.programCounter + 1]
 	return
 
+func start():
+	if execution_state == Constants.ExecutionState.Stopped:
+		execution_state = Constants.ExecutionState.Suspended
+		resume()
+
 func resume():
 	if current_node == null:
 		printerr('Cannot run dialogue with no node selected')
@@ -102,6 +107,10 @@ func resume():
 
 	if execution_state == Constants.ExecutionState.WaitingForOption:
 		printerr('Cannot run while waiting for option')
+		return false
+
+	if execution_state == Constants.ExecutionState.Stopped:
+		printerr('Dialogue is stopped, explicitely start it before resuming')
 		return false
 
 	execution_state = Constants.ExecutionState.Running
