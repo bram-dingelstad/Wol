@@ -4,158 +4,152 @@ class_name Compiler
 const Constants = preload('res://addons/Wol/core/constants.gd')
 const Lexer = preload('res://addons/Wol/core/compiler/lexer.gd')
 const Program = preload('res://addons/Wol/core/program.gd')
+const Parser = preload('res://addons/Wol/core/compiler/parser.gd')
 
-#patterns
-const INVALIDTITLENAME = '[\\[<>\\]{}\\|:\\s#\\$]'
+const INVALID_TITLE = '[\\[<>\\]{}\\|:\\s#\\$]'
 
-#ERROR Codes
 const NO_ERROR = 0x00
 const LEXER_FAILURE = 0x01
 const PARSER_FAILURE = 0x02
 const INVALID_HEADER = 0x04
-const DUPLICATE_NODES_IN_PROGRAM = 0x08
 const ERR_COMPILATION_FAILED = 0x10
 
-var _errors : int
-var _last_error : int
+var source = ''
+var filename = ''
 
-#-----Class vars
-var _current_node : Program.WolNode
-var _raw_text : bool
-var _file_name : String
-var _contains_implicit_string_tags : bool
-var _label_count : int = 0
+var _current_node
+var _contains_implicit_string_tags = false
+var _label_count = 0
 
-#<String, Program.Line>
-var _string_table : Dictionary = {}
-var _string_count : int = 0
-#<int, Constants.TokenType>
-var _tokens : Dictionary = {}
+var _string_table = {}
+var _string_count = 0
 
-static func compile_string(source: String, filename: String):
-	var Parser = load('res://addons/Wol/core/compiler/parser.gd')
-	var Compiler = load('res://addons/Wol/core/compiler/compiler.gd')
+func _init(_filename, _source = null):
+	filename = _filename
 
-	var compiler = Compiler.new()
-	compiler._file_name = filename
+	if not _filename and _source:
+		self.source = _source
+	else:
+		var file = File.new()
+		file.open(_filename, File.READ)
+		self.source = file.get_as_text()
+		file.close()
 
-	#--------------Nodes
-	var header_sep : RegEx = RegEx.new()
+func compile():
+	var header_sep = RegEx.new()
+	var header_property = RegEx.new()
 	header_sep.compile('---(\r\n|\r|\n)')
-	var header_property : RegEx = RegEx.new()
 	header_property.compile('(?<field>.*): *(?<value>.*)')
 
-	assert(not not header_sep.search(source), 'No headers found')
+	assert(header_sep.search(source), 'No headers found!')
 	
-	var line_number: int = 0
-	
-	var source_lines : Array = source.split('\n',false)
-	for i in range(source_lines.size()):
-		source_lines[i] = source_lines[i].strip_edges(false,true)
+	var line_number = 0
 
-	var parsed_nodes : Array = []
+	var source_lines = source.split('\n', false)
+	for i in range(source_lines.size()):
+		source_lines[i] = source_lines[i].strip_edges(false, true)
+
+	var parsed_nodes = []
 	
 	while line_number < source_lines.size():
-		
-		var title : String
-		var body : String
+		var title = ''
+		var body = ''
 
-		#get title
+		# Parse header
 		while true:
-			var line : String = source_lines[line_number]
-			line_number+=1
+			var line = source_lines[line_number]
+			line_number += 1
 			
-			if !line.empty():
+			if not line.empty():
 				var result = header_property.search(line)
-				if result != null :
-					var field : String = result.get_string('field')
-					var value : String = result.get_string('value')
+				if result != null:
+					var field = result.get_string('field')
+					var value = result.get_string('value')
 
 					if field == 'title':
-						assert(not ' ' in value, 'No space allowed in title "%s", correct to "%s"' % [value, value.replace(' ','')])
-						title = value
+						var regex = RegEx.new()
+						regex.compile(INVALID_TITLE)
+						assert(not regex.search(value), 'Invalid characters in title "%s", correct to "%s"' % [value, regex.sub(value, '', true)])
 
-			if(line_number >= source_lines.size() || source_lines[line_number] == '---'):
+						title = value
+					# TODO: Implement position, color and tags
+
+			if line_number >= source_lines.size() or line == '---':
 				break
 
-		
-		line_number+=1
+		line_number += 1
 
-		#past header
-		var body_lines : PoolStringArray = []
+		# past header
+		var body_lines = []
 		
-		while line_number < source_lines.size() and source_lines[line_number]!='===':
+		while line_number < source_lines.size() and source_lines[line_number] != '===':
 			body_lines.append(source_lines[line_number])
-			line_number+=1
+			line_number += 1
 
-		line_number+=1
+		line_number += 1
 
-		body = body_lines.join('\n')
-		var lexer = Lexer.new()
-		var tokens = lexer.tokenize(body, title, filename)
+		body = PoolStringArray(body_lines).join('\n')
 
-		var parser = Parser.new(tokens, title)
+		var lexer = Lexer.new(filename, title, body)
+		var tokens = lexer.tokenize()
+
+		var parser = Parser.new(title, tokens)
 		var parser_node = parser.parse_node()
 
 		parser_node.name = title
+		# parser_node.tags = title
 		parsed_nodes.append(parser_node)
-		while line_number < source_lines.size() && source_lines[line_number].empty():
-			line_number+=1
 
-	#--- End parsing nodes---
+		while line_number < source_lines.size() and source_lines[line_number].empty():
+			line_number += 1
 
 	var program = Program.new()
 
-	#compile nodes
 	for node in parsed_nodes:
-		compiler.compile_node(program, node)
+		compile_node(program, node)
 
-	for key in compiler._string_table:
-		program.strings[key] = compiler._string_table[key]
+	for key in _string_table:
+		program.strings[key] = _string_table[key]
 
 	return program
 
 func compile_node(program, parsed_node):
-	if program.nodes.has(parsed_node.name):
-		emit_error(DUPLICATE_NODES_IN_PROGRAM)
-		printerr('Duplicate node in program: %s' % parsed_node.name)
+	assert(not program.nodes.has(parsed_node.name), 'Duplicate node in program: %s' % parsed_node.name)
+
+	var node_compiled = Program.WolNode.new()
+
+	node_compiled.name = parsed_node.name
+	node_compiled.tags = parsed_node.tags
+
+	if parsed_node.source != null and not parsed_node.source.empty():
+		node_compiled.source_id = register_string(
+			parsed_node.source,
+			parsed_node.name,
+			'line:' + parsed_node.name,
+			0,
+			[]
+		)
 	else:
-		var node_compiled = Program.WolNode.new()
+		var start_label = register_label()
+		emit(Constants.ByteCode.Label,node_compiled,[Program.Operand.new(start_label)])
 
-		node_compiled.name = parsed_node.name
-		node_compiled.tags = parsed_node.tags
+		for statement in parsed_node.statements:
+			generate_statement(node_compiled, statement)
+		
+		var dangling_options = false
+		for instruction in node_compiled.instructions:
+			if instruction.operation == Constants.ByteCode.AddOption:
+				dangling_options = true
+			if instruction.operation == Constants.ByteCode.ShowOptions:
+				dangling_options = false
 
-		#raw text
-		if parsed_node.source != null && !parsed_node.source.empty():
-			node_compiled.source_id = register_string(parsed_node.source,parsed_node.name,
-			'line:'+parsed_node.name, 0, [])
+		if dangling_options:
+			emit(Constants.ByteCode.ShowOptions, node_compiled)
+			emit(Constants.ByteCode.RunNode, node_compiled)
 		else:
-			#compile node
-			var start_label : String = register_label()
-			emit(Constants.ByteCode.Label,node_compiled,[Program.Operand.new(start_label)])
+			emit(Constants.ByteCode.Stop, node_compiled)
 
-			for statement in parsed_node.statements:
-				generate_statement(node_compiled,statement)
-
-			
-			#add options
-			#todo: add parser flag
-
-			var dangling_options = false
-			for instruction in node_compiled.instructions :
-				if instruction.operation == Constants.ByteCode.AddOption:
-					dangling_options = true
-				if instruction.operation == Constants.ByteCode.ShowOptions:
-					dangling_options = false
-
-			if dangling_options:
-				emit(Constants.ByteCode.ShowOptions, node_compiled)
-				emit(Constants.ByteCode.RunNode, node_compiled)
-			else:
-				emit(Constants.ByteCode.Stop, node_compiled)
-
-			
-		program.nodes[node_compiled.name] = node_compiled
+	program.nodes[node_compiled.name] = node_compiled
 
 func register_string(text:String,node_name:String,id:String='',line_number:int=-1,tags:Array=[])->String:
 	var line_id_used : String
@@ -163,7 +157,7 @@ func register_string(text:String,node_name:String,id:String='',line_number:int=-
 	var implicit : bool
 
 	if id.empty():
-		line_id_used = '%s-%s-%d' % [self._file_name,node_name,self._string_count]
+		line_id_used = '%s-%s-%d' % [self.filename,node_name,self._string_count]
 		self._string_count+=1
 
 		#use this when we generate implicit tags
@@ -176,7 +170,7 @@ func register_string(text:String,node_name:String,id:String='',line_number:int=-
 		line_id_used = id
 		implicit = false
 
-	var string_info = Program.Line.new(text,node_name,line_number,_file_name,implicit,tags)
+	var string_info = Program.Line.new(text,node_name,line_number,filename,implicit,tags)
 	#add to string table and return id
 	self._string_table[line_id_used] = string_info
 
@@ -202,18 +196,11 @@ func emit(bytecode, node = _current_node, operands = []):
 		node.labels[instruction.operands[0].value] = node.instructions.size()-1
 
 
-func get_string_tokens()->Array:
-	return []
-
-#compile header
 func generate_header():
 	pass
 
-#compile instructions for statements
-#this will walk through all child branches
-#of the parse tree
 func generate_statement(node,statement):
-	# print('generating statement')
+
 	match statement.type:
 		Constants.StatementTypes.CustomCommand:
 			generate_custom_command(node,statement.custom_command)
@@ -230,8 +217,7 @@ func generate_statement(node,statement):
 		Constants.StatementTypes.Line:
 			generate_line(node,statement,statement.line)
 		_:
-			emit_error(ERR_COMPILATION_FAILED)
-			printerr('illegal statement type [%s]- could not generate code' % statement.type)
+			assert(false, 'Illegal statement type [%s]. Could not generate code.' % statement.type)
 
 #compile instructions for custom commands
 func generate_custom_command(node,command):
@@ -306,7 +292,6 @@ func generate_shortcut_group(node,shortcut_group):
 	emit(Constants.ByteCode.Pop,node)
 
 
-
 #compile instructions for block
 #blocks are just groups of statements
 func generate_block(node,statements:Array=[]):
@@ -347,7 +332,7 @@ func generate_option(node,option):
 	# print('generating option')
 	var destination : String = option.destination
 
-	if option.label == null || option.label.empty():
+	if option.label == null or option.label.empty():
 		#jump to another node
 		emit(Constants.ByteCode.RunNode,node,[Program.Operand.new(destination)])
 	else :
@@ -401,7 +386,7 @@ func generate_assignment(node,assignment):
 #compile expression instructions
 func generate_expression(node,expression):
 	# print('generating expression')
-	#expression = value || func call
+	#expression = value or func call
 	match expression.type:
 		Constants.ExpressionType.Value:
 			generate_value(node,expression.value)
@@ -437,22 +422,6 @@ func generate_value(node,value):
 			emit(Constants.ByteCode.PushNull,node)
 		_:
 			printerr('Unrecognized valuenode type: %s' % value.value.type)
-
-#get the error flags
-func get_errors()->int:
-	return _errors
-
-#get the last error code reported
-func get_last_error()->int:
-	return _last_error
-
-func clear_errors()->void:
-	_errors = NO_ERROR
-	_last_error = NO_ERROR
-
-func emit_error(error : int)->void:
-	_last_error = error
-	_errors |= _last_error
 
 static func print_tokens(tokens:Array=[]):
 	var list : PoolStringArray = []

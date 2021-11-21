@@ -1,4 +1,5 @@
 extends Object
+class_name Lexer
 
 const Constants = preload('res://addons/Wol/core/constants.gd')
 
@@ -23,15 +24,21 @@ var WHITESPACE : String = '\\s*'
 
 var _states : Dictionary = {}
 var _defaultState : LexerState
-
 var _currentState : LexerState
 
 var _indentStack : Array = []
 var _shouldTrackIndent : bool = false
 
+var filename = ''
+var title = ''
+var text = ''
 
-func _init():
+func _init(_filename, _title, _text):
 	create_states()
+
+	filename = _filename
+	title = _title
+	text = _text
 
 func create_states():
 	var patterns : Dictionary = {}
@@ -43,7 +50,7 @@ func create_states():
 	patterns[Constants.TokenType.LeftParen] = ['\\(', 'left parenthesis (']
 	patterns[Constants.TokenType.RightParen] =  ['\\)', 'right parenthesis )']
 	patterns[Constants.TokenType.EqualTo] = ['(==|is(?!\\w)|eq(?!\\w))', '"=", "is" or "eq"']
-	patterns[Constants.TokenType.EqualToOrAssign] = ['(=|to(?!\\w))', 'equal to "=" or assign "="']
+	patterns[Constants.TokenType.EqualToOrAssign] = ['(=|to(?!\\w))', '"=" or "to"']
 	patterns[Constants.TokenType.NotEqualTo] = ['(\\!=|neq(?!\\w))', '"!=" or "neq"']
 	patterns[Constants.TokenType.GreaterThanOrEqualTo] = ['(\\>=|gte(?!\\w))', '">=" or "gte"']
 	patterns[Constants.TokenType.GreaterThan] = ['(\\>|gt(?!\\w))', '">" or "gt"']
@@ -81,9 +88,9 @@ func create_states():
 	patterns[Constants.TokenType.ShortcutOption] = ['\\-\\>\\s*', '"->"']
 
 	#compound states
-	var shortcut_option : String= SHORTCUT + DASH + OPTION
+	var shortcut_option : String = SHORTCUT + DASH + OPTION
 	var shortcut_option_tag : String = shortcut_option + DASH + TAG
-	var command_or_expression : String= COMMAND + DASH + OR + DASH + EXPRESSION
+	var command_or_expression : String = COMMAND + DASH + OR + DASH + EXPRESSION
 	var link_destination : String = LINK + DASH + DESTINATION
 
 	_states = {}
@@ -91,7 +98,7 @@ func create_states():
 	_states[BASE] = LexerState.new(patterns)
 	_states[BASE].add_transition(Constants.TokenType.BeginCommand,COMMAND,true)
 	_states[BASE].add_transition(Constants.TokenType.OptionStart,LINK,true)
-	_states[BASE].add_transition(Constants.TokenType.ShortcutOption,shortcut_option)
+	_states[BASE].add_transition(Constants.TokenType.ShortcutOption, shortcut_option)
 	_states[BASE].add_transition(Constants.TokenType.TagMarker,TAG,true)
 	_states[BASE].add_text_rule(Constants.TokenType.Text)
 
@@ -112,7 +119,7 @@ func create_states():
 	_states[COMMAND].add_transition(Constants.TokenType.ElseToken)
 	_states[COMMAND].add_transition(Constants.TokenType.ElseIf,EXPRESSION)
 	_states[COMMAND].add_transition(Constants.TokenType.EndIf)
-	_states[COMMAND].add_transition(Constants.TokenType.Set,ASSIGNMENT)
+	_states[COMMAND].add_transition(Constants.TokenType.Set, ASSIGNMENT)
 	_states[COMMAND].add_transition(Constants.TokenType.EndCommand,BASE,true)
 	_states[COMMAND].add_transition(Constants.TokenType.Identifier,command_or_expression)
 	_states[COMMAND].add_text_rule(Constants.TokenType.Text)
@@ -173,9 +180,9 @@ func create_states():
 	for stateKey in _states.keys():
 		_states[stateKey].stateName = stateKey
 
-func tokenize(text, title, filename):
+func tokenize():
 	_indentStack.clear()
-	_indentStack.push_front(IntBoolPair.new(0,false))
+	_indentStack.push_front(IntBoolPair.new(0, false))
 	_shouldTrackIndent = false
 
 	var tokens : Array  = []
@@ -188,7 +195,7 @@ func tokenize(text, title, filename):
 	var line_number : int = 1
 
 	for line in lines:
-		tokens += tokenize_line(line, line_number, title, filename)
+		tokens += tokenize_line(line, line_number)
 		line_number += 1
 
 	var endOfInput = Token.new(
@@ -201,14 +208,14 @@ func tokenize(text, title, filename):
 
 	return tokens
 
-func tokenize_line(line, line_number, title, filename):
+func tokenize_line(line, line_number):
 	var tokenStack : Array = []
 
 	var freshLine = line.replace('\t','    ').replace('\r','')
 
 	#record indentation
 	var indentation = line_indentation(line)
-	var prevIndentation : IntBoolPair = _indentStack.front()
+	var prevIndentation = _indentStack.front()
 
 	if _shouldTrackIndent && indentation > prevIndentation.key:
 		#we add an indenation token to record indent level
@@ -259,7 +266,7 @@ func tokenize_line(line, line_number, title, filename):
 
 			var tokenText : String
 
-			if rule.tokenType == Constants.TokenType.Text:
+			if rule.token_type == Constants.TokenType.Text:
 				#if this is text then we back up to the most recent
 				#delimiting token and treat everything from there as text.
 				
@@ -289,29 +296,29 @@ func tokenize_line(line, line_number, title, filename):
 			column += tokenText.length()
 
 			#pre-proccess string
-			if rule.tokenType == Constants.TokenType.Str:
+			if rule.token_type == Constants.TokenType.Str:
 				tokenText = tokenText.substr(1, tokenText.length() - 2)
 				tokenText = tokenText.replace('\\\\', '\\')
 				tokenText = tokenText.replace('\\\'','\'')
 
 			var token = Token.new(
-				rule.tokenType,
+				rule.token_type,
 				_currentState,
 				filename,
 				line_number,
 				column,
 				tokenText
 			)
-			token.delimitsText = rule.delimitsText
+			token.delimits_text = rule.delimits_text
 
 			tokenStack.push_front(token)
 
-			if rule.enterState != null and rule.enterState.length() > 0:
-				if not _states.has(rule.enterState):
-					printerr('State[%s] not known - line(%s) col(%s)' % [rule.enterState, line_number, column])
+			if rule.enter_state != null and rule.enter_state.length() > 0:
+				if not _states.has(rule.enter_state):
+					printerr('State[%s] not known - line(%s) col(%s)' % [rule.enter_state, line_number, column])
 					return []
 				
-				enter_state(_states[rule.enterState])
+				enter_state(_states[rule.enter_state])
 
 				if _shouldTrackIndent:
 					if _indentStack.front().key < indentation:
@@ -323,7 +330,7 @@ func tokenize_line(line, line_number, title, filename):
 		if not matched:
 			var rules = []
 			for rule in _currentState.rules:
-				rules.append('"%s" (%s)' % [Constants.token_type_name(rule.tokenType), rule.human_readable_identifier])
+				rules.append('"%s" (%s)' % [Constants.token_type_name(rule.token_type), rule.human_readable_identifier])
 
 			var error_data = [
 				PoolStringArray(rules).join(', ') if rules.size() == 1 else PoolStringArray(rules.slice(0, rules.size() - 2)).join(', ') + ' or %s' % rules[-1],
@@ -368,17 +375,17 @@ class Token:
 	var column = -1
 	var text = ''
 
-	var delimitsText = false
+	var delimits_text = false
 	var paramCount = -1
 	var lexerState = ''
 
-	func _init(type, state, filename, line_number = -1, column = -1, value = ''):
-		self.type = type
-		self.lexerState = state.stateName
-		self.filename = filename
-		self.line_number = line_number
-		self.column = column
-		self.value = value
+	func _init(_type, _state, _filename, _line_number = -1, _column = -1, _value = ''):
+		type = _type
+		lexerState = _state.stateName
+		filename = _filename
+		line_number = _line_number
+		column = _column
+		value = _value
 
 	func _to_string():
 		return '%s (%s) at %s:%s (state: %s)' % [Constants.token_type_name(type),value,line_number,column,lexerState]
@@ -390,8 +397,8 @@ class LexerState:
 	var rules : Array = []
 	var track_indent : bool = false
 
-	func _init(patterns):
-		self.patterns = patterns
+	func _init(_patterns):
+		patterns = _patterns
 
 	func add_transition(type : int, state : String = '',delimitText : bool = false)->Rule:
 		var pattern = '\\G%s' % patterns[type][0]
@@ -407,48 +414,49 @@ class LexerState:
 		
 		var delimiters:Array = []
 		for rule in rules:
-			if rule.delimitsText:
+			if rule.delimits_text:
 				delimiters.append('%s' % rule.regex.get_pattern().substr(2))
 
 		var pattern = '\\G((?!%s).)*' % [PoolStringArray(delimiters).join('|')]
 		var rule : Rule = add_transition(type,state)
 		rule.regex = RegEx.new()
 		rule.regex.compile(pattern)
-		rule.isTextRule = true
+		rule.is_text_rule = true
 		return rule
 
 	func contains_text_rule()->bool:
 		for rule in rules:
-			if rule.isTextRule:
+			if rule.is_text_rule:
 				return true
 		return false
 	
-
 class Rule:
 	var regex : RegEx
 
-	var enterState : String
-	var tokenType : int
-	var isTextRule : bool
-	var delimitsText : bool
+	var enter_state : String
+	var token_type : int
+	var is_text_rule : bool
+	var delimits_text : bool
 	var human_readable_identifier = ''
 
-	func _init(type : int , regex : String, human_readable_identifier, enterState : String, delimitsText:bool):
-		self.tokenType = type
-		self.regex = RegEx.new()
-		self.regex.compile(regex)
-		self.human_readable_identifier = human_readable_identifier
-		self.enterState = enterState
-		self.delimitsText = delimitsText
+	func _init(_type, _regex, _human_readable_identifier, _enter_state, _delimits_text):
+		token_type = _type
+
+		regex = RegEx.new()
+		regex.compile(_regex)
+
+		human_readable_identifier = _human_readable_identifier
+		enter_state = _enter_state
+		delimits_text = _delimits_text
 
 	func _to_string():
-		return '[Rule : %s (%s) - %s]' % [Constants.token_type_name(tokenType), human_readable_identifier, regex]
+		return '[Rule : %s (%s) - %s]' % [Constants.token_type_name(token_type), human_readable_identifier, regex]
 
 class IntBoolPair:
-	var key : int
-	var value : bool
+	var key = -1
+	var value = false
 
-	func _init(key:int,value:bool):
-		self.key = key
-		self.value = value
+	func _init(_key, _value):
+		key = _key
+		value = _value
 	

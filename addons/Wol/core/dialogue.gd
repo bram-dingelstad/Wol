@@ -49,6 +49,7 @@ func set_node(name = DEFAULT_START):
 	_vm.set_node(name)
 
 func start():
+	print('got here')
 	if _vm.executionState == Constants.ExecutionState.Stopped:
 		_vm.resume()
 

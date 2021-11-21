@@ -3,10 +3,15 @@ extends Node
 class_name Wol
 
 signal node_started(node)
+signal node_finished(node)
+
+# NOTE: Warning is ignored because they get call_deferred
+# warning-ignore:unused_signal
 signal line(line)
+# warning-ignore:unused_signal
 signal options(options)
+# warning-ignore:unused_signal
 signal command(command)
-signal node_completed(node)
 
 signal started
 signal finished
@@ -62,13 +67,11 @@ func init_dialogue():
 	dialogue.set_program(program)
 
 func set_path(_path):
-	if not Engine.editor_hint:
-		var file = File.new()
-		file.open(_path, File.READ)
-		var source = file.get_as_text()
-		file.close()
-		program = WolCompiler.compile_string(source, _path)
 	path = _path
+
+	if not Engine.editor_hint:
+		var compiler = WolCompiler.new(path)
+		program = compiler.compile()
 
 func _handle_line(line):
 	call_deferred('emit_signal', 'line', line)
@@ -103,7 +106,7 @@ func _handle_node_start(node):
 		dialogue._visitedNodeCount[node] += 1
 
 func _handle_node_complete(node):
-	emit_signal('node_completed', node)
+	emit_signal('node_finished', node)
 	return Constants.HandlerState.ContinueExecution
 
 func select_option(id):

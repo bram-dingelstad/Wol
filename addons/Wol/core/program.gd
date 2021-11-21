@@ -15,28 +15,28 @@ class Line:
 	var implicit = false
 	var meta = []
 
-	func _init(text, node_name, line_number, file_name, implicit, meta):
-		self.text = text
-		self.node_name = node_name
-		self.file_name = file_name
-		self.implicit = implicit
-		self.meta = meta
+	func _init(_text, _node_name, _line_number, _file_name, _implicit, _meta):
+		text = _text
+		node_name = _node_name
+		file_name = _file_name
+		implicit = _implicit
+		meta = _meta
 
 class Option:
 	var line
 	var id = -1
 	var destination = ''
 
-	func _init(line, id, destination):
-		self.line = line
-		self.id = id
-		self.destination = destination
+	func _init(_line, _id, _destination):
+		line = _line
+		id = _id
+		destination = _destination
 
 class Command:
 	var command = ''
 
-	func _init(command):
-		self.command = command
+	func _init(_command):
+		command = _command
 
 class WolNode:
 	var name = ''
@@ -55,15 +55,15 @@ class WolNode:
 			source_id = other.source_id
 
 	func equals(other):
-		if other.get_script() != self.get_script():
+		if other.get_script() != get_script():
 			return false
-		if other.name != self.name:
+		if other.name != name:
 			return false
-		if other.instructions != self.instructions:
+		if other.instructions != instructions:
 			return false
-		if other.label != self.label:
+		if other.labels != labels:
 			return false
-		if other.sourceId != self.sourceId:
+		if other.source_id != source_id:
 			return false
 		return true
 
@@ -82,33 +82,33 @@ class Operand:
 	var value
 	var type
 
-	func _init(value):
-		if typeof(value) == TYPE_OBJECT and value.get_script() == self.get_script():
-			set_value(value.value)
+	func _init(_value):
+		if typeof(_value) == TYPE_OBJECT and _value.get_script() == get_script():
+			set_value(_value.value)
 		else:
-			set_value(value)
+			set_value(_value)
 
-	func set_value(value):
-		match typeof(value):
+	func set_value(_value):
+		match typeof(_value):
 			TYPE_REAL,TYPE_INT:
-				set_number(value)
+				set_number(_value)
 			TYPE_BOOL:
-				set_boolean(value)
+				set_boolean(_value)
 			TYPE_STRING:
-				set_string(value)
+				set_string(_value)
 
-	func set_boolean(value):
-		_value(value)
+	func set_boolean(_value):
+		value = _value
 		type = ValueType.BooleanValue
 		return self
 
-	func set_string(value):
-		_value(value)
+	func set_string(_value):
+		value = _value
 		type = ValueType.StringValue
 		return self
 
-	func set_number(value):
-		_value(value)
+	func set_number(_value):
+		value = _value
 		type = ValueType.FloatValue
 		return self
 
@@ -122,9 +122,6 @@ class Operand:
 	func _to_string():
 		return "Operand[%s:%s]" % [type, value]
 
-	func _value(value):
-		self.value = value
-
 class Instruction:
 	var operation = -1
 	var operands = []
@@ -133,9 +130,6 @@ class Instruction:
 		if other != null and other.get_script() == self.get_script():
 			self.operation = other.operation
 			self.operands += other.operands
-
-	func dump(program, library):
-		return "InstructionInformation:NotImplemented"
 
 	func _to_string():
 		return Constants.bytecode_name(operation) + ':' + operands as String

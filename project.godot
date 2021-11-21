@@ -20,6 +20,11 @@ _global_script_classes=[ {
 "path": "res://addons/Wol/core/constants.gd"
 }, {
 "base": "Object",
+"class": "Lexer",
+"language": "GDScript",
+"path": "res://addons/Wol/core/compiler/lexer.gd"
+}, {
+"base": "Object",
 "class": "Program",
 "language": "GDScript",
 "path": "res://addons/Wol/core/program.gd"
@@ -32,6 +37,7 @@ _global_script_classes=[ {
 _global_script_class_icons={
 "Compiler": "",
 "Constants": "",
+"Lexer": "",
 "Program": "",
 "Wol": ""
 }
@@ -41,6 +47,12 @@ _global_script_class_icons={
 config/name="Wol"
 run/main_scene="res://Dialogue.tscn"
 config/icon="res://icon.png"
+
+[debug]
+
+gdscript/warnings/treat_warnings_as_errors=true
+gdscript/warnings/exclude_addons=false
+gdscript/warnings/return_value_discarded=false
 
 [editor_plugins]
 

@@ -219,27 +219,27 @@ func run_instruction(instruction)->bool:
 
 			var function = _dialogue.library.get_function(functionName)
 
-			var expectedParamCount : int = function.paramCount
-			var actualParamCount : int = _state.pop_value().as_number()
+			var expected_parameter_count : int = function.paramCount
+			var actual_parameter_count : int = _state.pop_value().as_number()
 
 			#if function takes in -1 params disregard
 			#expect the compiler to have placed the number of params
 			#at the top of the stack
-			if expectedParamCount == -1:
-				expectedParamCount = actualParamCount
+			if expected_parameter_count == -1:
+				expected_parameter_count = actual_parameter_count
 
-			if expectedParamCount != actualParamCount:
+			if expected_parameter_count != actual_parameter_count:
 				printerr('Function %s expected %d parameters but got %d instead' %[functionName,
-				expectedParamCount,actualParamCount])
+				expected_parameter_count,actual_parameter_count])
 				return false
 
 			var result
 
-			if actualParamCount == 0:
+			if actual_parameter_count == 0:
 				result = function.invoke()
 			else:
 				var params : Array = []#value
-				for i in range(actualParamCount):
+				for _i in range(actual_parameter_count):
 					params.push_front(_state.pop_value())
 
 				result = function.invoke(params)
@@ -352,6 +352,6 @@ class SimpleEntry:
 	var key
 	var value
 
-	func _init(key, value):
-		self.key = key
-		self.value = value
+	func _init(_key, _value):
+		key = _key
+		value = _value
