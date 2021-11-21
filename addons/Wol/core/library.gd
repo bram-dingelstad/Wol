@@ -15,6 +15,7 @@ func get_function(name):
 
 func import_library(other):
 	Constants.merge_dir(functions, other.functions)
+	other.virtual_machine = virtual_machine
 
 func register_function(name, parameter_count, function, returns_value):
 	var functionInfo = FunctionInfo.new(name, parameter_count, function, returns_value)

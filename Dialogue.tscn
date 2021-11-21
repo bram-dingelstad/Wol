@@ -16,6 +16,8 @@ __meta__ = {
 script = ExtResource( 2 )
 path = "res://dialogue.yarn"
 auto_start = true
+variable_storage = {
+}
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
 anchor_right = 1.0

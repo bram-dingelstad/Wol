@@ -2,9 +2,6 @@ extends Object
 
 const Constants = preload('res://addons/Wol/core/Constants.gd')
 
-const NULL_STRING = 'null'
-const FALSE_STRING = 'false'
-const TRUE_STRING = 'true'
 const NANI = 'NaN'
 
 var type = Constants.ValueType.Nullean
@@ -74,7 +71,7 @@ func set_value(value):
 
 func add(other):
 	if type == Constants.ValueType.Str or other.type == Constants.ValueType.Str:
-		return get_script().new('%s%s'%[value(),other.value()])
+		return get_script().new('%s%s' % [value(), other.value()])
 	if type == Constants.ValueType.Number and other.type == Constants.ValueType.Number:
 		return get_script().new(number + other.number)
 	return null

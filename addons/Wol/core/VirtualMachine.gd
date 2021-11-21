@@ -1,6 +1,7 @@
-extends Node
+extends Object
 
 const Constants = preload('res://addons/Wol/core/Constants.gd')
+const Program = preload('res://addons/Wol/core/Program.gd')
 const Value = preload('res://addons/Wol/core/Value.gd')
 
 # Function references to handlers
@@ -59,8 +60,17 @@ func set_node(name):
 
 	current_node = program.nodes[name]
 	reset()
+
 	state.current_node_name = name
 	node_start_handler.call_func(name)
+
+	if not dialogue.variable_storage.has(program.filename):
+		dialogue.variable_storage[program.filename] = {}
+
+	if not dialogue.variable_storage[program.filename].has(name):
+		dialogue.variable_storage[program.filename][name] = 0
+
+	dialogue.variable_storage[program.filename][name] += 1
 	return true
 
 func pause():
@@ -91,8 +101,8 @@ func reset():
 	state = VmState.new()
 
 func get_next_instruction():
-	if current_node.instructions.size() - 1 > state.programCounter:
-		return current_node.instructions[state.programCounter + 1]
+	if current_node.instructions.size() - 1 > state.program_counter:
+		return current_node.instructions[state.program_counter + 1]
 	return
 
 func start():
@@ -115,14 +125,13 @@ func resume():
 
 	execution_state = Constants.ExecutionState.Running
 	
-	#execute instruction until something cool happens
 	while execution_state == Constants.ExecutionState.Running:
-		var current_instruction = current_node.instructions[state.programCounter]
+		var current_instruction = current_node.instructions[state.program_counter]
 		run_instruction(current_instruction)
-		state.programCounter += 1
+		state.program_counter += 1
 
-		if state.programCounter >= current_node.instructions.size():
-			node_finished_handler.call_func(current_node.nodeName)
+		if state.program_counter >= current_node.instructions.size():
+			node_finished_handler.call_func(current_node.name)
 			execution_state = Constants.ExecutionState.Stopped
 			reset()
 			dialogue_finished_handler.call_func()
@@ -142,17 +151,22 @@ func run_instruction(instruction):
 
 		# Jump to named label
 		Constants.ByteCode.JumpTo:
-			state.programCounter = find_label_instruction(instruction.operands[0].value) - 1
+			state.program_counter = find_label_instruction(instruction.operands[0].value) - 1
 
 		Constants.ByteCode.RunLine:
 			# Lookup string and give back as line
 			var key = instruction.operands[0].value
-			var line = program.strings[key]
+			var line = program.strings[key].clone()
 
 			# The second operand is the expression count of format function
-			# TODO: Add format functions supportk
+			# TODO: Add format functions support
+			line.substitutions = []
 			if instruction.operands.size() > 1:
-				pass
+				var expression_count = int(instruction.operands[1].value)
+
+				while expression_count > 0:
+					line.substitutions.append(state.pop_value().as_string())
+					expression_count -= 1
 
 			var return_state = line_handler.call_func(line)
 			
@@ -177,12 +191,12 @@ func run_instruction(instruction):
 		# Jump to named label if value of stack top is false
 		Constants.ByteCode.JumpIfFalse:
 			if not state.peek_value().as_bool():
-			 state.programCounter = find_label_instruction(instruction.operands[0].value) - 1
+			 state.program_counter = find_label_instruction(instruction.operands[0].value) - 1
 				
 		# Jump to label whose name is on the stack
 		Constants.ByteCode.Jump:
 			var destination = state.peek_value().as_string()
-			state.programCounter = find_label_instruction(destination) - 1
+			state.program_counter = find_label_instruction(destination) - 1
 
 		Constants.ByteCode.Pop:
 			state.pop_value()
@@ -204,25 +218,29 @@ func run_instruction(instruction):
 			if actual_parameter_count == 0:
 				result = function.invoke()
 			else:
-				var params = []
+				var parameters = []
 				for _i in range(actual_parameter_count):
-					params.push_front(state.pop_value())
+					parameters.push_front(state.pop_value())
 
-				result = function.invoke(params)
+				result = function.invoke(parameters)
 
 			if function.returns_value:
 				state.push_value(result)
 
 		Constants.ByteCode.PushVariable:
 			var name = instruction.operands[0].value
-			var godot_value = dialogue.variable_storage[name]
-			var value = Value.new(godot_value)
+			var value = dialogue.variable_storage[name.replace('$', '')]
 			state.push_value(value)
 
 		Constants.ByteCode.StoreVariable:
 			var value = state.peek_value()
+			if value.type == Constants.ValueType.Str:
+				value = program.strings[value.value()].text
+			else:
+				value = value.value()
+
 			var name = instruction.operands[0].value.replace('$', '')
-			dialogue.variable_storage[name] = value.value()
+			dialogue.variable_storage[name] = value
 
 		Constants.ByteCode.Stop:
 			node_finished_handler.call_func(current_node.name)
@@ -239,15 +257,15 @@ func run_instruction(instruction):
 
 			var return_state = node_finished_handler.call_func(current_node.name)
 			set_node(name)
-			state.programCounter -= 1
+
 			if return_state == Constants.HandlerState.PauseExecution:
 				execution_state = Constants.ExecutionState.Suspended
 
 		Constants.ByteCode.AddOption:
 			var key = instruction.operands[0].value
-			var line = program.strings[key]
+			var line = program.strings[key].clone()
 
-			# TODO: Add format functions supportk
+			# TODO: Add format functions support
 			if instruction.operands.size() > 2:
 				pass
 			
@@ -280,11 +298,11 @@ func run_instruction(instruction):
 
 class VmState:
 	var current_node_name = ''
-	var programCounter = 0
+	var program_counter = 0
 	var current_options = []
 	var stack = []
 
-	func push_value(value)->void:
+	func push_value(value):
 		if value is Value:
 			stack.push_back(value)
 		else:

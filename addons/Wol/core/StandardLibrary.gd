@@ -72,25 +72,14 @@ func xor(param1, param2):
 func lnot(param1):
 	return not param1.as_bool()
 
-var visited_node_count = {}
-
-func is_node_visited(node = virtual_machine.current_node_name()):
+func is_node_visited(node = virtual_machine.current_node.name):
 	return node_visit_count(node) > 0
 
-func node_visit_count(node = virtual_machine.current_node_name()):
+func node_visit_count(node = virtual_machine.current_node.name):
 	if node is Value:
 		node = virtual_machine.program.strings[node.value()].text
 
-	var visit_count = 0
-	if visited_node_count.has(node):
-		visit_count = visited_node_count[node]
+	var variable_storage = virtual_machine.dialogue.variable_storage
+	var visited_node_count = variable_storage[virtual_machine.program.filename]
 
-	return visit_count
-
-func get_visited_nodes():
-	return visited_node_count.keys()
-
-func set_visited_nodes(visitedList):
-	visited_node_count.clear()
-	for string in visitedList:
-		visited_node_count[string] = 1
+	return visited_node_count[node] if visited_node_count.has(node) else 0

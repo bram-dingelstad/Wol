@@ -87,8 +87,6 @@ class ParseNode:
 		var tokens = _parser.tokens as Array
 		if tokens.size() > 0:
 			line_number = tokens.front().line_number
-		else:
-			line_number = -1
 
 		tags = []
 
@@ -132,6 +130,105 @@ class WolNode extends ParseNode:
 class Header extends ParseNode:
 	pass
 
+class InlineExpression extends ParseNode:
+	var expression
+
+	func _init(parent, parser).(parent, parser):
+		parser.expect_symbol([Constants.TokenType.ExpressionFunctionStart])
+		expression = ExpressionNode.parse(self, parser)
+		parser.expect_symbol([Constants.TokenType.ExpressionFunctionEnd])
+
+	static func can_parse(parser):
+		return parser.next_symbol_is([Constants.TokenType.ExpressionFunctionStart])
+
+	func tree_string(_indent_level):
+		return "InlineExpression:"
+
+# Returns a format_text string as [ name "{0}" key1="value1" key2="value2" ]
+class FormatFunctionNode extends ParseNode:
+	var format_text = ''
+	var expression_value
+
+	func _init(parent:ParseNode, parser, expressionCount:int).(parent, parser):
+		format_text="["
+		parser.expect_symbol([Constants.TokenType.FormatFunctionStart])
+
+		while !parser.next_symbol_is([Constants.TokenType.FormatFunctionEnd]):
+			if parser.next_symbol_is([Constants.TokenType.Text]):
+				format_text += parser.expect_symbol().value
+
+			if InlineExpression.can_parse(parser):
+				expression_value = InlineExpression.new(self, parser)
+				format_text +=" \"{%d}\" " % expressionCount
+		parser.expect_symbol()
+		format_text+="]"
+
+	static func can_parse(parser):
+		return parser.next_symbol_is([Constants.TokenType.FormatFunctionStart])
+
+	# TODO: Make format prettier and add more information
+	func tree_string(_indent_level):
+		return "FormatFunction"
+
+class LineNode extends ParseNode:
+	var line_text = ''
+	# FIXME: Right now we are putting the formatfunctions and inline expressions in the same
+	#        list but if at some point we want to stronly type our sub list we need to make a new
+	#        parse node that can have either an InlineExpression or a FunctionFormat
+	#        .. This is a consideration for Godot4.x
+	var substitutions = []
+	var line_id = ''
+	var line_tags = []
+
+	# NOTE: If format function an inline functions are both present
+	# 		returns a line in the format "Some text {0} and some other {1}[format "{2}" key="value" key="value"]"
+
+	func _init(parent, parser).(parent, parser):
+		while parser.next_symbol_is(
+				[
+					Constants.TokenType.FormatFunctionStart,
+					Constants.TokenType.ExpressionFunctionStart,
+					Constants.TokenType.Text,
+					Constants.TokenType.TagMarker
+				]
+			):
+
+			if FormatFunctionNode.can_parse(parser):
+				var format_function = FormatFunctionNode.new(self, parser, substitutions.size())
+				if format_function.expression_value != null:
+					substitutions.append(format_function.expression_value)
+
+				line_text += format_function.format_text
+
+			elif InlineExpression.can_parse(parser):
+				var inline_expression = InlineExpression.new(self, parser)
+				line_text += '{%d}' % substitutions.size()
+				substitutions.append(inline_expression)
+
+			elif parser.next_symbols_are([Constants.TokenType.TagMarker, Constants.TokenType.Identifier]):
+				parser.expect_symbol()
+				var tag_token = parser.expect_symbol([ Constants.TokenType.Identifier ])
+				if tag_token.value.begins_with("line:"):
+					if line_id.empty():
+						line_id = tag_token.value
+					else:
+						printerr("Too many line_tags @[%s:%d]" %[parser.currentNodeName, tag_token.line_number])
+						return
+				else:
+					tags.append(tag_token.value)
+
+			else:
+				var token = parser.expect_symbol()
+				if token.line_number == line_number and token.type != Constants.TokenType.BeginCommand:
+					line_text += token.value
+				else:
+					parser.tokens.push_front(token)
+					break
+
+
+	func tree_string(indent_level):
+		return tab(indent_level, 'Line: (%s)[%d]' % [line_text, substitutions.size()])
+
 class Statement extends ParseNode:
 	var Type = Constants.StatementTypes
 
@@ -142,7 +239,7 @@ class Statement extends ParseNode:
 	var assignment
 	var shortcut_option_group
 	var custom_command
-	var line = ''
+	var line
 
 	func _init(parent, parser).(parent, parser):
 		if Block.can_parse(parser):
@@ -170,7 +267,7 @@ class Statement extends ParseNode:
 			type = Type.CustomCommand
 
 		elif parser.next_symbol_is([Constants.TokenType.Text]):
-			line = parser.expect_symbol([Constants.TokenType.Text]).value
+			line = LineNode.new(self, parser)
 			type = Type.Line
 
 		else:
@@ -203,7 +300,7 @@ class Statement extends ParseNode:
 			Type.CustomCommand:
 				info.append(custom_command.tree_string(indent_level))
 			Type.Line:
-				info.append(tab(indent_level, 'Line: %s' % line))
+				info.append(line.tree_string(indent_level))
 			_:
 				printerr('Cannot print statement')
 
@@ -233,11 +330,14 @@ class CustomCommand extends ParseNode:
 		
 		#if first token is identifier and second is leftt parenthesis
 		#evaluate as function
-		if (command_tokens.size() > 1 && command_tokens[0].type == Constants.TokenType.Identifier
-			&& command_tokens[1].type == Constants.TokenType.LeftParen):
+		if command_tokens.size() > 1 \
+				and command_tokens[0].type == Constants.TokenType.Identifier \
+				and command_tokens[1].type == Constants.TokenType.LeftParen:
+
 			var p = get_script().new(command_tokens, parser.library)
 			expression = ExpressionNode.parse(self, p)
 			type = Type.Expression
+
 		else:
 			#otherwise evaluuate command
 			type = Type.ClientCommand
@@ -545,10 +645,10 @@ class ExpressionNode extends ParseNode:
 	var parameters = []
 
 	func _init(parent, parser, _value, _function = '', _parameters = []).(parent, parser):
-
 		if _value != null:
 			type = Constants.ExpressionType.Value
 			value = _value
+
 		else:
 			type = Constants.ExpressionType.FunctionCall
 			function = _function
@@ -568,7 +668,7 @@ class ExpressionNode extends ParseNode:
 
 		return info.join('')
 
-	# using Djikstra's shunting-yard algorithm to convert stream of expresions into postfix notation,
+	# Using Djikstra's shunting-yard algorithm to convert stream of expresions into postfix notation,
 	# & then build a tree of expressions
 	static func parse(parent, parser):
 		var rpn = []
@@ -595,7 +695,7 @@ class ExpressionNode extends ParseNode:
 		var last
 
 		#read expression content
-		while parser.tokens.size() > 0 && parser.next_symbol_is(valid_types):
+		while parser.tokens.size() > 0 and parser.next_symbol_is(valid_types):
 			var next = parser.expect_symbol(valid_types)
 
 			if next.type == Constants.TokenType.Variable \
@@ -633,7 +733,7 @@ class ExpressionNode extends ParseNode:
 				
 				#find the closest function on stack
 				#increment parameters
-				func_stack.back().param_count+=1
+				func_stack.back().parameter_count+=1
 				
 			elif Operator.is_op(next.type):
 				#this is an operator
@@ -685,7 +785,7 @@ class ExpressionNode extends ParseNode:
 					#else
 					#we have more than 1 param
 					if last.type != Constants.TokenType.LeftParen:
-						func_stack.back().param_count+=1
+						func_stack.back().parameter_count+=1
 					
 					rpn.append(op_stack.pop_back())
 					func_stack.pop_back()
@@ -730,7 +830,7 @@ class ExpressionNode extends ParseNode:
 				var function_name = next.value
 
 				var function_parameters = []
-				for _i in range(next.param_count):
+				for _i in range(next.parameter_count):
 					function_parameters.append(eval_stack.pop_back())
 				
 				function_parameters.invert()
@@ -802,7 +902,7 @@ class Assignment extends ParseNode:
 		info.append(tab(indent_level + 1, destination))
 		info.append(tab(indent_level + 1, Constants.token_type_name(operation)))
 		info.append(value.tree_string(indent_level + 1))
-		return info.join('')
+		return PoolStringArray(info).join('')
 
 		
 	static func can_parse(parser):

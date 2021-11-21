@@ -76,6 +76,12 @@ enum TokenType {
 	#8 Command syntax ('<<foo>>')
 	BeginCommand, EndCommand,
 
+	ExpressionFunctionStart, # {
+	ExpressionFunctionEnd, # }
+
+	FormatFunctionStart, # [
+	FormatFunctionEnd,   # ]
+
 	#10 Variables ('$foo')
 	Variable,
 
@@ -145,7 +151,8 @@ enum TokenType {
 }
 
 enum ExpressionType {
-	Value, FunctionCall
+	Value,
+	FunctionCall
 }
 
 enum StatementTypes {
@@ -155,7 +162,8 @@ enum StatementTypes {
 	IfStatement,
 	OptionStatement,
 	AssignmentStatement,
-	Line
+	Line,
+	InlineExpression
 }
 
 enum ValueType {

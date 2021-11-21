@@ -79,7 +79,6 @@ func compile():
 		line_number += 1
 
 		body = PoolStringArray(body_lines).join('\n')
-
 		var lexer = Lexer.new(filename, title, body)
 		var tokens = lexer.tokenize()
 
@@ -94,6 +93,7 @@ func compile():
 			line_number += 1
 
 	var program = Program.new()
+	program.filename = filename
 
 	for node in parsed_nodes:
 		compile_node(program, node)
@@ -203,7 +203,7 @@ func generate_statement(node, statement):
 			generate_assignment(node, statement.assignment)
 
 		Constants.StatementTypes.Line:
-			generate_line(node, statement,statement.line)
+			generate_line(node, statement)
 		_:
 			assert(false, 'Illegal statement type [%s]. Could not generate code.' % statement.type)
 
@@ -218,12 +218,19 @@ func generate_custom_command(node, command):
 		else :
 			emit(Constants.ByteCode.RunCommand, node, [Program.Operand.new(command_string)])
 
-func generate_line(node, statement, line):
+func generate_line(node, statement):
 	# TODO: Implement proper line numbers (global and local)
-	var num = register_string(line, node.name, '', statement.line_number, []);
-	emit(Constants.ByteCode.RunLine, node, [Program.Operand.new(num)])
+	var line = statement.line
+	var expression_count = line.substitutions.size()
 
-func generate_shortcut_group(node,shortcut_group):
+	while not line.substitutions.empty():
+		var inline_expression = line.substitutions.pop_back()
+		generate_expression(node, inline_expression.expression)
+	
+	var num = register_string(line.line_text, node.name, line.line_id, statement.line_number, line.tags);
+	emit(Constants.ByteCode.RunLine, node,[Program.Operand.new(num), Program.Operand.new(expression_count)])
+
+func generate_shortcut_group(node, shortcut_group):
 	var end = register_label('group_end')
 	var labels = []
 	var option_count = 0
@@ -243,7 +250,8 @@ func generate_shortcut_group(node,shortcut_group):
 		var label_string_id = register_string(
 			option.label,
 			node.name,
-			label_line_id,option.line_number,
+			label_line_id,
+			option.line_number,
 			[]
 		)
 		
@@ -287,7 +295,7 @@ func generate_if(node, if_statement):
 			generate_expression(node, clause.expression)
 			emit(Constants.ByteCode.JumpIfFalse, node, [Program.Operand.new(end_clause)])
 		
-		generate_block(node,clause.statements)
+		generate_block(node, clause.statements)
 		emit(Constants.ByteCode.JumpTo, node, [Program.Operand.new(endif)])
 
 		if clause.expression != null:

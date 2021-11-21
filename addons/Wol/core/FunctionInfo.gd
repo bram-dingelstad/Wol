@@ -1,5 +1,6 @@
 extends Object
-var Value : GDScript = load("res://addons/Wol/core/Value.gd")
+
+const Value = preload("res://addons/Wol/core/Value.gd")
 
 var name = ''
 # NOTE: -1 means variable arguments
@@ -18,12 +19,18 @@ func invoke(parameters = []):
 	if parameters != null:
 		length = parameters.size()
 
-	if check_param_count(length):
+	if check_parameter_count(length):
 		if returns_value:
+			var return_value
 			if length > 0:
-				return Value.new(function.call_funcv(parameters))
+				return_value = function.call_funcv(parameters)
 			else:
-				return Value.new(function.call_func())
+				return_value = function.call_func()
+
+			if return_value is Value:
+				return return_value
+			else:
+				return Value.new(return_value)
 		else:
 			if length > 0:
 				function.call_funcv(parameters)
@@ -31,5 +38,5 @@ func invoke(parameters = []):
 				function.call_func()
 	return null
 
-func check_param_count(_parameter_count):
+func check_parameter_count(_parameter_count):
 	return parameter_count == _parameter_count or parameter_count == -1

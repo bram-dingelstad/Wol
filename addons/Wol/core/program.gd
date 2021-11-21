@@ -3,6 +3,7 @@ extends Object
 const Constants = preload('res://addons/Wol/core/Constants.gd')
 
 var name = ''
+var filename = ''
 var strings = {}
 var nodes = {}
 
@@ -12,6 +13,7 @@ class Line:
 	var line_number = -1
 	var file_name = ''
 	var implicit = false
+	var substitutions = []
 	var meta = []
 
 	func _init(_text, _node_name, _line_number, _file_name, _implicit, _meta):
@@ -20,6 +22,13 @@ class Line:
 		file_name = _file_name
 		implicit = _implicit
 		meta = _meta
+
+	func clone():
+		return get_script().new(text, node_name, line_number, file_name, implicit, meta)
+
+	func _to_string():
+		return '%s:%d: "%s"' % [file_name.get_file(), line_number, text]
+
 
 class Option:
 	var line
@@ -30,6 +39,9 @@ class Option:
 		line = _line
 		id = _id
 		destination = _destination
+
+	func clone():
+		return get_script().new(self)
 
 class Command:
 	var command = ''

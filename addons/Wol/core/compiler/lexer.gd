@@ -17,6 +17,8 @@ const ASSIGNMENT = 'assignment'
 const OPTION = 'option'
 const OR = 'or'
 const DESTINATION = 'destination'
+const INLINE = 'inline'
+const FORMAT_FUNCTION = 'format'
 
 var WHITESPACE = '\\s*'
 
@@ -84,27 +86,40 @@ func createstates():
 	patterns[Constants.TokenType.EndIf] = ['endif(?!\\w)', '"endif"']
 	patterns[Constants.TokenType.Set] = ['set(?!\\w)', '"set"']
 	patterns[Constants.TokenType.ShortcutOption] = ['\\-\\>\\s*', '"->"']
+	patterns[Constants.TokenType.ExpressionFunctionStart] = ['\\{', '"{"']
+	patterns[Constants.TokenType.ExpressionFunctionEnd] = ['\\}', '"}"']
+	patterns[Constants.TokenType.FormatFunctionStart] = ['(?<!\\[)\\[(?!\\[)', '"["']
+	patterns[Constants.TokenType.FormatFunctionEnd] = ['\\]', '"]"']
 
 	var shortcut_option = SHORTCUT + DASH + OPTION
 	var shortcut_option_tag = shortcut_option + DASH + TAG
 	var command_or_expression = COMMAND + DASH + OR + DASH + EXPRESSION
 	var link_destination = LINK + DASH + DESTINATION
+	var format_expression = FORMAT_FUNCTION + DASH + EXPRESSION
+	var inline_expression = INLINE + DASH + EXPRESSION
+	var link_inline_expression = LINK + DASH + INLINE + DASH + EXPRESSION
+	var link_format_expression = LINK + DASH + FORMAT_FUNCTION + DASH + EXPRESSION
 
 	states = {}
 
 	states[BASE] = LexerState.new(patterns)
 	states[BASE].add_transition(Constants.TokenType.BeginCommand, COMMAND, true)
+	states[BASE].add_transition(Constants.TokenType.ExpressionFunctionStart, inline_expression, true)
+	states[BASE].add_transition(Constants.TokenType.FormatFunctionStart, FORMAT_FUNCTION, true)
 	states[BASE].add_transition(Constants.TokenType.OptionStart, LINK, true)
 	states[BASE].add_transition(Constants.TokenType.ShortcutOption, shortcut_option)
 	states[BASE].add_transition(Constants.TokenType.TagMarker, TAG, true)
 	states[BASE].add_text_rule(Constants.TokenType.Text)
 
+	#TODO: FIXME - Tags are not being proccessed properly this way. We must look for the format #{identifier}:{value}
+	#              Possible solution is to add more transitions
 	states[TAG] = LexerState.new(patterns)
 	states[TAG].add_transition(Constants.TokenType.Identifier, BASE)
 
 	states[shortcut_option] = LexerState.new(patterns)
 	states[shortcut_option].track_indent = true
 	states[shortcut_option].add_transition(Constants.TokenType.BeginCommand, EXPRESSION, true)
+	states[shortcut_option].add_transition(Constants.TokenType.ExpressionFunctionStart, inline_expression, true)
 	states[shortcut_option].add_transition(Constants.TokenType.TagMarker, shortcut_option_tag, true)
 	states[shortcut_option].add_text_rule(Constants.TokenType.Text, BASE)
 	
@@ -134,39 +149,41 @@ func createstates():
 	states[ASSIGNMENT].add_transition(Constants.TokenType.MultiplyAssign, EXPRESSION)
 	states[ASSIGNMENT].add_transition(Constants.TokenType.DivideAssign, EXPRESSION)
 
+	states[FORMAT_FUNCTION] = LexerState.new(patterns)
+	states[FORMAT_FUNCTION].add_transition(Constants.TokenType.FormatFunctionEnd, BASE, true)
+	states[FORMAT_FUNCTION].add_transition(Constants.TokenType.ExpressionFunctionStart, format_expression, true)
+	states[FORMAT_FUNCTION].add_text_rule(Constants.TokenType.Text)
+
+
+	states[format_expression] = LexerState.new(patterns)
+	states[format_expression].add_transition(Constants.TokenType.ExpressionFunctionEnd, FORMAT_FUNCTION)
+	form_expression_state(states[format_expression])
+
+	states[inline_expression] = LexerState.new(patterns)
+	states[inline_expression].add_transition(Constants.TokenType.ExpressionFunctionEnd, BASE)
+	form_expression_state(states[inline_expression])
+
 	states[EXPRESSION] = LexerState.new(patterns)
 	states[EXPRESSION].add_transition(Constants.TokenType.EndCommand, BASE)
-	states[EXPRESSION].add_transition(Constants.TokenType.Number)
-	states[EXPRESSION].add_transition(Constants.TokenType.Str)
-	states[EXPRESSION].add_transition(Constants.TokenType.LeftParen)
-	states[EXPRESSION].add_transition(Constants.TokenType.RightParen)
-	states[EXPRESSION].add_transition(Constants.TokenType.EqualTo)
-	states[EXPRESSION].add_transition(Constants.TokenType.EqualToOrAssign)
-	states[EXPRESSION].add_transition(Constants.TokenType.NotEqualTo)
-	states[EXPRESSION].add_transition(Constants.TokenType.GreaterThanOrEqualTo)
-	states[EXPRESSION].add_transition(Constants.TokenType.GreaterThan)
-	states[EXPRESSION].add_transition(Constants.TokenType.LessThanOrEqualTo)
-	states[EXPRESSION].add_transition(Constants.TokenType.LessThan)
-	states[EXPRESSION].add_transition(Constants.TokenType.Add)
-	states[EXPRESSION].add_transition(Constants.TokenType.Minus)
-	states[EXPRESSION].add_transition(Constants.TokenType.Multiply)
-	states[EXPRESSION].add_transition(Constants.TokenType.Divide)
-	states[EXPRESSION].add_transition(Constants.TokenType.Modulo)
-	states[EXPRESSION].add_transition(Constants.TokenType.And)
-	states[EXPRESSION].add_transition(Constants.TokenType.Or)
-	states[EXPRESSION].add_transition(Constants.TokenType.Xor)
-	states[EXPRESSION].add_transition(Constants.TokenType.Not)
-	states[EXPRESSION].add_transition(Constants.TokenType.Variable)
-	states[EXPRESSION].add_transition(Constants.TokenType.Comma)
-	states[EXPRESSION].add_transition(Constants.TokenType.TrueToken)
-	states[EXPRESSION].add_transition(Constants.TokenType.FalseToken)
-	states[EXPRESSION].add_transition(Constants.TokenType.NullToken)
-	states[EXPRESSION].add_transition(Constants.TokenType.Identifier)
+	# states[EXPRESSION].add_transition(Constants.TokenType.FormatFunctionEnd, BASE)
+	form_expression_state(states[EXPRESSION])
 
 	states[LINK] = LexerState.new(patterns)
 	states[LINK].add_transition(Constants.TokenType.OptionEnd, BASE, true)
+	states[LINK].add_transition(Constants.TokenType.ExpressionFunctionStart, link_inline_expression, true)
+	states[LINK].add_transition(Constants.TokenType.FormatFunctionStart, link_format_expression, true)
+	states[LINK].add_transition(Constants.TokenType.FormatFunctionEnd, LINK, true)
 	states[LINK].add_transition(Constants.TokenType.OptionDelimit, link_destination, true)
 	states[LINK].add_text_rule(Constants.TokenType.Text)
+
+	states[link_format_expression] = LexerState.new(patterns)
+	states[link_format_expression].add_transition(Constants.TokenType.FormatFunctionEnd, LINK, true)
+	states[link_format_expression].add_transition(Constants.TokenType.ExpressionFunctionStart, link_inline_expression, true)
+	states[link_format_expression].add_text_rule(Constants.TokenType.Text)
+
+	states[link_inline_expression] = LexerState.new(patterns)
+	states[link_inline_expression].add_transition(Constants.TokenType.ExpressionFunctionEnd, LINK)
+	form_expression_state(states[link_inline_expression])
 
 	states[link_destination] = LexerState.new(patterns)
 	states[link_destination].add_transition(Constants.TokenType.Identifier)
@@ -176,6 +193,34 @@ func createstates():
 
 	for key in states.keys():
 		states[key].name = key
+
+func form_expression_state(expression_state):
+	expression_state.add_transition(Constants.TokenType.Number)
+	expression_state.add_transition(Constants.TokenType.Str)
+	expression_state.add_transition(Constants.TokenType.LeftParen)
+	expression_state.add_transition(Constants.TokenType.RightParen)
+	expression_state.add_transition(Constants.TokenType.EqualTo)
+	expression_state.add_transition(Constants.TokenType.EqualToOrAssign)
+	expression_state.add_transition(Constants.TokenType.NotEqualTo)
+	expression_state.add_transition(Constants.TokenType.GreaterThanOrEqualTo)
+	expression_state.add_transition(Constants.TokenType.GreaterThan)
+	expression_state.add_transition(Constants.TokenType.LessThanOrEqualTo)
+	expression_state.add_transition(Constants.TokenType.LessThan)
+	expression_state.add_transition(Constants.TokenType.Add)
+	expression_state.add_transition(Constants.TokenType.Minus)
+	expression_state.add_transition(Constants.TokenType.Multiply)
+	expression_state.add_transition(Constants.TokenType.Divide)
+	expression_state.add_transition(Constants.TokenType.Modulo)
+	expression_state.add_transition(Constants.TokenType.And)
+	expression_state.add_transition(Constants.TokenType.Or)
+	expression_state.add_transition(Constants.TokenType.Xor)
+	expression_state.add_transition(Constants.TokenType.Not)
+	expression_state.add_transition(Constants.TokenType.Variable)
+	expression_state.add_transition(Constants.TokenType.Comma)
+	expression_state.add_transition(Constants.TokenType.TrueToken)
+	expression_state.add_transition(Constants.TokenType.FalseToken)
+	expression_state.add_transition(Constants.TokenType.NullToken)
+	expression_state.add_transition(Constants.TokenType.Identifier)
 
 func tokenize():
 	var tokens = []
@@ -371,7 +416,7 @@ class Token:
 		value = _value
 
 	func _to_string():
-		return '%s (%s) at %s:%s (state: %s)' % [Constants.token_type_name(type),value, line_number, column, lexer_state]
+		return '%s (%s) at %s:%s (state: %s)' % [Constants.token_type_name(type), value, line_number, column, lexer_state]
 	
 class LexerState:
 	var name = ''

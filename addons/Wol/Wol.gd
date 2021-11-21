@@ -17,15 +17,17 @@ signal started
 signal finished
 
 export(String, FILE, '*.wol,*.yarn') var path setget set_path
-export(String) var start_node = 'Start'
-export(bool) var auto_start = false
+
+export var starting_node = 'Start'
+export var auto_start = false
 export var auto_show_options = true
+export var auto_substitute = true
 
 export(Dictionary) var variable_storage = {}
 
 const Constants = preload('res://addons/Wol/core/Constants.gd')
-const WolCompiler = preload('res://addons/Wol/core/compiler/Compiler.gd')
-const WolLibrary = preload('res://addons/Wol/core/Library.gd')
+const Compiler = preload('res://addons/Wol/core/compiler/Compiler.gd')
+const Library = preload('res://addons/Wol/core/Library.gd')
 const VirtualMachine = preload('res://addons/Wol/core/VirtualMachine.gd')
 const StandardLibrary = preload('res://addons/Wol/core/StandardLibrary.gd')
 
@@ -35,9 +37,10 @@ func _ready():
 	if Engine.editor_hint:
 		return
 	
-	var libraries = WolLibrary.new()
-	libraries.import_library(StandardLibrary.new())
+	var libraries = Library.new()
 	virtual_machine = VirtualMachine.new(self, libraries)
+
+	libraries.import_library(StandardLibrary.new())
 
 	set_path(path)
 
@@ -48,10 +51,16 @@ func set_path(_path):
 	path = _path
 
 	if not Engine.editor_hint and virtual_machine:
-		var compiler = WolCompiler.new(path)
+		var compiler = Compiler.new(path)
 		virtual_machine.program = compiler.compile()
 
 func _on_line(line):
+	if auto_substitute:
+		var index = 0
+		for substitute in line.substitutions:
+			line.text = line.text.replace('{%d}' % index, substitute)
+			index += 1
+	
 	call_deferred('emit_signal', 'line', line)
 	if auto_show_options \
 			and virtual_machine.get_next_instruction().operation == Constants.ByteCode.AddOption:
@@ -88,7 +97,7 @@ func select_option(id):
 func pause():
 	virtual_machine.call_deferred('pause')
 
-func start(node = start_node):
+func start(node = starting_node):
 	emit_signal('started')
 
 	virtual_machine.set_node(node)
