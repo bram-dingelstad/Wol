@@ -83,7 +83,6 @@ func _on_dialogue_finished():
 
 func _on_node_start(node):
 	emit_signal('node_started', node)
-	resume()
 
 func _on_node_finished(node):
 	emit_signal('node_finished', node)

@@ -3,30 +3,29 @@ class_name Lexer
 
 const Constants = preload('res://addons/Wol/core/constants.gd')
 
-const LINE_COMENT : String = '//'
-const FORWARD_SLASH : String = '/'
+const LINE_COMENT = '//'
+const FORWARD_SLASH = '/'
+const LINE_SEPARATOR = '\n'
 
-const LINE_SEPARATOR : String = '\n'
+const BASE = 'base'
+const DASH = '-'
+const COMMAND = 'command'
+const LINK = 'link'
+const SHORTCUT = 'shortcut'
+const TAG = 'tag'
+const EXPRESSION = 'expression'
+const ASSIGNMENT = 'assignment'
+const OPTION = 'option'
+const OR = 'or'
+const DESTINATION = 'destination'
 
-const BASE : String = 'base'
-const DASH : String = '-'
-const COMMAND : String = 'command'
-const LINK : String = 'link'
-const SHORTCUT : String = 'shortcut'
-const TAG : String = 'tag'
-const EXPRESSION : String = 'expression'
-const ASSIGNMENT : String = 'assignment'
-const OPTION : String = 'option'
-const OR : String = 'or'
-const DESTINATION : String = 'destination'
+var WHITESPACE = '\\s*'
 
-var WHITESPACE : String = '\\s*'
+var _states = {}
+var _defaultState
+var _currentState
 
-var _states : Dictionary = {}
-var _defaultState : LexerState
-var _currentState : LexerState
-
-var _indentStack : Array = []
+var _indentStack = []
 var _shouldTrackIndent : bool = false
 
 var filename = ''
@@ -185,11 +184,11 @@ func tokenize():
 	_indentStack.push_front(IntBoolPair.new(0, false))
 	_shouldTrackIndent = false
 
-	var tokens : Array  = []
+	var tokens = []
 
 	_currentState = _defaultState
 
-	var lines : PoolStringArray = text.split(LINE_SEPARATOR)
+	var lines = text.split(LINE_SEPARATOR)
 	lines.append('')
 
 	var line_number : int = 1
