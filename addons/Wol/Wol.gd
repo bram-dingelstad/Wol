@@ -7,7 +7,9 @@ signal node_finished(node)
 
 # NOTE: Warning is ignored because they get call_deferred
 # warning-ignore:unused_signal
-signal line(line)
+signal line(line, next_is_options)
+# warning-ignore:unused_signal
+signal next_line_is_options
 # warning-ignore:unused_signal
 signal options(options)
 # warning-ignore:unused_signal
@@ -60,10 +62,13 @@ func _on_line(line):
 		for substitute in line.substitutions:
 			line.text = line.text.replace('{%d}' % index, substitute)
 			index += 1
+
+	var next_is_options = virtual_machine.get_next_instruction().operation == Constants.ByteCode.AddOption
 	
-	call_deferred('emit_signal', 'line', line)
+	call_deferred('emit_signal', 'line', line, next_is_options)
+
 	if auto_show_options \
-			and virtual_machine.get_next_instruction().operation == Constants.ByteCode.AddOption:
+			and next_is_options:
 		return Constants.HandlerState.ContinueExecution
 	else:
 		return Constants.HandlerState.PauseExecution
