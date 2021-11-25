@@ -8,16 +8,6 @@
 
 config_version=4
 
-_global_script_classes=[ {
-"base": "Node",
-"class": "Wol",
-"language": "GDScript",
-"path": "res://addons/Wol/Wol.gd"
-} ]
-_global_script_class_icons={
-"Wol": ""
-}
-
 [application]
 
 config/name="Wol"

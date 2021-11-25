@@ -1,8 +1,46 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene load_steps=12 format=2]
 
-[ext_resource path="res://addons/Wol/Ostrich Sans Font.tres" type="DynamicFont" id=1]
-[ext_resource path="res://addons/Wol/Wol.gd" type="Script" id=2]
+[ext_resource path="res://addons/Wol/Wol.gd" type="Script" id=1]
+[ext_resource path="res://addons/Wol/logo.svg" type="Texture" id=3]
+[ext_resource path="res://addons/Wol/font/Italic.tres" type="DynamicFont" id=4]
+[ext_resource path="res://addons/Wol/font/Regular.tres" type="DynamicFont" id=5]
+[ext_resource path="res://addons/Wol/font/Bold.tres" type="DynamicFont" id=6]
 [ext_resource path="res://Dialogue.gd" type="Script" id=7]
+[ext_resource path="res://addons/Wol/font/ItalicBold.tres" type="DynamicFont" id=8]
+
+[sub_resource type="StyleBoxFlat" id=2]
+bg_color = Color( 0.705882, 0.709804, 0.74902, 1 )
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
+
+[sub_resource type="StyleBoxFlat" id=4]
+bg_color = Color( 0.2914, 0.29295, 0.31, 1 )
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
+
+[sub_resource type="StyleBoxFlat" id=3]
+bg_color = Color( 0.490196, 0.501961, 0.619608, 1 )
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color( 0.705, 0.70875, 0.75, 1 )
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0, 0, 0, 1 )
+border_blend = true
+corner_radius_top_left = 32
+corner_radius_top_right = 32
+corner_radius_bottom_right = 32
+corner_radius_bottom_left = 32
 
 [node name="Dialogue" type="Control"]
 anchor_right = 1.0
@@ -12,11 +50,34 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Background" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="Wol" type="Node" parent="."]
-script = ExtResource( 2 )
+script = ExtResource( 1 )
 path = "res://dialogue.yarn"
 auto_start = true
 variable_storage = {
+}
+
+[node name="Logo" type="TextureRect" parent="."]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = -198.0
+margin_top = -98.0
+margin_right = -16.0
+margin_bottom = -16.0
+texture = ExtResource( 3 )
+expand = true
+stretch_mode = 6
+__meta__ = {
+"_edit_use_anchors_": false
 }
 
 [node name="RichTextLabel" type="RichTextLabel" parent="."]
@@ -26,10 +87,30 @@ margin_left = 16.0
 margin_top = 16.0
 margin_right = -16.0
 margin_bottom = -256.0
-custom_fonts/normal_font = ExtResource( 1 )
+custom_colors/default_color = Color( 0, 0, 0, 1 )
+custom_fonts/bold_italics_font = ExtResource( 8 )
+custom_fonts/italics_font = ExtResource( 4 )
+custom_fonts/bold_font = ExtResource( 6 )
+custom_fonts/normal_font = ExtResource( 5 )
+bbcode_enabled = true
+bbcode_text = "Here is where the [i]dialogue[/i] will go.
+
+[b]Run the scene[/b] in order to see how         works."
 text = "Here is where the dialogue will go.
 
-Run the scene in order to see how \"wol\" works."
+Run the scene in order to see how         works."
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Logo" type="TextureRect" parent="RichTextLabel"]
+margin_left = 790.0
+margin_top = 139.0
+margin_right = 875.0
+margin_bottom = 181.0
+texture = ExtResource( 3 )
+expand = true
+stretch_mode = 6
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -46,8 +127,12 @@ __meta__ = {
 
 [node name="ButtonTemplate" type="Button" parent="VBoxContainer"]
 margin_right = 992.0
-margin_bottom = 66.0
-custom_fonts/font = ExtResource( 1 )
+margin_bottom = 63.0
+custom_fonts/font = ExtResource( 6 )
+custom_styles/hover = SubResource( 2 )
+custom_styles/pressed = SubResource( 4 )
+custom_styles/focus = SubResource( 3 )
+custom_styles/normal = SubResource( 1 )
 text = "This is a dialogue option"
 
 [node name="Tween" type="Tween" parent="."]

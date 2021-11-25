@@ -1,6 +1,5 @@
 tool
 extends Node
-class_name Wol
 
 signal node_started(node)
 signal node_finished(node)

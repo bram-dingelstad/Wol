@@ -1,6 +1,7 @@
 extends Control
 
 func _ready():
+	$RichTextLabel/Logo.hide()
 	$VBoxContainer/ButtonTemplate.hide()
 
 func continue_dialogue():
@@ -12,7 +13,7 @@ func continue_dialogue():
 	$Wol.resume()
 
 func _on_Wol_line(line):
-	$RichTextLabel.text = line.text
+	$RichTextLabel.bbcode_text = line.text
 
 	$Tween.remove_all()
 	$Tween.interpolate_property(

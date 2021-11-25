@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/icon.png-79ec48c27aef60cbae9d34f0545addad.stex"
+path="res://.import/icon-white.svg-c9027de825c45801066398a50f83be46.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/Wol/assets/icon.png"
-dest_files=[ "res://.import/icon.png-79ec48c27aef60cbae9d34f0545addad.stex" ]
+source_file="res://addons/Wol/icon-white.svg"
+dest_files=[ "res://.import/icon-white.svg-c9027de825c45801066398a50f83be46.stex" ]
 
 [params]
 
@@ -32,4 +32,4 @@ process/normal_map_invert_y=false
 stream=false
 size_limit=0
 detect_3d=true
-svg/scale=1.0
+svg/scale=0.3

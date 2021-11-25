@@ -6,7 +6,7 @@ func _enter_tree():
 		'Wol',
 		'Node',
 		load('res://addons/Wol/Wol.gd'),
-		load('res://addons/Wol/assets/icon.png')
+		load('res://addons/Wol/icon-white.svg')
 	)
 
 func _exit_tree():
