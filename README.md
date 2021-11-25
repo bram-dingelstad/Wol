@@ -45,7 +45,7 @@ Wol is available under the [MIT License](LICENSE.md). This means that you can us
 
 Yarn Spinner was originally created by [Secret Lab](http://secretlab.com.au), an Australian game dev studio. [Say hi to them for me!](https://twitter.com/thesecretlab)!
 
-Started on Godot by [kyperbelt](https://github.com/kyperbelt/GDYarn) (thank you so much for the initial work!) and completed by Bram Dingelstad. [Say hi to me as well! ](bram.dingelstad.works/)!
+Started on Godot by [kyperbelt](https://github.com/kyperbelt/GDYarn) (thank you so much for the initial work!) and completed by Bram Dingelstad. [Say hi to me as well!](https://bram.dingelstad.works/)
 
 
 ## Help Me Make Wol & Secret Lab's Yarn Spinner!
