@@ -1,6 +1,7 @@
 <p align="center">
 <img style="height: 120px; object-fit: cover" src="https://user-images.githubusercontent.com/3514405/143497096-e5d98c85-1f1b-4d8a-9a63-ee439d4c616d.png" /> 
 <p align="center" style="font-style: italic"> The friendly tool for writing game dialogue, in and for Godot</p>
+<p align="center" style="font-style: italic"> <a href="README.md#Getting-Started">Getting Started</a> | <a href="README.md#Documentation">Documentation</a> | <a href="README.md#Tutorial">Tutorial</a> | <a href="https://twitter.com/bram_dingelstad">Follow me 🐦!</a> </p>
 </p> 
 
 ---
@@ -36,9 +37,15 @@ There are few things that need to be ironed out to be 100% feature compatible wi
 - [ ] Full support for [format functions](https://yarnspinner.dev/docs/syntax/#format-functions).
 - [ ] In-editor dialogue editor with preview.
 - [ ] Fully extend the documentation of this project.
-- [ ] Provide helpful anchors in the documentation.
+  - [ ] Document the `Option` object.
+  - [ ] Write the method descriptions for the `Wol` node.
+  - [ ] Write a basic "Hello World"-esque tutorial.
+  - [ ] Write a more advanced "Custom `Wol` Node" tutorial.
+  - [ ] Perhaps write a little bit about the internals 🤷 (?).
+  - [ ] Provide helpful anchors in the documentation.
 - [x] Porting to usable signals in Godot.
 - [x] Providing helpful errors when failing to compile.
+- [x] Having a working repository with example code.
 
 ## Getting Help
 
