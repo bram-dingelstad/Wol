@@ -173,6 +173,45 @@ It has several properties that you can change either in-editor or using GDScript
 
   In the future there'll be a signal added for when the `variable_storage` is updated.
 
+## `Line` 
+_Inherits from [Object](https://docs.godotengine.org/en/stable/classes/class_object.html)_
+
+An object holding all information related to a line in your dialogue.
+
+### Description
+The `Line` object is _the_ object that you're gonna be interacting with the most. This object holds all of the information of the actual lines of dialogue. The most important property is `text`, but it has some additional properties you can make use of for debugging or holding of metadata (no support for that yet however).
+
+### Properties
+| Type         | Property     |
+|--------------|-----------|
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)       | text      |
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)       | node_name      | 
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)       | file_name      |
+| [Array](https://docs.godotengine.org/en/stable/classes/class_array.html)      | substitutions      |
+| [Array](https://docs.godotengine.org/en/stable/classes/class_array.html)      | meta      |
+
+### Property Descriptions
+* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) text 
+
+  A line of dialogue that's been processed by Wol. You can use this to set a [Label](https://docs.godotengine.org/en/stable/classes/class_label.html) in a text bubble above your character, add to a [RichTextLabel](https://docs.godotengine.org/en/stable/classes/class_richtextlabel.html#class-richtextlabel) for more dynamic stuff (Wol fully supports bbcode). Look at this repository's `Dialogue.tscn` and `Dialogue.gd` for some inspiration ;)
+
+* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) node_name
+
+  The name of the dialogue node this piece of dialogue came from.
+
+* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) file_name
+
+  The filename of the file where this piece of dialogue came from.
+
+* [Array](https://docs.godotengine.org/en/stable/classes/class_array.html) substitutions
+
+  An [Array](https://docs.godotengine.org/en/stable/classes/class_array.html) of [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)s that the result of Wol proccessing statements. Use this array if you disabled `auto_substitutions` and want to manually substitute your dialogue.
+  
+* [Array](https://docs.godotengine.org/en/stable/classes/class_array.html) meta
+
+  Currently unimplemented.
+  
+
 # Tutorial
 
 _The tutorial is currently under construction, stay tuned!_
