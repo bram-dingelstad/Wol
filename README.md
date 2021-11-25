@@ -13,12 +13,20 @@ Yarn's similar in style to [Twine](http://twinery.org), so if you already know t
 
 ## Getting Started
 
-This repo contains the source code for the Wol compiler. If you want to use it in a game engine other than Godot, you should get the appropriate package for your game engine.
+This repo contains the source code for the Wol compiler. If you want to use it in a game engine other than Godot, you should get the appropriate package for your game engine. Check out [YarnSpinner-Unity](https://github.com/YarnSpinnerTool/YarnSpinner-Unity) for a Unity version of this project.
 
-* ~**Download Wol in Godot's AssetLib**~ (not available yet)
-* **[Yarn Spinner for Unity](https://github.com/YarnSpinnerTool/YarnSpinner-Unity/releases/latest)** (2018.4 LTS or later)
+### Download from AssetLib
+Unfortunately, this option isn't available yet. Stay tuned!
 
-Once you've downloaded it, head over to the ~[tutorial](#)~! (Currently under construction)
+### Clone this repository / [download the zip](https://github.com/bram-dingelstad/Wol/archive/refs/heads/main.zip)
+
+1. Extract the repository in a folder of your choice.
+2. Import the project in Godot.
+3. Run the scene to get a taste of Wol!
+4. Move the addons folder to your Godot project.
+5. Enable the plugin in your Project Settings.
+6. Setup the Wol node using the [documentation](README.md#Documentation) or [tutorial](README.md#Tutorial)!
+
 
 ## Roadmap
 
@@ -27,6 +35,8 @@ There are few things that need to be ironed out to be 100% feature compatible wi
 - [ ] Integration with Godot's translation/localization system.
 - [ ] Full support for [format functions](https://yarnspinner.dev/docs/syntax/#format-functions).
 - [ ] In-editor dialogue editor with preview.
+- [ ] Fully extend the documentation of this project.
+- [ ] Provide helpful anchors in the documentation.
 - [x] Porting to usable signals in Godot.
 - [x] Providing helpful errors when failing to compile.
 
@@ -56,3 +66,113 @@ Wol & Yarn Spinner needs your help to be as awesome as it can be! You don't have
 * The [issues page](https://github.com/bram-dingelstad/Wol/issues) contains a list of things we'd love your help in improving.
 * Join Secret Lab's discussion on Slack by joining the [narrative game development](http://lab.to/narrativegamedev) channel.
 * Follow [Bram Dingelstad](https://twitter.com/bram_dingelstad) & [Yarn Spinner](http://twitter.com/YarnSpinnerTool).
+
+# Documentation
+
+## `Wol` 
+_Inherits from [Node](https://docs.godotengine.org/en/stable/classes/class_node.html)_
+
+Node for all interaction with Wol.
+
+### Description
+Godot's Nodes as building blocks work really well. That's why this plugin gives you access to a simple node that does all the heavy lifting for you.
+It has several properties that you can change either in-editor or using GDScript (or any other compatible language) and signals you can use to listen to events coming from your dialogue.
+
+### Properties
+| Type         | Property     | Default value |
+|--------------|-----------|------------|
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)       | path      | `''`        |
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)       | starting_node  | `'Start'`       |
+| [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)         | auto_start | `false` |
+| [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)  | auto_show_options | `false` |
+| [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)  | auto_substitute | `true` |
+| [Dictionary](https://docs.godotengine.org/en/stable/classes/class_dictionary.html) | variable_storage | `{}` |
+
+### Methods
+| Return value         | Method name     |
+|--------------|-----------|
+| void | select_option ( [int](https://docs.godotengine.org/en/stable/classes/class_int.html#class-int) id ) |
+| void | start ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) starting_node = 'Start' ) |
+| void | pause ( ) |
+| void | resume ( ) |
+
+### Signals
+
+* started ( ) 
+
+  Emitted when the dialogue is started.
+
+* finished ( ) 
+
+  Emitted when the dialogue is came to a stop, either through running out of dialogue or by using the `<<stop>>` command.
+
+* node_started ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) node ) 
+
+  Emitted when a dialogue node is started. Has the node name as a parameter so you can see which node was started.
+
+* node_finished ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) node ) 
+
+  Emitted when a dialogue node is started. Has the node name as a parameter so you can see which node was started.
+
+* line ( `Line` line ) 
+
+  Emitted when a `Line` is emitted from the dialogue. `line` holds relevant information.
+
+* options ( [`Array`](https://docs.godotengine.org/en/stable/classes/class_array.html) options ) 
+
+  Emitted when the dialogue runs into a set of options. Is emitted with an [`Array`](https://docs.godotengine.org/en/stable/classes/class_array.html) of `Option`s.
+ 
+* command ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) command ) 
+
+  Emitted when the dialogue executes a command. Use this signal to provide interactivity with you game world.
+
+### Property Descriptions
+* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) path 
+  
+  |Default|`''`|
+  |-------|----|
+
+  The path to your `.yarn` or `.wol` file. Must be a valid `Yarn` file otherwise the compiler will throw an error.
+
+* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) starting_node 
+
+  |Default|`'Start'`|
+  |-------|---------|
+
+  The node that is the starting point of the dialogue. Will automatically be the default for the `start()` function as well. The string should be a valid name for a Yarn node and be available in the file or an error will be thrown. You can always start from a different node by calling `start('OtherStartingNode')` for instance.
+
+* [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html) auto_start 
+
+  |Default|`false`|
+  |-------|-------|
+
+  If enabled, will automatically start the dialogue using the `starting_node` as the entrypoint.
+
+* [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html) auto_show_options
+
+  |Default|`false`|
+  |-------|-------|
+
+  If enabled, will automatically show you options when they're available, rather than waiting for the player to resume to the line that has options.
+
+* [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html) auto_substitude
+
+  |Default|`false`|
+  |-------|-------|
+
+  If enabled, will automatically substitute format functions and inline expressions for you. It's recommended to leave enabled, but if you want to manually do this for whatever reason, you can turn it off.
+
+* [Dictionary](https://docs.godotengine.org/en/stable/classes/class_dictionary.html) variable_storage 
+
+  |Default|`{}`|
+  |-------|----|
+
+  A [Dictionary](https://docs.godotengine.org/en/stable/classes/class_dictionary.html) that holds all of the variables of your of your dialogue. 
+  All of the entries of this dictionary are accesible in your dialogue with a `$` prefix. (e.g `a_variable` would be `$a_variable`). 
+  If you set a variable from within your dialogue, this dictionary will also be updated.
+
+  In the future there'll be a signal added for when the `variable_storage` is updated.
+
+# Tutorial
+
+_The tutorial is currently under construction, stay tuned!_
