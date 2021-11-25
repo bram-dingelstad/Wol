@@ -55,4 +55,4 @@ Wol & Yarn Spinner needs your help to be as awesome as it can be! You don't have
 * Yarn Spinner's development is powered by our wonderful Patreon supporters. [Become a patron](https://patreon.com/secretlab), and help us make Yarn Spinner be amazing.
 * The [issues page](https://github.com/bram-dingelstad/Wol/issues) contains a list of things we'd love your help in improving.
 * Join Secret Lab's discussion on Slack by joining the [narrative game development](http://lab.to/narrativegamedev) channel.
-* Follow [Bram Dingelstad](https://twitter.com/bram_dingelstad) [Yarn Spinner](http://twitter.com/YarnSpinnerTool).
+* Follow [Bram Dingelstad](https://twitter.com/bram_dingelstad) & [Yarn Spinner](http://twitter.com/YarnSpinnerTool).
