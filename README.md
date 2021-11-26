@@ -131,7 +131,7 @@ It has several properties that you can change either in-editor or using GDScript
  
 * command ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) command ) 
 
-  Emitted when the dialogue executes a command. Use this signal to provide interactivity with you game world.
+  Emitted when the dialogue executes a command. Use this signal to provide interactivity with your game world.
 
 ### Property Descriptions
 * [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) path 
