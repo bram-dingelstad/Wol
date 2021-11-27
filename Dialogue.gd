@@ -4,6 +4,10 @@ func _ready():
 	$RichTextLabel/Logo.hide()
 	$VBoxContainer/ButtonTemplate.hide()
 
+	$Wol.connect('line', self, '_on_line')
+	$Wol.connect('option', self, '_on_option')
+	$Wol.connect('finished', self, '_on_finished')
+
 func continue_dialogue():
 	if $Tween.is_active():
 		$Tween.remove_all()
@@ -12,7 +16,7 @@ func continue_dialogue():
 
 	$Wol.resume()
 
-func _on_Wol_line(line):
+func _on_line(line):
 	$RichTextLabel.bbcode_text = line.text
 
 	$Tween.remove_all()
@@ -26,7 +30,7 @@ func _on_Wol_line(line):
 
 	$Tween.start()
 
-func _on_Wol_options(options):
+func _on_options(options):
 	var button_template = $VBoxContainer/ButtonTemplate
 	
 	for option in options:
@@ -45,7 +49,7 @@ func _on_option_selected(option):
 		if not 'Template' in child.name:
 			child.queue_free()
 
-func _on_Wol_finished():
+func _on_finished():
 	$RichTextLabel.text = ''
 
 func _input(event):

@@ -1,6 +1,5 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=11 format=2]
 
-[ext_resource path="res://addons/Wol/Wol.gd" type="Script" id=1]
 [ext_resource path="res://addons/Wol/logo.svg" type="Texture" id=3]
 [ext_resource path="res://addons/Wol/font/Italic.tres" type="DynamicFont" id=4]
 [ext_resource path="res://addons/Wol/font/Regular.tres" type="DynamicFont" id=5]
@@ -56,13 +55,6 @@ anchor_bottom = 1.0
 color = Color( 0.96, 0.95648, 0.9408, 1 )
 __meta__ = {
 "_edit_use_anchors_": false
-}
-
-[node name="Wol" type="Node" parent="."]
-script = ExtResource( 1 )
-path = "res://dialogue.yarn"
-auto_start = true
-variable_storage = {
 }
 
 [node name="Logo" type="TextureRect" parent="."]
@@ -137,7 +129,3 @@ custom_styles/normal = SubResource( 1 )
 text = "This is a dialogue option"
 
 [node name="Tween" type="Tween" parent="."]
-
-[connection signal="finished" from="Wol" to="." method="_on_Wol_finished"]
-[connection signal="line" from="Wol" to="." method="_on_Wol_line"]
-[connection signal="options" from="Wol" to="." method="_on_Wol_options"]
