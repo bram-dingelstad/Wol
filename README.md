@@ -59,6 +59,7 @@ There are several places to get help with Wol, and stay up to date with what's h
 
 * [Follow me on Twitter](https://twitter.com/bram_dingelstad) or [@ me](https://twitter.com/intent/tweet?text=Hey%20@bram_dingelstad,%20I%20need%20help%20using%20%23Wol%21)!
 * Open an issue on [Github](https://github.com/bram-dingelstad/Wol/issues)!
+* Email bram [at] dingelstad.works for more indepth questions or inqueries for consultancy. You can also email me to [hire me](https://hire.bram.dingelstad.works) for all your Godot needs!
 
 ## License
 
