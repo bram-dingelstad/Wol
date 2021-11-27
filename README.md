@@ -86,22 +86,22 @@ Godot's Nodes as building blocks work really well. That's why this plugin gives 
 It has several properties that you can change either in-editor or using GDScript (or any other compatible language) and signals you can use to listen to events coming from your dialogue.
 
 ### Properties
-| Type         | Property     | Default value |
-|--------------|-----------|------------|
-| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)       | path      | `''`        |
-| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)       | starting_node  | `'Start'`       |
-| [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)         | auto_start | `false` |
-| [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)  | auto_show_options | `false` |
-| [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)  | auto_substitute | `true` |
-| [Dictionary](https://docs.godotengine.org/en/stable/classes/class_dictionary.html) | variable_storage | `{}` |
+| Type                                                                                           | Property          | Default value |
+|------------------------------------------------------------------------------------------------|-------------------|---------------|
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)       | path              | `''`          |
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)       | starting_node     | `'Start'`     |
+| [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)                         | auto_start        | `false`       |
+| [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)                         | auto_show_options | `false`       |
+| [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)                         | auto_substitute   | `true`        |
+| [Dictionary](https://docs.godotengine.org/en/stable/classes/class_dictionary.html)             | variable_storage  | `{}`          |
 
 ### Methods
-| Return value         | Method name     |
-|--------------|-----------|
-| void | select_option ( [int](https://docs.godotengine.org/en/stable/classes/class_int.html#class-int) id ) |
-| void | start ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) starting_node = 'Start' ) |
-| void | pause ( ) |
-| void | resume ( ) |
+| Return value         | Method name                                                                                                                |
+|----------------------|----------------------------------------------------------------------------------------------------------------------------|
+| void                 | start ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) starting_node = 'Start' ) |
+| void                 | pause ( )                                                                                                                  |
+| void                 | resume ( )                                                                                                                 |
+| void                 | select_option ( [int](https://docs.godotengine.org/en/stable/classes/class_int.html#class-int) id )                        |
 
 ### Signals
 
@@ -180,6 +180,26 @@ It has several properties that you can change either in-editor or using GDScript
 
   In the future there'll be a signal added for when the `variable_storage` is updated.
 
+### Method Descriptions
+
+* start ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) starting_node = 'Start') 
+
+  Starts the dialogue at the `starting_node` (defaults to the value of `self.starting_node` which is `Start`)
+  When the dialogue comes to a full stop through reaching the end or reaching a `<<stop>` command, you need to explicitly call this function instead of `resume ( )`.
+
+* pause ( )
+
+  Pauses the dialogue until `resume ( )` is called.
+
+* resume ( )
+
+  Resumes the dialogue. Won't work when the dialogue comes to a full stop by reaching the end or reaching a `<<stop>>` command. You need to call `start ( starting_node )` instead.
+
+* select_option ( [int](https://docs.godotengine.org/en/stable/classes/class_int.html#class-int) id )
+
+  When getting an option from the `options` signal, use this function to let Wol node which option you want to select.
+  Use `Option.id` for the `id` parameter.
+
 ## `Line` 
 _Inherits from [Object](https://docs.godotengine.org/en/stable/classes/class_object.html)_
 
@@ -189,13 +209,13 @@ An object holding all information related to a line in your dialogue.
 The `Line` object is _the_ object that you're gonna be interacting with the most. This object holds all of the information of the actual lines of dialogue. The most important property is `text`, but it has some additional properties you can make use of for debugging or holding of metadata (no support for that yet however).
 
 ### Properties
-| Type         | Property     |
-|--------------|-----------|
-| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)       | text      |
-| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)       | node_name      | 
-| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)       | file_name      |
-| [Array](https://docs.godotengine.org/en/stable/classes/class_array.html)      | substitutions      |
-| [Array](https://docs.godotengine.org/en/stable/classes/class_array.html)      | meta      |
+| Type                                                                                      | Property      |
+|-------------------------------------------------------------------------------------------|---------------|
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)  | text          |
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)  | node_name     | 
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)  | file_name     |
+| [Array](https://docs.godotengine.org/en/stable/classes/class_array.html)                  | substitutions |
+| [Array](https://docs.godotengine.org/en/stable/classes/class_array.html)                  | meta          |
 
 ### Property Descriptions
 * [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) text 
