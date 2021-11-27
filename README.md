@@ -12,6 +12,8 @@ Write your conversations in *Yarn*, a simple programming language that's designe
 
 Yarn's similar in style to [Twine](http://twinery.org), so if you already know that, you'll be right at home! If you don't, that's cool - Yarn's syntax is extremely minimal, and there's not much there to learn. 
 
+Wol is actively maintained by [Bram Dingelstad](https://bram.dingelstad.works), if you need a programmer or designer for your next (Godot) project, you can [hire him!](https://hire.bram.dingelstad.works)
+
 ## Getting Started
 
 This repo contains the source code for the Wol compiler. If you want to use it in a game engine other than Godot, you should get the appropriate package for your game engine. Check out [YarnSpinner-Unity](https://github.com/YarnSpinnerTool/YarnSpinner-Unity) for a Unity version of this project.
@@ -28,7 +30,6 @@ Unfortunately, this option isn't available yet. Stay tuned!
 5. Enable the plugin in your Project Settings.
 6. Setup the Wol node using the [documentation](README.md#Documentation) or [tutorial](README.md#Tutorial)!
 
-
 ## Roadmap
 
 There are few things that need to be ironed out to be 100% feature compatible with the original YarnSpinner.
@@ -37,15 +38,20 @@ There are few things that need to be ironed out to be 100% feature compatible wi
 - [ ] Full support for [format functions](https://yarnspinner.dev/docs/syntax/#format-functions).
 - [ ] In-editor dialogue editor with preview.
 - [ ] Fully extend the documentation of this project.
-  - [ ] Document the `Option` object.
-  - [ ] Write the method descriptions for the `Wol` node.
+  - [x] Document the `Option` object.
+  - [x] Write the method descriptions for the `Wol` node.
   - [ ] Write a basic "Hello World"-esque tutorial.
-  - [ ] Write a more advanced "Custom `Wol` Node" tutorial.
-  - [ ] Perhaps write a little bit about the internals 🤷 (?).
   - [ ] Provide helpful anchors in the documentation.
 - [x] Porting to usable signals in Godot.
 - [x] Providing helpful errors when failing to compile.
 - [x] Having a working repository with example code.
+
+### On request
+
+If for whatever reason a lot of people want more documentation or certain features, here's some additional stuff I'll do: 
+ 
+- [ ] Write a more advanced "Custom `Wol` Node" tutorial.
+- [ ] Perhaps write a little bit about the internals 🤷 (?).
 
 ## Getting Help
 
@@ -237,7 +243,37 @@ The `Line` object is _the_ object that you're gonna be interacting with the most
 * [Array](https://docs.godotengine.org/en/stable/classes/class_array.html) meta
 
   Currently unimplemented.
-  
+
+## `Option` 
+_Inherits from [Object](https://docs.godotengine.org/en/stable/classes/class_object.html)_
+
+An object holding information of an option in your dialogue.
+
+### Description
+The `Option` object is anoter object that you're gonna be interacting with a lot. This object holds the information of a choice in your dialogue. 
+It has a reference to a `Line` with it's `line` property so you can show the appropriate text to your player!
+
+### Properties
+| Type                                                                                      | Property      |
+|-------------------------------------------------------------------------------------------|---------------|
+| [int](https://docs.godotengine.org/en/stable/classes/class_int.html#class-int)            | id            | 
+| `Line`                                                                                    | line          |
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)  | destination   |
+
+### Property Descriptions
+
+* [int](https://docs.godotengine.org/en/stable/classes/class_int.html#class-int) id 
+
+  A unique identifier that you can use to communicate your option choice with `select_option ( id )`.
+
+* `Line` line 
+
+  A line of dialogue that's been processed by Wol. See `Line` for more details.
+
+* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) destination
+
+  The node that you will jump to when this option is selected. (Only relevant for jump questions, not inline ones).
+ 
 
 # Tutorial
 
