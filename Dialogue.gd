@@ -5,7 +5,7 @@ func _ready():
 	$VBoxContainer/ButtonTemplate.hide()
 
 	$Wol.connect('line', self, '_on_line')
-	$Wol.connect('option', self, '_on_option')
+	$Wol.connect('options', self, '_on_options')
 	$Wol.connect('finished', self, '_on_finished')
 
 func continue_dialogue():

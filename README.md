@@ -37,13 +37,11 @@ Unfortunately, this option isn't available yet. Stay tuned!
 There are few things that need to be ironed out to be 100% feature compatible with the original YarnSpinner.
 
 - [ ] Integration with Godot's translation/localization system.
-- [ ] Full support for [format functions](https://yarnspinner.dev/docs/syntax/#format-functions).
+  - [ ] Auto generation for `#line:` suffixes
+- [ ] Support for [format functions](https://yarnspinner.dev/docs/syntax/#format-functions).
+- [ ] Support for conditional options.
 - [ ] In-editor dialogue editor with preview.
-- [ ] Fully extend the documentation of this project.
-  - [ ] Replicate the files needed for the Yarn Spinner tutorial.
-  - [x] Document the [Option](README.md#Option) object.
-  - [x] Write the method descriptions for the `Wol` node.
-  - [x] Provide helpful anchors in the documentation.
+- [x] Fully extend the documentation of this project.
 - [x] Porting to usable signals in Godot.
 - [x] Providing helpful errors when failing to compile.
 - [x] Having a working repository with example code.
@@ -280,10 +278,10 @@ It has a reference to a [Line](README.md#Line) with it's `line` property so you 
 
 # Tutorial
 
-Welcome to Yarn Spinner! In this tutorial, you’ll learn how to use Wol in a Godot project to create interactive dialogue.
+Welcome to Wol! In this tutorial, you’ll learn how to use Wol in a Godot project to create interactive dialogue.
 
-We’ll start by downloading and installing Yarn Spinner. We’ll then take a look at the core concepts that power Yarn Spinner, and write some dialogue. 
-After that, we’ll explore some of the more advanced features of Yarn Spinner.
+We’ll start by downloading and installing Wol. We’ll then take a look at the core concepts that power Wol / Yarn, and write some dialogue. 
+After that, we’ll explore some of the more advanced features of Wol & Yarn.
 
 ## Introducing Yarn Spinner
 
@@ -311,8 +309,8 @@ We’ll begin by playing the example game that comes with Wol. It’s very short
 
 1. Create a new empty Godot project.
 2. Download and install Wol. Go to the [Getting started section](#README.md#Getting-Started), and follow the directions there.
-3. Open the example scene.
-4. Play the game. Use the left and right arrow keys to move, and the space bar to talk to characters.
+3. Open the example scene (`res://ExampleDialogue/ExampleScene.tscn`).
+4. Play the game. Use the left and right arrow keys to move, and the enter key to talk to characters.
 
 We’re now ready to start looking under the hood, to see how Wol & Yarn power this game.
 
@@ -320,7 +318,7 @@ We’re now ready to start looking under the hood, to see how Wol & Yarn power t
 
 Wol & Yarn Spinner stores its dialogue in .yarn (or .wol) files. These are plain text files, which means you can edit them in any plain text editor (Visual Studio Code is a good option, and Secret Labs offers a syntax highlighting extension to make it nice to use!)
 
-You can also use the Wol Editor, which is a tool in the Godot editor for working with Yarn code. This editor is useful because it lets you view the structure of your dialogue in a very visual way.
+You can also use the Wol Editor, which is a tool in the Godot editor for working with Yarn code. This editor is useful because it lets you view the structure of your dialogue in a very visual way. (This is not completed yet however)
 
 ### Reading Yarn
 
@@ -328,7 +326,7 @@ In this section of the tutorial, we’re going to open the file Sally.yarn, and 
 
 #### Open Sally.yarn in your editor of choice.
 
-Yarn Spinner groups all of its dialogue into nodes. Nodes contain everything: your lines of dialogue, the choices you show to the player, and the commands that you send to the game. The Sally.yarn file contains four of them: Sally, Sally.Watch, Sally.Exit, and Sally.Sorry. The example game is set up so that when you walk up to Sally and press the spacebar, the game will start running the Sally node.
+Wol & Yarn groups all of its dialogue into nodes. Nodes contain everything: your lines of dialogue, the choices you show to the player, and the commands that you send to the game. The Sally.yarn file contains four of them: Sally, Sally.Watch, Sally.Exit, and Sally.Sorry. The example game is set up so that when you walk up to Sally and press the spacebar, the game will start running the Sally node.
 
 #### Go to the Sally node.
 
@@ -373,14 +371,16 @@ We’ll now take a closer look at each part of this code, and explain what’s g
 <<endif>>
 ```
 
-The first line of code in this node checks to see if Yarn Spinner has already run this node. visited is a function that this example game has defined - it isn’t built into Yarn Spinner. It returns true if the node you specify has been run before. You’ll notice that this line is wrapped in << and >> symbols. This tells Yarn Spinner that it’s control code, and not meant to be shown to the player.
+The first line of code in this node checks to see if Wol has already run this node. `visited` is a function that 
+is built into Wol. It returns true if the node you specify has been run before. 
+You’ll notice that this line is wrapped in `<<` and `>>` symbols. This tells Wol that it’s control code, and not meant to be shown to the player.
 
-If they haven’t run the Sally node yet, it means that this is the first time that we’ve spoken to Sally in this game. As a result, we run lines in which Sally and the player character meet. Otherwise, we instead run some shorter lines.
+If they haven’t run the `Sally` node yet, it means that this is the first time that we’ve spoken to `Sally` in this game. As a result, we run lines in which Sally and the player character meet. Otherwise, we instead run some shorter lines.
+Each line in Wol is just a run of text, which is sent directly to the game. It’s up to the game to decide how it wants to display it; in the example game, it’s shown at the top of the screen.
 
-Each line in Yarn Spinner is just a run of text, which is sent directly to the game. It’s up to the game to decide how it wants to display it; in the example game, it’s shown at the top of the screen.
+At the end of each line, you’ll see a `#line:` tag. This tag lets Wol identify lines across multiple translations, and is optional if you aren’t translating your game into other languages. Wol can automatically generate them for you (not supported yet however).
 
-At the end of each line, you’ll see a #line: tag. This tag lets Yarn Spinner identify lines across multiple translations, and is optional if you aren’t translating your game into other languages. Yarn Spinner can automatically generate them for you.
-Options
+#### Options
 
 Here’s the next part of the code.
 
@@ -396,11 +396,11 @@ Here’s the next part of the code.
 
 In the next part of the code, we do a check, and if it passes, we add an option. Options are things that the player can select; in this game, they’re things the player can say, but like lines, it’s up to the game to decide what to do with them. Options are shown to the player when the end of a node is reached.
 
-The first couple of lines here test to see whether the player has run the node Sally.Watch. If they haven’t, then the code adds a new option. Options are wrapped with [[ and ]]. The text before the | is shown to the player, and the text after is the name of the node that will be run if the player chooses the option. Like lines, options can have line tags for localisation.
+The first couple of lines here test to see whether the player has run the node `Sally.Watch`. If they haven’t, then the code adds a new option. Options are wrapped with `[[` and `]]`. The text before the `|` is shown to the player, and the text after is the name of the node that will be run if the player chooses the option. Like lines, options can have line tags for localisation.
 
-If the player has run the Sally.Watch node before, this code won’t be run, which means that the option to run it again won’t appear.
+If the player has run the `Sally.Watch` node before, this code won’t be run, which means that the option to run it again won’t appear.
 
-The rest of this part does a similar thing as the first: it does a check, and adds another option if the check passes. In this case, it checks to see if the variable $sally_warning is true, and if the player has not yet run the Sally.Sorry node. $sally_warning is set in a different node - it’s in the node Ship, which is stored in the file Ship.yarn.
+The rest of this part does a similar thing as the first: it does a check, and adds another option if the check passes. In this case, it checks to see if the variable `$sally_warning` is `true`, and if the player has not yet run the `Sally.Sorry` node. `$sally_warning` is set in a different node - it’s in the node Ship, which is stored in the file `Ship.yarn`.
 
 ```yarn
 [[See you later.|Sally.Exit]] #line:0facf7
@@ -408,23 +408,25 @@ The rest of this part does a similar thing as the first: it does a check, and ad
 
 The very last line of the node adds an option, which takes the player to the Sally.Exit line. Because this option isn’t inside an if statement, it’s always added.
 
-When Yarn Spinner hits the end of the node, all of the options that have been accumulated so far will be shown to the player. Yarn Spinner will then wait for the player to make a selection, and then start running the node that they selected.
+When Wol hits the end of the node, all of the options that have been accumulated so far will be shown to the player. Wol will then wait for the player to make a selection, and then start running the node that they selected.
 
 And that’s how the node works!
-Writing Some Dialogue
+
+### Writing Some Dialogue
 
 Let’s write some dialogue! We’ll add a couple of lines to the Ship.
 
-    Open the file Ship.yarn. It contains a single node, called Ship - go to it.
+> Open the file Ship.yarn. It contains a single node, called Ship - go to it.
 
 This code uses couple of features that we didn’t see in Sally: commands, and variables.
-Commands
 
-Commands are messages that Yarn Spinner sends to your game, but aren’t intended to be shown to the player. Commands let you control things in your scene, like moving the camera around, or instructing a character to move to another point.
+#### Commands
 
-Because every game is different, Yarn Spinner leaves the task of defining most commands to you. Yarn Spinner defines two built-in commands: wait, which pauses the dialogue for a certain number of seconds, and stop, which ends the dialogue immediately.
+Commands are messages that Wol sends to your game, but aren’t intended to be shown to the player. Commands let you control things in your scene, like moving the camera around, or instructing a character to move to another point.
 
-The example game defines its own command, setsprite, which is used to change the sprite that the Ship character’s face is displaying. You can see this in action in the file Ship.yarn:
+Because every game is different, Wol leaves the task of defining most commands to you. Wol defines two built-in commands: wait, which pauses the dialogue for a certain number of seconds, and stop, which ends the dialogue immediately.
+
+The example game defines its own command, `setsprite`, which is used to change the sprite that the Ship character’s face is displaying. You can see this in action in the file `Ship.yarn`:
 
 ```yarn
 Player: How's space?
@@ -434,12 +436,14 @@ Ship: It's HUGE!
 <<setsprite ShipFace neutral>>
 ```
 
-You can learn how to define your own custom commands in Working With Commands.
-Variables
+<!-- TODO: make tutorial about setting up commands
+You can learn how to define your own custom commands in Working With Commands. -->
 
-Variables are how you store information about what the player has done in the game. We saw variables in use in the Sally node, where the variable $sally_warning was used to control whether some content was shown or not. This variable is set in here, in the Ship node - it represents whether or not the player has heard Sally’s warning about the console from the Ship.
+#### Variables
 
-Variables in Yarn Spinner start with a $, and can store text, numbers, booleans (true or false values), or null. If you try and access a variable that hasn’t been set, you’ll get the value null, which represents “no value”.
+Variables are how you store information about what the player has done in the game. We saw variables in use in the `Sally` node, where the variable `$sally_warning` was used to control whether some content was shown or not. This variable is set in here, in the `Ship` node - it represents whether or not the player has heard Sally’s warning about the console from the Ship.
+
+Variables in Wol start with a `$`, and can store text, numbers, booleans (`true` or `false` values), or `null`. If you try and access a variable that hasn’t been set, you’ll get the value `null`, which represents “no value”.
 Adding Some Content
 
 #### Add some new dialogue. Add the following text to the end of the node:
@@ -457,7 +461,7 @@ Ship: Bye!
 
 #### Shortcut Options
 
-The `->` items that we just added are called shortcut options. Shortcut options let you put choices in your node without having to create new nodes, which you link to through the [[Option]] syntax. They exist in-line with the rest of your node.
+The `->` items that we just added are called shortcut options. Shortcut options let you put choices in your node without having to create new nodes, which you link to through the `[[Option]]` syntax. They exist in-line with the rest of your node.
 
 To use a shortcut option, you write a `->`, followed by the text that you want to display. Then, on the next lines, indent the code a few spaces (it doesn’t matter how many, as long as you’re consistent.) The indented lines will run if the option they’re attached to is selected. Shortcut options can be nested, which means you can put a group of shortcut options inside another. You can put any kind of code inside a shortcut option’s lines.
 
@@ -469,4 +473,4 @@ Save the file, and go back to the game. Play the game again, and talk to the Shi
 
 The example game is set up so that when you talk to Sally, the node Sally is run, and when you talk to the Ship, the node Ship is run. With this in mind, change the story so that after you get told off by Sally, she asks you to go and fix a problem with the Ship.
 
-You can also read the Syntax Reference for Yarn Spinner.
+You can also read the [Syntax Reference](https://yarnspinner.dev/docs/syntax/) for Yarn.

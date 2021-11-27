@@ -45,7 +45,7 @@ func createstates():
 	patterns[Constants.TokenType.Text] = ['.*', 'any text']
 
 	patterns[Constants.TokenType.Number] = ['\\-?[0-9]+(\\.[0-9+])?', 'any number']
-	patterns[Constants.TokenType.Str] = ['\'([^\'\\\\]*(?:\\.[^\'\\\\]*)*)\'', 'any text']
+	patterns[Constants.TokenType.Str] = ['\"([^\"\\\\]*(?:\\.[^\"\\\\]*)*)\"', 'any text']
 	patterns[Constants.TokenType.TagMarker] = ['\\#', 'a tag #']
 	patterns[Constants.TokenType.LeftParen] = ['\\(', 'left parenthesis (']
 	patterns[Constants.TokenType.RightParen] =  ['\\)', 'right parenthesis )']

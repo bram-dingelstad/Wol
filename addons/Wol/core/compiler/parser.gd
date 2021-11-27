@@ -37,11 +37,10 @@ func next_symbols_are(valid_types):
 
 func expect_symbol(token_types = []):
 	var token = tokens.pop_front() as Lexer.Token
-	
+
 	if token_types.size() == 0:
 		if token.type == Constants.TokenType.EndOfInput:
 			assert(false, 'Unexpected end of input')
-			return null
 		return token
 
 	for type in token_types:
@@ -153,7 +152,7 @@ class FormatFunctionNode extends ParseNode:
 		format_text="["
 		parser.expect_symbol([Constants.TokenType.FormatFunctionStart])
 
-		while !parser.next_symbol_is([Constants.TokenType.FormatFunctionEnd]):
+		while not parser.next_symbol_is([Constants.TokenType.FormatFunctionEnd]):
 			if parser.next_symbol_is([Constants.TokenType.Text]):
 				format_text += parser.expect_symbol().value
 
@@ -849,7 +848,7 @@ class ExpressionNode extends ParseNode:
 		#we should have a single root expression left
 		#if more then we failed ---- NANI
 		if eval_stack.size() != 1:
-			printerr('[%s] Error parsing expression (stack did not reduce correctly )' % first.name)
+			printerr('[%s] Error parsing expression (stack did not reduce correctly )' % first)
 
 		return eval_stack.pop_back()
 
