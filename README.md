@@ -38,10 +38,10 @@ There are few things that need to be ironed out to be 100% feature compatible wi
 - [ ] Full support for [format functions](https://yarnspinner.dev/docs/syntax/#format-functions).
 - [ ] In-editor dialogue editor with preview.
 - [ ] Fully extend the documentation of this project.
-  - [x] Document the `Option` object.
+  - [x] Document the [Option](README.md#Option) object.
   - [x] Write the method descriptions for the `Wol` node.
   - [ ] Write a basic "Hello World"-esque tutorial.
-  - [ ] Provide helpful anchors in the documentation.
+  - [x] Provide helpful anchors in the documentation.
 - [x] Porting to usable signals in Godot.
 - [x] Providing helpful errors when failing to compile.
 - [x] Having a working repository with example code.
@@ -128,13 +128,13 @@ It has several properties that you can change either in-editor or using GDScript
 
   Emitted when a dialogue node is started. Has the node name as a parameter so you can see which node was started.
 
-* line ( `Line` line ) 
+* line ( [Line](README.md#Line) line ) 
 
-  Emitted when a `Line` is emitted from the dialogue. `line` holds relevant information.
+  Emitted when a [Line](README.md#Line) is emitted from the dialogue. `line` holds relevant information.
 
 * options ( [`Array`](https://docs.godotengine.org/en/stable/classes/class_array.html) options ) 
 
-  Emitted when the dialogue runs into a set of options. Is emitted with an [`Array`](https://docs.godotengine.org/en/stable/classes/class_array.html) of `Option`s.
+  Emitted when the dialogue runs into a set of options. Is emitted with an [`Array`](https://docs.godotengine.org/en/stable/classes/class_array.html) of [Option](README.md#Option)s.
  
 * command ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) command ) 
 
@@ -207,13 +207,13 @@ It has several properties that you can change either in-editor or using GDScript
   When getting an option from the `options` signal, use this function to let Wol node which option you want to select.
   Use `Option.id` for the `id` parameter.
 
-## `Line` 
+## [Line](README.md#Line) 
 _Inherits from [Object](https://docs.godotengine.org/en/stable/classes/class_object.html)_
 
 An object holding all information related to a line in your dialogue.
 
 ### Description
-The `Line` object is _the_ object that you're gonna be interacting with the most. This object holds all of the information of the actual lines of dialogue. The most important property is `text`, but it has some additional properties you can make use of for debugging or holding of metadata (no support for that yet however).
+The [Line](README.md#Line) object is _the_ object that you're gonna be interacting with the most. This object holds all of the information of the actual lines of dialogue. The most important property is `text`, but it has some additional properties you can make use of for debugging or holding of metadata (no support for that yet however).
 
 ### Properties
 | Type                                                                                      | Property      |
@@ -245,20 +245,20 @@ The `Line` object is _the_ object that you're gonna be interacting with the most
 
   Currently unimplemented.
 
-## `Option` 
+## [Option](README.md#Option) 
 _Inherits from [Object](https://docs.godotengine.org/en/stable/classes/class_object.html)_
 
 An object holding information of an option in your dialogue.
 
 ### Description
-The `Option` object is anoter object that you're gonna be interacting with a lot. This object holds the information of a choice in your dialogue. 
-It has a reference to a `Line` with it's `line` property so you can show the appropriate text to your player!
+The [Option](README.md#Option) object is anoter object that you're gonna be interacting with a lot. This object holds the information of a choice in your dialogue. 
+It has a reference to a [Line](README.md#Line) with it's `line` property so you can show the appropriate text to your player!
 
 ### Properties
 | Type                                                                                      | Property      |
 |-------------------------------------------------------------------------------------------|---------------|
 | [int](https://docs.godotengine.org/en/stable/classes/class_int.html#class-int)            | id            | 
-| `Line`                                                                                    | line          |
+| [Line](README.md#Line)                                                                    | line          |
 | [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)  | destination   |
 
 ### Property Descriptions
@@ -267,9 +267,9 @@ It has a reference to a `Line` with it's `line` property so you can show the app
 
   A unique identifier that you can use to communicate your option choice with `select_option ( id )`.
 
-* `Line` line 
+* [Line](README.md#Line) line 
 
-  A line of dialogue that's been processed by Wol. See `Line` for more details.
+  A line of dialogue that's been processed by Wol. See [Line](README.md#Line) for more details.
 
 * [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) destination
 
