@@ -31,6 +31,7 @@ const VirtualMachine = preload('res://addons/Wol/core/VirtualMachine.gd')
 const StandardLibrary = preload('res://addons/Wol/core/StandardLibrary.gd')
 
 var virtual_machine
+var running = false
 
 func _ready():
 	if Engine.editor_hint:
@@ -80,6 +81,7 @@ func _on_options(options):
 	return Constants.HandlerState.PauseExecution
 
 func _on_dialogue_finished():
+	running = false
 	emit_signal('finished')
 
 func _on_node_start(node):
@@ -97,6 +99,7 @@ func pause():
 	virtual_machine.call_deferred('pause')
 
 func start(node = starting_node):
+	running = true
 	emit_signal('started')
 
 	virtual_machine.set_node(node)

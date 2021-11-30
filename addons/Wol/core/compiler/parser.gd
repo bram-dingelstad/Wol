@@ -849,7 +849,7 @@ class ExpressionNode extends ParseNode:
 		#we should have a single root expression left
 		#if more then we failed ---- NANI
 		if eval_stack.size() != 1:
-			printerr('[%s] Error parsing expression (stack did not reduce correctly )' % first.name)
+			printerr('[%s] Error parsing expression (stack did not reduce correctly )' % first)
 
 		return eval_stack.pop_back()
 
