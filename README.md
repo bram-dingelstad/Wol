@@ -81,201 +81,6 @@ Wol & Yarn Spinner needs your help to be as awesome as it can be! You don't have
 * Join Secret Lab's discussion on Slack by joining the [narrative game development](http://lab.to/narrativegamedev) channel.
 * Follow [Bram Dingelstad](https://twitter.com/bram_dingelstad) & [Yarn Spinner](http://twitter.com/YarnSpinnerTool).
 
-# Documentation
-
-## `Wol` 
-_Inherits from [Node](https://docs.godotengine.org/en/stable/classes/class_node.html)_
-
-Node for all interaction with Wol.
-
-### Description
-Godot's Nodes as building blocks work really well. That's why this plugin gives you access to a simple node that does all the heavy lifting for you.
-It has several properties that you can change either in-editor or using GDScript (or any other compatible language) and signals you can use to listen to events coming from your dialogue.
-
-### Properties
-| Type                                                                                           | Property          | Default value |
-|------------------------------------------------------------------------------------------------|-------------------|---------------|
-| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)       | path              | `''`          |
-| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)       | starting_node     | `'Start'`     |
-| [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)                         | auto_start        | `false`       |
-| [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)                         | auto_show_options | `false`       |
-| [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)                         | auto_substitute   | `true`        |
-| [Dictionary](https://docs.godotengine.org/en/stable/classes/class_dictionary.html)             | variable_storage  | `{}`          |
-
-### Methods
-| Return value         | Method name                                                                                                                |
-|----------------------|----------------------------------------------------------------------------------------------------------------------------|
-| void                 | start ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) starting_node = 'Start' ) |
-| void                 | pause ( )                                                                                                                  |
-| void                 | resume ( )                                                                                                                 |
-| void                 | select_option ( [int](https://docs.godotengine.org/en/stable/classes/class_int.html#class-int) id )                        |
-
-### Signals
-
-* started ( ) 
-
-  Emitted when the dialogue is started.
-
-* finished ( ) 
-
-  Emitted when the dialogue is came to a stop, either through running out of dialogue or by using the `<<stop>>` command.
-
-* node_started ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) node ) 
-
-  Emitted when a dialogue node is started. Has the node name as a parameter so you can see which node was started.
-
-* node_finished ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) node ) 
-
-  Emitted when a dialogue node is started. Has the node name as a parameter so you can see which node was started.
-
-* line ( [Line](README.md#Line) line ) 
-
-  Emitted when a [Line](README.md#Line) is emitted from the dialogue. `line` holds relevant information.
-
-* options ( [`Array`](https://docs.godotengine.org/en/stable/classes/class_array.html) options ) 
-
-  Emitted when the dialogue runs into a set of options. Is emitted with an [`Array`](https://docs.godotengine.org/en/stable/classes/class_array.html) of [Option](README.md#Option)s.
- 
-* command ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) command ) 
-
-  Emitted when the dialogue executes a command. Use this signal to provide interactivity with your game world.
-
-### Property Descriptions
-* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) path 
-  
-  |Default|`''`|
-  |-------|----|
-
-  The path to your `.yarn` or `.wol` file. Must be a valid `Yarn` file otherwise the compiler will throw an error.
-
-* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) starting_node 
-
-  |Default|`'Start'`|
-  |-------|---------|
-
-  The node that is the starting point of the dialogue. Will automatically be the default for the `start()` function as well. The string should be a valid name for a Yarn node and be available in the file or an error will be thrown. You can always start from a different node by calling `start('OtherStartingNode')` for instance.
-
-* [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html) auto_start 
-
-  |Default|`false`|
-  |-------|-------|
-
-  If enabled, will automatically start the dialogue using the `starting_node` as the entrypoint.
-
-* [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html) auto_show_options
-
-  |Default|`false`|
-  |-------|-------|
-
-  If enabled, will automatically show you options when they're available, rather than waiting for the player to resume to the line that has options.
-
-* [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html) auto_substitude
-
-  |Default|`false`|
-  |-------|-------|
-
-  If enabled, will automatically substitute format functions and inline expressions for you. It's recommended to leave enabled, but if you want to manually do this for whatever reason, you can turn it off.
-
-* [Dictionary](https://docs.godotengine.org/en/stable/classes/class_dictionary.html) variable_storage 
-
-  |Default|`{}`|
-  |-------|----|
-
-  A [Dictionary](https://docs.godotengine.org/en/stable/classes/class_dictionary.html) that holds all of the variables of your of your dialogue. 
-  All of the entries of this dictionary are accesible in your dialogue with a `$` prefix. (e.g `a_variable` would be `$a_variable`). 
-  If you set a variable from within your dialogue, this dictionary will also be updated.
-
-  In the future there'll be a signal added for when the `variable_storage` is updated.
-
-### Method Descriptions
-
-* start ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) starting_node = 'Start') 
-
-  Starts the dialogue at the `starting_node` (defaults to the value of `self.starting_node` which is `Start`)
-  When the dialogue comes to a full stop through reaching the end or reaching a `<<stop>` command, you need to explicitly call this function instead of `resume ( )`.
-
-* pause ( )
-
-  Pauses the dialogue until `resume ( )` is called.
-
-* resume ( )
-
-  Resumes the dialogue. Won't work when the dialogue comes to a full stop by reaching the end or reaching a `<<stop>>` command. You need to call `start ( starting_node )` instead.
-
-* select_option ( [int](https://docs.godotengine.org/en/stable/classes/class_int.html#class-int) id )
-
-  When getting an option from the `options` signal, use this function to let Wol node which option you want to select.
-  Use `Option.id` for the `id` parameter.
-
-## `Line`
-_Inherits from [Object](https://docs.godotengine.org/en/stable/classes/class_object.html)_
-
-An object holding all information related to a line in your dialogue.
-
-### Description
-The [Line](README.md#Line) object is _the_ object that you're gonna be interacting with the most. This object holds all of the information of the actual lines of dialogue. The most important property is `text`, but it has some additional properties you can make use of for debugging or holding of metadata (no support for that yet however).
-
-### Properties
-| Type                                                                                      | Property      |
-|-------------------------------------------------------------------------------------------|---------------|
-| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)  | text          |
-| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)  | node_name     | 
-| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)  | file_name     |
-| [Array](https://docs.godotengine.org/en/stable/classes/class_array.html)                  | substitutions |
-| [Array](https://docs.godotengine.org/en/stable/classes/class_array.html)                  | meta          |
-
-### Property Descriptions
-* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) text 
-
-  A line of dialogue that's been processed by Wol. You can use this to set a [Label](https://docs.godotengine.org/en/stable/classes/class_label.html) in a text bubble above your character, add to a [RichTextLabel](https://docs.godotengine.org/en/stable/classes/class_richtextlabel.html#class-richtextlabel) for more dynamic stuff (Wol fully supports bbcode). Look at this repository's `Dialogue.tscn` and `Dialogue.gd` for some inspiration ;)
-
-* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) node_name
-
-  The name of the dialogue node this piece of dialogue came from.
-
-* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) file_name
-
-  The filename of the file where this piece of dialogue came from.
-
-* [Array](https://docs.godotengine.org/en/stable/classes/class_array.html) substitutions
-
-  An [Array](https://docs.godotengine.org/en/stable/classes/class_array.html) of [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)s that the result of Wol proccessing statements. Use this array if you disabled `auto_substitutions` and want to manually substitute your dialogue.
-  
-* [Array](https://docs.godotengine.org/en/stable/classes/class_array.html) meta
-
-  Currently unimplemented.
-
-## `Option`
-_Inherits from [Object](https://docs.godotengine.org/en/stable/classes/class_object.html)_
-
-An object holding information of an option in your dialogue.
-
-### Description
-The [Option](README.md#Option) object is anoter object that you're gonna be interacting with a lot. This object holds the information of a choice in your dialogue. 
-It has a reference to a [Line](README.md#Line) with it's `line` property so you can show the appropriate text to your player!
-
-### Properties
-| Type                                                                                      | Property      |
-|-------------------------------------------------------------------------------------------|---------------|
-| [int](https://docs.godotengine.org/en/stable/classes/class_int.html#class-int)            | id            | 
-| [Line](README.md#Line)                                                                    | line          |
-| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)  | destination   |
-
-### Property Descriptions
-
-* [int](https://docs.godotengine.org/en/stable/classes/class_int.html#class-int) id 
-
-  A unique identifier that you can use to communicate your option choice with `select_option ( id )`.
-
-* [Line](README.md#Line) line 
-
-  A line of dialogue that's been processed by Wol. See [Line](README.md#Line) for more details.
-
-* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) destination
-
-  The node that you will jump to when this option is selected. (Only relevant for jump questions, not inline ones).
- 
-
 # Tutorial
 
 Welcome to Wol! In this tutorial, you’ll learn how to use Wol in a Godot project to create interactive dialogue.
@@ -474,3 +279,199 @@ Save the file, and go back to the game. Play the game again, and talk to the Shi
 The example game is set up so that when you talk to Sally, the node Sally is run, and when you talk to the Ship, the node Ship is run. With this in mind, change the story so that after you get told off by Sally, she asks you to go and fix a problem with the Ship.
 
 You can also read the [Syntax Reference](https://yarnspinner.dev/docs/syntax/) for Yarn.
+
+# Documentation
+
+## `Wol` 
+_Inherits from [Node](https://docs.godotengine.org/en/stable/classes/class_node.html)_
+
+Node for all interaction with Wol.
+
+### Description
+Godot's Nodes as building blocks work really well. That's why this plugin gives you access to a simple node that does all the heavy lifting for you.
+It has several properties that you can change either in-editor or using GDScript (or any other compatible language) and signals you can use to listen to events coming from your dialogue.
+
+### Properties
+| Type                                                                                           | Property          | Default value |
+|------------------------------------------------------------------------------------------------|-------------------|---------------|
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)       | path              | `''`          |
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)       | starting_node     | `'Start'`     |
+| [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)                         | auto_start        | `false`       |
+| [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)                         | auto_show_options | `false`       |
+| [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html)                         | auto_substitute   | `true`        |
+| [Dictionary](https://docs.godotengine.org/en/stable/classes/class_dictionary.html)             | variable_storage  | `{}`          |
+
+### Methods
+| Return value         | Method name                                                                                                                |
+|----------------------|----------------------------------------------------------------------------------------------------------------------------|
+| void                 | start ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) starting_node = 'Start' ) |
+| void                 | pause ( )                                                                                                                  |
+| void                 | resume ( )                                                                                                                 |
+| void                 | select_option ( [int](https://docs.godotengine.org/en/stable/classes/class_int.html#class-int) id )                        |
+
+### Signals
+
+* started ( ) 
+
+  Emitted when the dialogue is started.
+
+* finished ( ) 
+
+  Emitted when the dialogue is came to a stop, either through running out of dialogue or by using the `<<stop>>` command.
+
+* node_started ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) node ) 
+
+  Emitted when a dialogue node is started. Has the node name as a parameter so you can see which node was started.
+
+* node_finished ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) node ) 
+
+  Emitted when a dialogue node is started. Has the node name as a parameter so you can see which node was started.
+
+* line ( [Line](README.md#Line) line ) 
+
+  Emitted when a [Line](README.md#Line) is emitted from the dialogue. `line` holds relevant information.
+
+* options ( [`Array`](https://docs.godotengine.org/en/stable/classes/class_array.html) options ) 
+
+  Emitted when the dialogue runs into a set of options. Is emitted with an [`Array`](https://docs.godotengine.org/en/stable/classes/class_array.html) of [Option](README.md#Option)s.
+ 
+* command ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) command ) 
+
+  Emitted when the dialogue executes a command. Use this signal to provide interactivity with your game world.
+
+### Property Descriptions
+* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) path 
+  
+  |Default|`''`|
+  |-------|----|
+
+  The path to your `.yarn` or `.wol` file. Must be a valid `Yarn` file otherwise the compiler will throw an error.
+
+* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) starting_node 
+
+  |Default|`'Start'`|
+  |-------|---------|
+
+  The node that is the starting point of the dialogue. Will automatically be the default for the `start()` function as well. The string should be a valid name for a Yarn node and be available in the file or an error will be thrown. You can always start from a different node by calling `start('OtherStartingNode')` for instance.
+
+* [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html) auto_start 
+
+  |Default|`false`|
+  |-------|-------|
+
+  If enabled, will automatically start the dialogue using the `starting_node` as the entrypoint.
+
+* [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html) auto_show_options
+
+  |Default|`false`|
+  |-------|-------|
+
+  If enabled, will automatically show you options when they're available, rather than waiting for the player to resume to the line that has options.
+
+* [bool](https://docs.godotengine.org/en/stable/classes/class_bool.html) auto_substitude
+
+  |Default|`false`|
+  |-------|-------|
+
+  If enabled, will automatically substitute format functions and inline expressions for you. It's recommended to leave enabled, but if you want to manually do this for whatever reason, you can turn it off.
+
+* [Dictionary](https://docs.godotengine.org/en/stable/classes/class_dictionary.html) variable_storage 
+
+  |Default|`{}`|
+  |-------|----|
+
+  A [Dictionary](https://docs.godotengine.org/en/stable/classes/class_dictionary.html) that holds all of the variables of your of your dialogue. 
+  All of the entries of this dictionary are accesible in your dialogue with a `$` prefix. (e.g `a_variable` would be `$a_variable`). 
+  If you set a variable from within your dialogue, this dictionary will also be updated.
+
+  In the future there'll be a signal added for when the `variable_storage` is updated.
+
+### Method Descriptions
+
+* start ( [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) starting_node = 'Start') 
+
+  Starts the dialogue at the `starting_node` (defaults to the value of `self.starting_node` which is `Start`)
+  When the dialogue comes to a full stop through reaching the end or reaching a `<<stop>` command, you need to explicitly call this function instead of `resume ( )`.
+
+* pause ( )
+
+  Pauses the dialogue until `resume ( )` is called.
+
+* resume ( )
+
+  Resumes the dialogue. Won't work when the dialogue comes to a full stop by reaching the end or reaching a `<<stop>>` command. You need to call `start ( starting_node )` instead.
+
+* select_option ( [int](https://docs.godotengine.org/en/stable/classes/class_int.html#class-int) id )
+
+  When getting an option from the `options` signal, use this function to let Wol node which option you want to select.
+  Use `Option.id` for the `id` parameter.
+
+## `Line`
+_Inherits from [Object](https://docs.godotengine.org/en/stable/classes/class_object.html)_
+
+An object holding all information related to a line in your dialogue.
+
+### Description
+The [Line](README.md#Line) object is _the_ object that you're gonna be interacting with the most. This object holds all of the information of the actual lines of dialogue. The most important property is `text`, but it has some additional properties you can make use of for debugging or holding of metadata (no support for that yet however).
+
+### Properties
+| Type                                                                                      | Property      |
+|-------------------------------------------------------------------------------------------|---------------|
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)  | text          |
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)  | node_name     | 
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)  | file_name     |
+| [Array](https://docs.godotengine.org/en/stable/classes/class_array.html)                  | substitutions |
+| [Array](https://docs.godotengine.org/en/stable/classes/class_array.html)                  | meta          |
+
+### Property Descriptions
+* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) text 
+
+  A line of dialogue that's been processed by Wol. You can use this to set a [Label](https://docs.godotengine.org/en/stable/classes/class_label.html) in a text bubble above your character, add to a [RichTextLabel](https://docs.godotengine.org/en/stable/classes/class_richtextlabel.html#class-richtextlabel) for more dynamic stuff (Wol fully supports bbcode). Look at this repository's `Dialogue.tscn` and `Dialogue.gd` for some inspiration ;)
+
+* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) node_name
+
+  The name of the dialogue node this piece of dialogue came from.
+
+* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) file_name
+
+  The filename of the file where this piece of dialogue came from.
+
+* [Array](https://docs.godotengine.org/en/stable/classes/class_array.html) substitutions
+
+  An [Array](https://docs.godotengine.org/en/stable/classes/class_array.html) of [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)s that the result of Wol proccessing statements. Use this array if you disabled `auto_substitutions` and want to manually substitute your dialogue.
+  
+* [Array](https://docs.godotengine.org/en/stable/classes/class_array.html) meta
+
+  Currently unimplemented.
+
+## `Option`
+_Inherits from [Object](https://docs.godotengine.org/en/stable/classes/class_object.html)_
+
+An object holding information of an option in your dialogue.
+
+### Description
+The [Option](README.md#Option) object is anoter object that you're gonna be interacting with a lot. This object holds the information of a choice in your dialogue. 
+It has a reference to a [Line](README.md#Line) with it's `line` property so you can show the appropriate text to your player!
+
+### Properties
+| Type                                                                                      | Property      |
+|-------------------------------------------------------------------------------------------|---------------|
+| [int](https://docs.godotengine.org/en/stable/classes/class_int.html#class-int)            | id            | 
+| [Line](README.md#Line)                                                                    | line          |
+| [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string)  | destination   |
+
+### Property Descriptions
+
+* [int](https://docs.godotengine.org/en/stable/classes/class_int.html#class-int) id 
+
+  A unique identifier that you can use to communicate your option choice with `select_option ( id )`.
+
+* [Line](README.md#Line) line 
+
+  A line of dialogue that's been processed by Wol. See [Line](README.md#Line) for more details.
+
+* [String](https://docs.godotengine.org/en/lastest/classes/class_string.html#class-string) destination
+
+  The node that you will jump to when this option is selected. (Only relevant for jump questions, not inline ones).
+ 
+
