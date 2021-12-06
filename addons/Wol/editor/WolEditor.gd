@@ -5,6 +5,7 @@ const Compiler = preload('res://addons/Wol/core/compiler/Compiler.gd')
 onready var GraphNodeTemplate = $GraphNodeTemplate
 
 var path
+var refreshed = false
 
 func _ready():
 	for menu_button in [$Menu/File]:
@@ -19,9 +20,12 @@ func build_nodes():
 	for node in Compiler.new(path).get_nodes():
 		var graph_node = GraphNodeTemplate.duplicate()
 		$GraphEdit.add_child(graph_node)
+
+		graph_node.connect('recompiled', self, '_on_graph_node_recompiled', [graph_node])
+		graph_node.connect('gui_input', self, '_on_graph_node_input', [graph_node, node])
+
 		graph_node.node = node
 		graph_node.show()
-		graph_node.connect('gui_input', self, '_on_graph_node_input', [graph_node, node])
 
 func serialize_to_file():
 	var buffer = []
@@ -92,6 +96,32 @@ func _on_menu_pressed(index, node):
 			save_as()
 		'Open':
 			open()
+
+# FIXME: Come up with better way of showing connections between nodes
+func _on_graph_node_recompiled(_graph_node):
+	if refreshed: return
+	$GraphEdit.clear_connections()
+	for graph_node in $GraphEdit.get_children():
+		if not graph_node is GraphNode:
+			continue
+
+		var connections = graph_node.get_connections()
+		graph_node.set_slot_enabled_right(0, connections.size() != 0)
+		graph_node.set_slot_type_right(0, 1)
+
+		for connection in connections:
+			if not $GraphEdit.has_node(connection):
+				continue
+
+			var other_graph_node = $GraphEdit.get_node(connection)
+			other_graph_node.set_slot_enabled_left(0, true)
+			other_graph_node.set_slot_type_left(0, 1)
+
+			$GraphEdit.connect_node(graph_node.name, 0, connection, 0)
+
+	refreshed = true
+	yield(get_tree().create_timer(.3), 'timeout')
+	refreshed = false
 
 func _on_graph_node_input(event, graph_node, node):
 	if event is InputEventMouseButton \

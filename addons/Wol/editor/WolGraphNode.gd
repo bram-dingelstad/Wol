@@ -4,11 +4,13 @@ extends GraphNode
 signal recompiled
 
 const Compiler = preload('res://addons/Wol/core/compiler/Compiler.gd')
+const Constants = preload('res://addons/Wol/core/Constants.gd')
 
 var node setget set_node
 
 var error_lines = []
 var compiler
+var program
 
 onready var text_edit = $TextEdit
 
@@ -18,7 +20,32 @@ func _ready():
 	$TextDebounce.connect('timeout', self, '_on_debounce')
 
 func get_connections():
-	print(compiler)
+	# NOTE: Program failed to compile
+	if not program:
+		return []
+
+	var program_node = program.nodes.values().front()
+	var connections = []
+
+	# FIXME: Don't rely on checking on 'Label\d'
+	var label_check = RegEx.new()
+	label_check.compile('^Label\\doption_\\d')
+
+	for instruction in program_node.instructions:
+		# NOTE: When next node is explicit
+		if instruction.operation == Constants.ByteCode.RunNode:
+			if instruction.operands.size() > 0 \
+					and instruction.operands.front().value != name:
+				connections.append(instruction.operands.front().value)
+
+		# NOTE: When next node is decided through options
+		if instruction.operation == Constants.ByteCode.AddOption:
+			if instruction.operands.size() == 2 \
+					and not label_check.search(instruction.operands[1].value) \
+					and instruction.operands[1].value != name:
+				connections.append(instruction.operands[1].value)
+
+	return connections
 
 func _on_text_changed():
 	$TextDebounce.start(.3)
@@ -45,6 +72,7 @@ func _on_error(message, line_number, _column):
 func set_node(_node):
 	node = _node
 	title = node.title
+	name = node.title
 	text_edit.text = node.body
 	text_edit.clear_undo_history()
 	offset = node.position
@@ -55,5 +83,7 @@ func compile():
 	var text = '---\n%s\n===' % text_edit.text
 	compiler = Compiler.new(null, text, true)
 	compiler.connect('error', self, '_on_error')
-	compiler.compile()
+	program = compiler.compile()
+
+	yield(get_tree(), 'idle_frame')
 	emit_signal('recompiled')

@@ -25,7 +25,8 @@ func parse_node():
 	return WolNode.new('Start', null, self)
 
 func next_symbol_is(valid_types):
-	return tokens.front().type in valid_types
+	compiler.assert(tokens.size() != 0, 'Ran out of tokens!')
+	return tokens.front() and tokens.front().type in valid_types
 
 # NOTE: 0 look ahead for `<<` and `else`
 func next_symbols_are(valid_types):
@@ -233,7 +234,7 @@ class FormatFunctionNode extends ParseNode:
 		parser.expect_symbol([Constants.TokenType.FormatFunctionStart])
 
 		# FIXME: Add exit condition in case of failure
-		while not parser.next_symbol_is([Constants.TokenType.FormatFunctionEnd]):
+		while parser.tokens.size() > 0 and not parser.next_symbol_is([Constants.TokenType.FormatFunctionEnd]):
 			if parser.next_symbol_is([Constants.TokenType.Text]):
 				format_text += parser.expect_symbol().value
 
@@ -328,7 +329,7 @@ class CustomCommand extends ParseNode:
 		command_tokens.append(parser.expect_symbol())
 
 		# FIXME: add exit condition
-		while not parser.next_symbol_is([Constants.TokenType.EndCommand]):
+		while parser.tokens.size() > 0 and not parser.next_symbol_is([Constants.TokenType.EndCommand]):
 			command_tokens.append(parser.expect_symbol())
 
 		parser.expect_symbol([Constants.TokenType.EndCommand])
@@ -451,7 +452,7 @@ class Block extends ParseNode:
 
 		#keep reading statements until we hit a dedent
 		# FIXME: find exit condition
-		while not parser.next_symbol_is([Constants.TokenType.Dedent]):
+		while parser.tokens.size() > 0 and not parser.next_symbol_is([Constants.TokenType.Dedent]):
 			#parse all statements including nested blocks
 			statements.append(Statement.new(self, parser))
 
