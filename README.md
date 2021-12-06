@@ -283,7 +283,7 @@ Welcome to Wol! In this tutorial, you’ll learn how to use Wol in a Godot proje
 We’ll start by downloading and installing Wol. We’ll then take a look at the core concepts that power Wol / Yarn, and write some dialogue. 
 After that, we’ll explore some of the more advanced features of Wol & Yarn.
 
-## Introducing Yarn Spinner
+## Introducing Wol
 
 Wol & Yarn (Spinner) are tools for writing interactive dialogue in games - that is, conversations that the player can have with characters in the game. 
 Yarn Spinner does this by letting you write your dialogue in a programming language called Yarn.
