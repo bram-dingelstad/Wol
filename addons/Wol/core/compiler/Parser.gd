@@ -700,10 +700,8 @@ class ExpressionNode extends ParseNode:
 
 		var last
 
-		print(parser.tokens.slice(0, 6))
 		#read expression content
 		while parser.tokens.size() > 0 and parser.next_symbol_is(valid_types):
-			print(parser.tokens.front())
 			var next = parser.expect_symbol(valid_types)
 
 			if next.type in [
@@ -716,14 +714,11 @@ class ExpressionNode extends ParseNode:
 				]:
 
 				# Output primitives
-				print('adding value "%s" in expression' % next)
-				print(op_stack.size())
 				if func_stack.size() != 0:
 					op_stack.append(next)
 				else:
 					rpn.append(next)
 			elif next.type == Constants.TokenType.Identifier:
-				print('adding function')
 				op_stack.push_back(next)
 				func_stack.push_back(next)
 
@@ -829,8 +824,6 @@ class ExpressionNode extends ParseNode:
 		var first = rpn.front()
 		var eval_stack = []#ExpressionNode
 
-		print(rpn)
-
 		while rpn.size() > 0:
 			var next = rpn.pop_front()
 			if Operator.is_op(next.type):
@@ -861,7 +854,6 @@ class ExpressionNode extends ParseNode:
 			# A function call
 			elif next.type == Constants.TokenType.Identifier:
 				var function_name = next.value
-				prints(function_name, next.parameter_count)
 
 				var function_parameters = []
 				for _i in range(next.parameter_count):
