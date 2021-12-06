@@ -35,5 +35,9 @@ func get_plugin_name():
 	return 'Wol'
 
 func get_plugin_icon():
-	print(get_editor_interface().get_base_control().get_icon('Node', 'EditorIcons'))
-	return get_editor_interface().get_base_control().get_icon('Node', 'EditorIcons')
+	var icon = ImageTexture.new()
+	var image = Image.new()
+	image.load('res://addons/Wol/icon-white.svg')
+	image.resize(34, 34)
+	icon.create_from_image(image)
+	return icon
