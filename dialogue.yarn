@@ -1,54 +1,54 @@
 title: Start
 tags: 
-colorID: 0
+colorID: 
 position: 0, 0
 ---
 <<a_custom_command>>
 <<command_with multiple arguments>>
 
 // remove "to" to trigger error
-<<set $direction to 'that'>>
+<<set $direction to "that">>
 <<set $one to 1>>
 
-// Implement inline expressions 
+// Implement inline expressions
 <<if visit_count() == 1>>
-Narrator: You, {$direction} way! 
+Narrator: You, {$direction} way!
 <<endif>>
 Narrator: Do you know you've been here {visit_count()} times?
 You: Did you know one + one equals {$one + $one}?
 Narrator: You wanna go somewhere?
 
- -> Go to the store
-     [[TheStore]]
-// -> Wait, how many times have I been to the store?
-//       Narrator: You've been to the store {visit_count('TheStore')} times.
-//       [[Start]]
+-> Go to the store
+    [[TheStore]]
+-> How much did I visit the store?
+    Narrator: You've been to the store { visit_count("TheStore") } times.
+    [[Start]]
 -> Lets stay here and talk
     [[Talk]]
 ===
 title: TheStore
 tags: 
-colorID: 0
-position: 0, 200
+colorID: 
+position: 400, 200
 ---
 Guy: Hey what's up I need your help can you come here?
 You: Well I can't I'm buying clothes.
-All right well hurry up and come over here.
+Guy: All right well hurry up and come over here.
 You: I can't find them.
 Guy: What do you mean you can't find them?
 You: I can't find them there's only soup.
-Guy: What do you mean there's only soup?! 
+Guy: What do you mean there's only soup?!
 You: It means there's only soup.
 Guy: WELL THEN GET OUT OF THE SOUP ISLE!!
 You: Alright you dont have to shout at me!
 You: There's more soup.
-Guy: What do you mean there's more soup? 
+Guy: What do you mean there's more soup?
 You: There's just more soup.
 Guy: Then go to the next aisle!
-You: There's still soup! 
+You: There's still soup!
 Guy: Where are you right now?!
 You: I'm at soup!
-Guy: What do you mean you're at soup?! 
+Guy: What do you mean you're at soup?!
 You: I mean I'm at soup.
 Guy: WHAT STORE ARE YOU IN?!
 You: IM AT THE SOUP STORE!!
@@ -58,8 +58,8 @@ You: FUCK YOU!
 ===
 title: Talk
 tags: 
-colorID: 0
-position: 0, 400
+colorID: 
+position: 800, 400
 ---
 Narrator: So how are you really?
 You: I'm good!

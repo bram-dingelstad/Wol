@@ -24,6 +24,11 @@ gdscript/warnings/return_value_discarded=false
 
 enabled=PoolStringArray( "res://addons/Wol/plugin.cfg" )
 
+[network]
+
+limits/debugger_stdout/max_chars_per_second=8096
+limits/debugger_stdout/max_messages_per_frame=200
+
 [physics]
 
 common/enable_pause_aware_picking=true

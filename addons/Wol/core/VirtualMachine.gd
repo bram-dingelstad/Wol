@@ -68,7 +68,7 @@ func set_node(name):
 		dialogue.variable_storage[program.filename] = {}
 
 	if not dialogue.variable_storage[program.filename].has(name):
-		dialogue.variable_storage[program.filename][name] = 0
+		dialogue.variable_storage[program.filename][name] = 1
 	else:
 		dialogue.variable_storage[program.filename][name] += 1
 	return true
@@ -287,7 +287,7 @@ func run_instruction(instruction):
 				var line = option[0]
 				var destination = option[1]
 				choices.append(Program.Option.new(line, option_index, destination))
-
+			
 			execution_state = Constants.ExecutionState.WaitingForOption
 			options_handler.call_func(choices)
 

@@ -29,7 +29,6 @@ class Line:
 	func _to_string():
 		return '%s:%d: "%s"' % [file_name.get_file(), line_number, text]
 
-
 class Option:
 	var line
 	var id = -1

@@ -230,3 +230,7 @@ __meta__ = {
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="StaticBody2D"]
 polygon = PoolVector2Array( -3, 427, -40, 426, -40, 648, 838, 647, 838, 419, 787, 420, 788, 600, 2, 600, 0, 420 )
+
+[node name="DialogueCooldown" type="Timer" parent="."]
+wait_time = 0.4
+one_shot = true
