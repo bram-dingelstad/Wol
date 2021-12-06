@@ -28,18 +28,6 @@ Guy: WHY ARE YOU BUYING CLOTHES AT THE SOUP STORE?!
 You: FUCK YOU!
 [[Go home|Start]]
 ===
-title: Talk
-tags: 
-colorID: 
-position: 800, 400
----
-Narrator: So how are you really?
-You: I'm good!
-Narrator: Do you want to continue talking?
--> Yes
-    [[Start]]
--> No
-===
 title: Start
 tags: 
 colorID: 
@@ -67,4 +55,16 @@ Narrator: You wanna go somewhere?
     [[Start]]
 -> Lets stay here and talk
     [[Talk]]
+===
+title: Talk
+tags: 
+colorID: 
+position: 800, 400
+---
+Narrator: So how are you really?
+You: I'm good!
+Narrator: Do you want to continue talking?
+-> Yes
+    [[Start]]
+-> No
 ===

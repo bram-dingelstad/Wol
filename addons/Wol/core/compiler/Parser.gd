@@ -25,7 +25,7 @@ func parse_node():
 	return WolNode.new('Start', null, self)
 
 func next_symbol_is(valid_types):
-	compiler.assert(tokens.size() != 0, 'Ran out of tokens!')
+	compiler.assert(tokens.size() != 0, 'Ran out of tokens looking for next symbol!')
 	return tokens.front() and tokens.front().type in valid_types
 
 # NOTE: 0 look ahead for `<<` and `else`
@@ -37,7 +37,11 @@ func next_symbols_are(valid_types):
 	return true
 
 func expect_symbol(token_types = []):
+	compiler.assert(tokens.size() != 0, 'Ran out of tokens expecting next symbol!')
 	var token = tokens.pop_front() as Lexer.Token
+
+	if tokens.size() == 0:
+		return token
 
 	if token_types.size() == 0:
 		if token.type == Constants.TokenType.EndOfInput:

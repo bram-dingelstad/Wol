@@ -6,15 +6,45 @@ onready var GraphNodeTemplate = $GraphNodeTemplate
 
 var path
 var refreshed = false
+var selected_node
+
+onready var original_delete_node_dialog = $DeleteNodeDialog.dialog_text
 
 func _ready():
 	for menu_button in [$Menu/File]:
 		menu_button.get_popup().connect('index_pressed', self, '_on_menu_pressed', [menu_button.get_popup()])
 
+	$GraphEdit.connect('gui_input', self, '_on_graph_edit_input')
+	$GraphEdit.connect('node_selected', self, '_on_node_selected', [true])
+	$GraphEdit.connect('node_unselected', self, '_on_node_selected', [false])
+
+	$DeleteNodeDialog.connect('confirmed', self, 'delete_node')
+
 	# TODO: Conditionally load in theme based on Editor or standalone
 
 	path = 'res://dialogue.wol'
 	build_nodes()
+
+func create_node(position = Vector2.ZERO):
+	print('creating node!')
+	var graph_node = GraphNodeTemplate.duplicate()
+	$GraphEdit.add_child(graph_node)
+
+	var node = {
+		'title': 'NewNode',
+		'body': 'Wol: Hello world',
+		'position': position
+	}
+
+	graph_node.connect('recompiled', self, '_on_graph_node_recompiled', [graph_node])
+	graph_node.connect('gui_input', self, '_on_graph_node_input', [graph_node, node])
+
+	graph_node.node = node
+	graph_node.show()
+
+func delete_node(node = selected_node):
+	$GraphEdit.remove_child(node)
+	node.queue_free()
 
 func build_nodes():
 	for node in Compiler.new(path).get_nodes():
@@ -128,3 +158,22 @@ func _on_graph_node_input(event, graph_node, node):
 			and event.doubleclick and event.button_index == BUTTON_LEFT:
 		$HBoxContainer/Editor.open_node(graph_node, node)
 		accept_event()
+
+func _on_node_selected(node, selected):
+	if not selected:
+		selected_node = null
+	else:
+		selected_node = node
+
+func _on_graph_edit_input(event):
+	if event is InputEventMouseButton \
+			and event.doubleclick and event.button_index == BUTTON_LEFT:
+		create_node(event.global_position + $GraphEdit.scroll_offset)
+
+func _input(event):
+	if event is InputEventKey \
+			and not event.pressed and event.scancode == KEY_DELETE \
+			and selected_node:
+		$DeleteNodeDialog.dialog_text = original_delete_node_dialog % selected_node.name
+		$DeleteNodeDialog.popup()
+		

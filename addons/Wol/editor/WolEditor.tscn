@@ -766,7 +766,6 @@ __meta__ = {
 }
 
 [node name="Editor" type="Panel" parent="HBoxContainer"]
-visible = false
 margin_left = 192.0
 margin_right = 832.0
 margin_bottom = 600.0
@@ -775,6 +774,22 @@ script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="HBoxContainer" type="HBoxContainer" parent="HBoxContainer/Editor"]
+anchor_right = 0.939
+anchor_bottom = 0.053
+margin_left = 4.0
+margin_top = 4.0
+margin_right = -4.0
+margin_bottom = -4.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextEdit" type="TextEdit" parent="HBoxContainer/Editor/HBoxContainer"]
+margin_right = 144.0
+margin_bottom = 23.0
+rect_min_size = Vector2( 144, 0 )
 
 [node name="Close" type="Button" parent="HBoxContainer/Editor"]
 anchor_left = 1.0
@@ -809,6 +824,23 @@ margin_bottom = 231.0
 rect_min_size = Vector2( 400, 140 )
 resizable = true
 filters = PoolStringArray( "*.yarn", "*.wol" )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="DeleteNodeDialog" type="ConfirmationDialog" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -223.0
+margin_top = -70.0
+margin_right = 223.0
+margin_bottom = 70.0
+rect_min_size = Vector2( 400, 140 )
+dialog_text = "Are you sure you want to delete the \"%s\" node from your dialogue?
+
+You can't undo this action."
 __meta__ = {
 "_edit_use_anchors_": false
 }

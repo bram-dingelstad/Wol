@@ -80,7 +80,7 @@ func set_node(_node):
 	compile()
 
 func compile():
-	var text = '---\n%s\n===' % text_edit.text
+	var text = 'title: %s\n---\n%s\n===' % [node.title, text_edit.text]
 	compiler = Compiler.new(null, text, true)
 	compiler.connect('error', self, '_on_error')
 	program = compiler.compile()

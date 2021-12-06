@@ -21,9 +21,11 @@ func open_node(graph_node, node):
 	$Content.add_child(text_edit)
 	toggle_text_edit(text_edit)
 	
-	show()
+	$HBoxContainer/TextEdit.disconnect('text_changed', self, '_on_title_changed')
+	$HBoxContainer/TextEdit.text = node.title
+	$HBoxContainer/TextEdit.connect('text_changed', self, '_on_title_changed')
 	
-	# window_title = node.title
+	show()
 
 func toggle_text_edit(text_edit):
 	text_edit.anchor_left = 0
@@ -47,6 +49,10 @@ func toggle_text_edit(text_edit):
 		'minimap_draw'
 	]:
 		text_edit.set(property, not text_edit.get(property))
+
+func _on_title_changed():
+	current_graph_node.node.title = $HBoxContainer/TextEdit.text
+	current_graph_node.compile()
 
 func _on_visibility_changed():
 	if not visible:
