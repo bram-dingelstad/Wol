@@ -39,8 +39,12 @@ There are few things that need to be ironed out to be 100% feature compatible wi
 - [ ] Integration with Godot's translation/localization system.
   - [ ] Auto generation for `#line:` suffixes
 - [ ] Support for [format functions](https://yarnspinner.dev/docs/syntax/#format-functions).
-- [ ] Support for conditional options.
+- [ ] ~Support~ Fix for conditional options.
 - [ ] In-editor dialogue editor with preview.
+  - [ ] Lines connecting different nodes if they refer to eachother.
+  - [x] Error hints when doing something wrong.
+  - [x] Basic saving, opening and saving-as.
+- [ ] Remove all `printerr` in favor of (soft) `assert`s.
 - [x] Fully extend the documentation of this project.
 - [x] Porting to usable signals in Godot.
 - [x] Providing helpful errors when failing to compile.

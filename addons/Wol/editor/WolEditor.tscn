@@ -706,6 +706,7 @@ margin_bottom = 250.0
 mouse_filter = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+custom_colors/safe_line_number_color = Color( 1, 0, 0, 1 )
 syntax_highlighting = true
 fold_gutter = true
 context_menu_enabled = false

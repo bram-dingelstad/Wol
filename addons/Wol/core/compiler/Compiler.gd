@@ -126,7 +126,7 @@ func get_nodes():
 
 func assert(statement, message, line_number = -1, column = -1, _absolute_line_number = -1):
 	if not soft_assert:
-		assert(statement, message + ('; on line %d column %d' % [line_number, column]))
+		assert(statement, '"%s" on line %d column %d' % [message, line_number, column])
 	elif not statement:
 		emit_signal('error', message, line_number, column)
 

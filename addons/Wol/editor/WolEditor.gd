@@ -5,7 +5,6 @@ const Compiler = preload('res://addons/Wol/core/compiler/Compiler.gd')
 onready var GraphNodeTemplate = $GraphNodeTemplate
 
 var path
-var compiler
 
 func _ready():
 	for menu_button in [$Menu/File]:
@@ -13,13 +12,11 @@ func _ready():
 
 	# TODO: Conditionally load in theme based on Editor or standalone
 
-	path = 'res://dialogue.yarn'
+	path = 'res://dialogue.wol'
 	build_nodes()
 
 func build_nodes():
-	compiler = Compiler.new(path)
-
-	for node in compiler.get_nodes():
+	for node in Compiler.new(path).get_nodes():
 		var graph_node = GraphNodeTemplate.duplicate()
 		$GraphEdit.add_child(graph_node)
 		graph_node.node = node
