@@ -14,7 +14,7 @@ __meta__ = {
 
 [node name="Wol" type="Node" parent="Dialogue"]
 script = ExtResource( 1 )
-path = "res://dialogue.yarn"
+path = "res://dialogue.wol"
 auto_start = true
 variable_storage = {
 }

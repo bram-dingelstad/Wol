@@ -1,31 +1,3 @@
-title: Start
-tags: 
-colorID: 
-position: 0, 0
----
-<<a_custom_command>>
-<<command_with multiple arguments>>
-
-// remove "to" to trigger error
-<<set $direction to "that">>
-<<set $one to 1>>
-
-// Implement inline expressions
-<<if visit_count() == 1>>
-Narrator: You, {$direction} way!
-<<endif>>
-Narrator: Do you know you've been here {visit_count()} times?
-You: Did you know one + one equals {$one + $one}?
-Narrator: You wanna go somewhere?
-
--> Go to the store
-    [[TheStore]]
--> How much did I visit the store?
-    Narrator: You've been to the store { visit_count("TheStore") } times.
-    [[Start]]
--> Lets stay here and talk
-    [[Talk]]
-===
 title: TheStore
 tags: 
 colorID: 
@@ -67,4 +39,32 @@ Narrator: Do you want to continue talking?
 -> Yes
     [[Start]]
 -> No
+===
+title: Start
+tags: 
+colorID: 
+position: 0, 0
+---
+<<a_custom_command>>
+<<command_with multiple arguments>>
+
+// remove "to" to trigger error
+<<set $direction to "that">>
+<<set $one to 1>>
+
+// Implement inline expressions
+<<if visit_count() == 1>>
+Narrator: You, {$direction} way!
+<<endif>>
+Narrator: Do you know you've been here {visit_count()} times?
+You: Did you know one + one equals {$one + $one}?
+Narrator: You wanna go somewhere?
+
+-> Go to the store
+    [[TheStore]]
+-> How much did I visit the store?
+    Narrator: You've been to the store { visit_count("TheStore") } times.
+    [[Start]]
+-> Lets stay here and talk
+    [[Talk]]
 ===
