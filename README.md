@@ -314,7 +314,7 @@ We’ll begin by playing the example game that comes with Wol. It’s very short
 
 We’re now ready to start looking under the hood, to see how Wol & Yarn power this game.
 
-### The Yarn Editor
+### The Wol Editor
 
 Wol & Yarn Spinner stores its dialogue in .yarn (or .wol) files. These are plain text files, which means you can edit them in any plain text editor (Visual Studio Code is a good option, and Secret Labs offers a syntax highlighting extension to make it nice to use!)
 
