@@ -1,19 +1,21 @@
 tool
 extends Panel
 
-var current_node
 var current_graph_node
+
+onready var preview = get_node('../Preview')
 
 func _ready():
 	hide()
 	connect('visibility_changed', self, '_on_visibility_changed')
-	$Close.connect('pressed', self, 'close')
+	$Tools/Left/Play.connect('pressed', self, '_on_play')
+	$Tools/Right/Close.connect('pressed', self, 'close')
 
 func close():
 	hide()
+	preview.close()
 
-func open_node(graph_node, node):
-	current_node = node
+func open_node(graph_node):
 	current_graph_node = graph_node
 
 	var text_edit = graph_node.get_node('TextEdit')
@@ -21,9 +23,9 @@ func open_node(graph_node, node):
 	$Content.add_child(text_edit)
 	toggle_text_edit(text_edit)
 	
-	$HBoxContainer/TextEdit.disconnect('text_changed', self, '_on_title_changed')
-	$HBoxContainer/TextEdit.text = node.title
-	$HBoxContainer/TextEdit.connect('text_changed', self, '_on_title_changed')
+	$Tools/Left/Title.disconnect('text_changed', self, '_on_title_changed')
+	$Tools/Left/Title.text = graph_node.node.title
+	$Tools/Left/Title.connect('text_changed', self, '_on_title_changed')
 	
 	show()
 
@@ -49,6 +51,9 @@ func toggle_text_edit(text_edit):
 		'minimap_draw'
 	]:
 		text_edit.set(property, not text_edit.get(property))
+
+func _on_play():
+	preview.open_node(current_graph_node)
 
 func _on_title_changed():
 	current_graph_node.node.title = $HBoxContainer/TextEdit.text

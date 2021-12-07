@@ -1,5 +1,4 @@
 extends Object
-
 signal error(message, line_number, column)
 
 const Constants = preload('res://addons/Wol/core/Constants.gd')
@@ -25,11 +24,12 @@ func _init(_filename, _source = null, _soft_assert = false):
 	soft_assert = _soft_assert
 
 	if not _filename and _source:
-		self.source = _source
+		filename = 'inline_source'
+		source = _source
 	else:
 		var file = File.new()
 		file.open(_filename, File.READ)
-		self.source = file.get_as_text()
+		source = file.get_as_text()
 		file.close()
 
 	var source_lines = source.split('\n')

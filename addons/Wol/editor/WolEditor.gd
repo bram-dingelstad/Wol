@@ -37,7 +37,7 @@ func create_node(position = Vector2.ZERO):
 	}
 
 	graph_node.connect('recompiled', self, '_on_graph_node_recompiled', [graph_node])
-	graph_node.connect('gui_input', self, '_on_graph_node_input', [graph_node, node])
+	graph_node.connect('gui_input', self, '_on_graph_node_input', [graph_node])
 
 	graph_node.node = node
 	graph_node.show()
@@ -52,10 +52,13 @@ func build_nodes():
 		$GraphEdit.add_child(graph_node)
 
 		graph_node.connect('recompiled', self, '_on_graph_node_recompiled', [graph_node])
-		graph_node.connect('gui_input', self, '_on_graph_node_input', [graph_node, node])
+		graph_node.connect('gui_input', self, '_on_graph_node_input', [graph_node])
 
 		graph_node.node = node
 		graph_node.show()
+
+func get_program():
+	return Compiler.new(null, serialize_to_file(), true).compile()
 
 func serialize_to_file():
 	var buffer = []
@@ -153,10 +156,10 @@ func _on_graph_node_recompiled(_graph_node):
 	yield(get_tree().create_timer(.3), 'timeout')
 	refreshed = false
 
-func _on_graph_node_input(event, graph_node, node):
+func _on_graph_node_input(event, graph_node):
 	if event is InputEventMouseButton \
 			and event.doubleclick and event.button_index == BUTTON_LEFT:
-		$HBoxContainer/Editor.open_node(graph_node, node)
+		$HBoxContainer/Editor.open_node(graph_node)
 		accept_event()
 
 func _on_node_selected(node, selected):

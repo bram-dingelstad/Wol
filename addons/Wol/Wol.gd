@@ -55,6 +55,9 @@ func set_path(_path):
 		var compiler = Compiler.new(path)
 		virtual_machine.program = compiler.compile()
 
+func set_program(program):
+	virtual_machine.program = program
+
 func _on_line(line):
 	if auto_substitute:
 		var index = 0
@@ -105,6 +108,11 @@ func start(node = starting_node):
 
 	virtual_machine.set_node(node)
 	virtual_machine.start()
+
+func stop():
+	if running:
+		virtual_machine.call_deferred('stop')
+	running = false
 
 func resume():
 	virtual_machine.call_deferred('resume')
