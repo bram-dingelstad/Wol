@@ -37,15 +37,13 @@ func next_symbols_are(valid_types):
 	return true
 
 func expect_symbol(token_types = []):
-	compiler.assert(tokens.size() != 0, 'Ran out of tokens expecting next symbol!')
+	if compiler.assert(tokens.size() != 0, 'Ran out of tokens expecting next symbol!'):
+		return
+
 	var token = tokens.pop_front() as Lexer.Token
 
-	if tokens.size() == 0:
-		return token
-
 	if token_types.size() == 0:
-		if token.type == Constants.TokenType.EndOfInput:
-			compiler.assert(false, 'Unexpected end of input')
+		compiler.assert(token.type != Constants.TokenType.EndOfInput, 'Unexpected end of input')
 		return token
 
 	for type in token_types:
@@ -70,7 +68,7 @@ func expect_symbol(token_types = []):
 		error_guess
 	]
 	compiler.assert(false, 'Expected token "%s" but got "%s"%s' % error_data, token.line_number, token.column)
-	return token
+	return
 
 static func tab(indent_level, input, newline = true):
 	return '%*s| %s%s' % [indent_level * 2, '', input, '' if not newline else '\n']
@@ -127,8 +125,12 @@ class WolNode extends ParseNode:
 				parser.tokens.front().line_number,
 				parser.tokens.front().column
 			)
+			
+			var statement = Statement.new(self, parser)
+			if statement.failed_to_parse:
+				break
 
-			statements.append(Statement.new(self, parser))
+			statements.append(statement)
 
 	func tree_string(indent_level):
 		var info = []
@@ -148,6 +150,7 @@ class Statement extends ParseNode:
 	var shortcut_option_group
 	var custom_command
 	var line
+	var failed_to_parse = false
 
 	func _init(parent, parser).(parent, parser):
 		if Block.can_parse(parser):
@@ -180,6 +183,8 @@ class Statement extends ParseNode:
 
 		else:
 			parser.compiler.assert(false, 'Expected a statement but got %s instead. (probably an imbalanced if statement)' % parser.tokens.front()._to_string())
+			failed_to_parse = true
+			return
 		
 		var tags = []
 
@@ -210,7 +215,7 @@ class Statement extends ParseNode:
 			Type.Line:
 				info.append(line.tree_string(indent_level))
 			_:
-				printerr('Cannot print statement')
+				self.parser.compiler.assert(false, 'Cannot print statement')
 
 		return PoolStringArray(info).join('')
 
@@ -297,7 +302,7 @@ class LineNode extends ParseNode:
 					if line_id.empty():
 						line_id = tag_token.value
 					else:
-						printerr("Too many line_tags @[%s:%d]" % [parser.currentNodeName, tag_token.line_number])
+						parser.compiler.assert(false, 'Too many line_tags @[%s:%d]' % [parser.currentNodeName, tag_token.line_number])
 						return
 				else:
 					tags.append(tag_token.value)
@@ -642,7 +647,7 @@ class ValueNode extends ParseNode:
 			Constants.TokenType.NullToken:
 				value = Value.new(null)
 			_:
-				printerr('%s, Invalid token type' % token.name)
+				self.parser.compiler.assert(false, '%s, Invalid token type' % token.name)
 
 	func tree_string(indent_level):
 		return tab(indent_level, '%s' % value.value())
@@ -736,16 +741,15 @@ class ExpressionNode extends ParseNode:
 				while op_stack.back().type != Constants.TokenType.LeftParen:
 					var p = op_stack.pop_back()
 					if p == null:
-						printerr('unbalanced parenthesis %s' % next.name)
+						parser.compiler.assert(false, 'unbalanced parenthesis %s' % next.name)
 						break
 					rpn.append(p)
 
 				
 				#next token in op_stack left paren
 				# next parser token not allowed to be right paren or comma
-				if parser.next_symbol_is([Constants.TokenType.RightParen,
-					Constants.TokenType.Comma]):
-					printerr('Expected Expression : %s' % parser.tokens.front().name)
+				if parser.next_symbol_is([Constants.TokenType.RightParen, Constants.TokenType.Comma]):
+					parser.compiler.assert(false, 'Expected Expression : %s' % parser.tokens.front().name)
 				
 				#find the closest function on stack
 				#increment parameters
@@ -823,7 +827,7 @@ class ExpressionNode extends ParseNode:
 
 		#if rpn is empty then this is not expression
 		if rpn.size() == 0:
-			printerr('Error parsing expression: Expression not found!')
+			parser.compiler.assert(false, 'Error parsing expression: Expression not found!')
 
 		#build expression tree
 		var first = rpn.front()
@@ -833,10 +837,10 @@ class ExpressionNode extends ParseNode:
 			var next = rpn.pop_front()
 			if Operator.is_op(next.type):
 				#operation
-				var info = Operator.op_info(next.type)
+				var info = Operator.op_info(next.type, parser)
 
 				if eval_stack.size() < info.arguments:
-					printerr(
+					parser.compiler.assert(false,
 						'Error parsing : Not enough arguments for %s [ got %s expected - was %s]' \
 						% [
 							Constants.token_type_name(next.type),
@@ -900,8 +904,7 @@ class ExpressionNode extends ParseNode:
 		if operator_stack.size() == 0:
 			return false
 		
-		if not Operator.is_op(_type):
-			parser.compiler.assert(false, 'Unable to parse expression!')
+		if parser.compiler.assert(Operator.is_op(_type), 'Unable to parse expression!'):
 			return false
 		
 		var second = operator_stack.back().type
@@ -909,8 +912,8 @@ class ExpressionNode extends ParseNode:
 		if not Operator.is_op(second):
 			return false
 		
-		var first_info = Operator.op_info(_type)
-		var second_info = Operator.op_info(second)
+		var first_info = Operator.op_info(_type, parser)
+		var second_info = Operator.op_info(second, parser)
 
 		return \
 			(first_info.associativity == Associativity.Left \
@@ -970,9 +973,9 @@ class Operator extends ParseNode:
 		info.append(tab(indent_level, op_type))
 		return info.join('')
 
-	static func op_info(op):
-		if not Operator.is_op(op) :
-			printerr('%s is not a valid operator' % op.name)
+	static func op_info(op, parser):
+		if parser.compiler.assert(Operator.is_op(op), '%s is not a valid operator' % op):
+			return
 
 		#determine associativity and operands
 		# each operand has
@@ -996,8 +999,8 @@ class Operator extends ParseNode:
 			TokenType.Xor:
 				return OperatorInfo.new(Associativity.Left, 2, 2)
 			_:
-				printerr('Unknown operator: %s' % op.name)
-		return null
+				parser.compiler.assert(false, 'Unknown operator: %s' % op.name)
+		return
 
 	static func is_op(type):
 		return type in op_types()

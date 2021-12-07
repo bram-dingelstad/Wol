@@ -48,7 +48,7 @@ func get_connections():
 	return connections
 
 func _on_text_changed():
-	$TextDebounce.start(.3)
+	$TextDebounce.start()
 
 func _on_debounce():
 	text_edit.get_node('ErrorGutter').hide()

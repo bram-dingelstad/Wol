@@ -130,6 +130,8 @@ func assert(statement, message, line_number = -1, column = -1, _absolute_line_nu
 	elif not statement:
 		emit_signal('error', message, line_number, column)
 
+	return not statement
+
 func compile():
 	var parsed_nodes = []
 	for node in get_nodes():
