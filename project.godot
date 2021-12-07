@@ -11,7 +11,7 @@ config_version=4
 [application]
 
 config/name="Wol"
-run/main_scene="res://Dialogue.tscn"
+run/main_scene="res://TestScene.tscn"
 config/icon="res://icon.png"
 
 [debug]
@@ -23,6 +23,11 @@ gdscript/warnings/return_value_discarded=false
 [editor_plugins]
 
 enabled=PoolStringArray( "res://addons/Wol/plugin.cfg" )
+
+[network]
+
+limits/debugger_stdout/max_chars_per_second=8096
+limits/debugger_stdout/max_messages_per_frame=200
 
 [physics]
 

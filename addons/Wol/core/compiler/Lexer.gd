@@ -2,7 +2,7 @@ extends Object
 
 const Constants = preload('res://addons/Wol/core/Constants.gd')
 
-const LINE_COMENT = '//'
+const LINE_COMMENT = '//'
 const FORWARD_SLASH = '/'
 const LINE_SEPARATOR = '\n'
 
@@ -22,6 +22,7 @@ const FORMAT_FUNCTION = 'format'
 
 var WHITESPACE = '\\s*'
 
+var compiler
 var filename = ''
 var title = ''
 var text = ''
@@ -33,19 +34,20 @@ var current_state
 var indent_stack = []
 var should_track_indent = false
 
-func _init(_filename, _title, _text):
-	createstates()
+func _init(_compiler, _filename, _title, _text):
+	create_states()
 
+	compiler = _compiler
 	filename = _filename
 	title = _title
 	text = _text
 
-func createstates():
+func create_states():
 	var patterns = {}
 	patterns[Constants.TokenType.Text] = ['.*', 'any text']
 
 	patterns[Constants.TokenType.Number] = ['\\-?[0-9]+(\\.[0-9+])?', 'any number']
-	patterns[Constants.TokenType.Str] = ['\'([^\'\\\\]*(?:\\.[^\'\\\\]*)*)\'', 'any text']
+	patterns[Constants.TokenType.Str] = ['\"([^\"\\\\]*(?:\\.[^\"\\\\]*)*)\"', 'any text']
 	patterns[Constants.TokenType.TagMarker] = ['\\#', 'a tag #']
 	patterns[Constants.TokenType.LeftParen] = ['\\(', 'left parenthesis (']
 	patterns[Constants.TokenType.RightParen] =  ['\\)', 'right parenthesis )']
@@ -111,8 +113,8 @@ func createstates():
 	states[BASE].add_transition(Constants.TokenType.TagMarker, TAG, true)
 	states[BASE].add_text_rule(Constants.TokenType.Text)
 
-	#TODO: FIXME - Tags are not being proccessed properly this way. We must look for the format #{identifier}:{value}
-	#              Possible solution is to add more transitions
+	#FIXME - Tags are not being proccessed properly this way. We must look for the format #{identifier}:{value}
+	#        Possible solution is to add more transitions
 	states[TAG] = LexerState.new(patterns)
 	states[TAG].add_transition(Constants.TokenType.Identifier, BASE)
 
@@ -236,7 +238,11 @@ func tokenize():
 	lines.append('')
 
 	for line in lines:
-		tokens += tokenize_line(line, line_number)
+		var line_tokens = tokenize_line(line, line_number)
+		if line_tokens == null:
+			return
+
+		tokens.append_array(line_tokens)
 		line_number += 1
 
 	var end_of_input = Token.new(
@@ -252,12 +258,12 @@ func tokenize():
 func tokenize_line(line, line_number):
 	var token_stack = []
 
-	var fresh_line = line.replace('\t','    ').replace('\r','')
+	var fresh_line = line.replace('\t', '    ').replace('\r', '')
 
 	var indentation = line_indentation(line)
 	var previous_indentation = indent_stack.front()[0]
 
-	if should_track_indent && indentation > previous_indentation:
+	if should_track_indent and indentation > previous_indentation:
 		indent_stack.push_front([indentation, true])
 
 		var indent = Token.new(
@@ -284,7 +290,7 @@ func tokenize_line(line, line_number):
 	whitespace.compile(WHITESPACE)
 
 	while column < fresh_line.length():
-		if fresh_line.substr(column).begins_with(LINE_COMENT):
+		if fresh_line.substr(column).begins_with(LINE_COMMENT):
 			break
 		
 		var matched = false
@@ -367,12 +373,12 @@ func tokenize_line(line, line_number):
 				line_number,
 				column
 			]
-			assert(false, 'Expected %s in file %s in node "%s" on line #%d (column #%d)' % error_data)
+			compiler.assert(false, 'Expected %s in file %s in node "%s" on line #%d (column #%d)' % error_data, line_number, column)
+			return
 
 		var last_whitespace = whitespace.search(line, column)
 		if last_whitespace:
 			column += last_whitespace.get_string().length()
-		
 	
 	token_stack.invert()
 

@@ -1,4 +1,5 @@
 extends Object
+signal error(message, line_number, column)
 
 const Constants = preload('res://addons/Wol/core/Constants.gd')
 const Lexer = preload('res://addons/Wol/core/compiler/Lexer.gd')
@@ -12,85 +13,140 @@ var filename = ''
 
 var current_node
 var has_implicit_string_tags = false
+var soft_assert = false
 
 var string_count = 0
 var string_table = {}
 var label_count = 0
 
-func _init(_filename, _source = null):
+func _init(_filename, _source = null, _soft_assert = false):
 	filename = _filename
+	soft_assert = _soft_assert
 
 	if not _filename and _source:
-		self.source = _source
+		filename = 'inline_source'
+		source = _source
 	else:
 		var file = File.new()
 		file.open(_filename, File.READ)
-		self.source = file.get_as_text()
+		source = file.get_as_text()
 		file.close()
 
-func compile():
-	var header_sep = RegEx.new()
-	var header_property = RegEx.new()
-	header_sep.compile('---(\r\n|\r|\n)')
-	header_property.compile('(?<field>.*): *(?<value>.*)')
-
-	assert(header_sep.search(source), 'No headers found!')
-	
-	var line_number = 0
-
-	var source_lines = source.split('\n', false)
+	var source_lines = source.split('\n')
 	for i in range(source_lines.size()):
 		source_lines[i] = source_lines[i].strip_edges(false, true)
 
-	var parsed_nodes = []
+	source = source_lines.join('\n')
+
+func get_headers(offset = 0):
+	var header_property = RegEx.new()
+	var header_sep = RegEx.new()
+
+	header_sep.compile('---(\r\n|\r|\n)')
+	header_property.compile('(?<field>.*): *(?<value>.*)')
+
+	self.assert(header_sep.search(source), 'No headers found!')
+
+	var title = ''
+	var position = Vector2.ZERO
+
+	var source_lines = source.split('\n')
+	var line_number = offset
 	while line_number < source_lines.size():
-		var title = ''
-		var body = ''
-
-		# Parse header
-		while true:
-			var line = source_lines[line_number]
-			line_number += 1
-			
-			if not line.empty():
-				var result = header_property.search(line)
-				if result != null:
-					var field = result.get_string('field')
-					var value = result.get_string('value')
-
-					if field == 'title':
-						var regex = RegEx.new()
-						regex.compile(INVALID_TITLE)
-						assert(not regex.search(value), 'Invalid characters in title "%s", correct to "%s"' % [value, regex.sub(value, '', true)])
-
-						title = value
-					# TODO: Implement position, color and tags
-
-			if line_number >= source_lines.size() or line == '---':
-				break
-
-		# past header
-		var body_lines = []
+		var line = source_lines[line_number]
+		line_number += 1
 		
-		while line_number < source_lines.size() and source_lines[line_number] != '===':
-			body_lines.append(source_lines[line_number])
-			line_number += 1
+		if not line.empty():
+			var result = header_property.search(line)
 
+			if result != null:
+				var field = result.get_string('field')
+				var value = result.get_string('value')
+
+				if field == 'title':
+					var regex = RegEx.new()
+					regex.compile(INVALID_TITLE)
+					self.assert(not regex.search(value), 'Invalid characters in title "%s", correct to "%s"' % [value, regex.sub(value, '', true)])
+
+					title = value
+
+				if field == 'position':
+					var regex = RegEx.new()
+					regex.compile('^position:.*,.*\\d$')
+					self.assert(regex.search(line), 'Couldn\'t parse position property in the headers, got "%s" instead in node "%s"' % [value, title])
+
+					position = Vector2(int(value.split(',')[0].strip_edges()), int(value.split(',')[1].strip_edges()))
+
+				# TODO: Implement color and tags
+
+		if line == '---':
+			break
+
+	return {
+		'title': title,
+		'position': position
+	}
+
+func get_body(offset = 0):
+	var body_lines = []
+	
+	var source_lines = source.split('\n')
+	var recording = false
+	var line_number = offset
+
+	while line_number < source_lines.size() and source_lines[line_number] != '===':
+		if recording:
+			body_lines.append(source_lines[line_number])
+
+		recording = recording or source_lines[line_number] == '---'
 		line_number += 1
 
-		body = PoolStringArray(body_lines).join('\n')
-		var lexer = Lexer.new(filename, title, body)
-		var tokens = lexer.tokenize()
+	line_number += 1
 
-		var parser = Parser.new(title, tokens)
-		var parser_node = parser.parse_node()
+	return PoolStringArray(body_lines).join('\n')
 
-		parser_node.name = title
-		# parser_node.tags = title
-		parsed_nodes.append(parser_node)
+func get_nodes():
+	var nodes = []
+	var line_number = 0
+	var source_lines = source.split('\n')
+	while line_number < source_lines.size():
+		var headers = get_headers(line_number)
+		var body = get_body(line_number)
+		headers.body = body
+
+		nodes.append(headers)
+
+		# Add +2 to the final line to skip the === from that node
+		line_number = Array(source_lines).find_last(body.split('\n')[-1]) + 2
 
 		while line_number < source_lines.size() and source_lines[line_number].empty():
 			line_number += 1
+	
+	return nodes
+
+func assert(statement, message, line_number = -1, column = -1, _absolute_line_number = -1):
+	if not soft_assert:
+		assert(statement, '"%s" on line %d column %d' % [message, line_number, column])
+	elif not statement:
+		emit_signal('error', message, line_number, column)
+
+	return not statement
+
+func compile():
+	var parsed_nodes = []
+	for node in get_nodes():
+		var lexer = Lexer.new(self, filename, node.title, node.body)
+		var tokens = lexer.tokenize()
+
+		# In case of lexer error
+		if not tokens:
+			return
+
+		var parser = Parser.new(self, node.title, tokens)
+		var parser_node = parser.parse_node()
+
+		parser_node.name = node.title
+		parsed_nodes.append(parser_node)
 
 	var program = Program.new()
 	program.filename = filename
@@ -104,7 +160,7 @@ func compile():
 	return program
 
 func compile_node(program, parsed_node):
-	assert(not program.nodes.has(parsed_node.name), 'Duplicate node in program: %s' % parsed_node.name)
+	self.assert(not program.nodes.has(parsed_node.name), 'Duplicate node in program: %s' % parsed_node.name)
 
 	var node_compiled = Program.WolNode.new()
 
@@ -205,7 +261,7 @@ func generate_statement(node, statement):
 		Constants.StatementTypes.Line:
 			generate_line(node, statement)
 		_:
-			assert(false, 'Illegal statement type [%s]. Could not generate code.' % statement.type)
+			self.assert(false, statement.line_number, 'Illegal statement type [%s]. Could not generate code.' % statement.type)
 
 func generate_custom_command(node, command):
 	# TODO: See if the first tree of this statement is being used
@@ -234,7 +290,7 @@ func generate_shortcut_group(node, shortcut_group):
 	var end = register_label('group_end')
 	var labels = []
 	var option_count = 0
-
+	
 	for option in shortcut_group.options:
 		var endof_clause = ''
 		var op_destination = register_label('option_%s' % [option_count + 1])
@@ -356,6 +412,9 @@ func generate_assignment(node, assignment):
 	emit(Constants.ByteCode.Pop, node)
 
 func generate_expression(node, expression):
+	if self.assert(expression != null, 'Wrong expression (perhaps unterminated command block ">>"?)'):
+		return false
+
 	match expression.type:
 		Constants.ExpressionType.Value:
 			generate_value(node, expression.value)
