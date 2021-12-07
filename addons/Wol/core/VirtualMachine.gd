@@ -156,6 +156,9 @@ func run_instruction(instruction):
 		Constants.ByteCode.RunLine:
 			# Lookup string and give back as line
 			var key = instruction.operands[0].value
+			if not program.strings.has(key):
+				printerr('Cant find line for "%s"' % key)
+				return
 			var line = program.strings[key].clone()
 
 			# The second operand is the expression count of format function

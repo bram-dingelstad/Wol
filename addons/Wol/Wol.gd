@@ -24,8 +24,6 @@ export var auto_substitute = true
 
 export(Dictionary) var variable_storage = {}
 
-var running = false
-
 const Constants = preload('res://addons/Wol/core/Constants.gd')
 const Compiler = preload('res://addons/Wol/core/compiler/Compiler.gd')
 const Library = preload('res://addons/Wol/core/Library.gd')
@@ -53,6 +51,7 @@ func set_path(_path):
 	path = _path
 
 	if not Engine.editor_hint and virtual_machine and not path.empty():
+		print('recompiling')
 		var compiler = Compiler.new(path)
 		virtual_machine.program = compiler.compile()
 
@@ -102,6 +101,9 @@ func select_option(id):
 
 func pause():
 	virtual_machine.call_deferred('pause')
+
+func is_blocked():
+	return virtual_machine.execution_state == Constants.ExecutionState.WaitingForOption
 
 func start(node = starting_node):
 	running = true
