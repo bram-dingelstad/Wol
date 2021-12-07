@@ -6,7 +6,7 @@
 
 ---
 
-**Wol** is a tool for creating interactive dialogue for games. Its based on [YarnSpinner](https://yarnspinner.dev/) and it's [Yarn language](https://yarnspinner.dev/docs/syntax/). 
+**Wol** is a tool for creating interactive dialogue for games. Its based on [YarnSpinner](https://yarnspinner.dev/) and it's [Yarn language](https://yarnspinner.dev/docs/syntax/). (**_currently under heavy development, very unstable, do not use for production_**)
 
 Write your conversations in *Yarn*, a simple programming language that's designed to be easy for writers to learn, while also powerful enough to handle whatever you need. 
 
