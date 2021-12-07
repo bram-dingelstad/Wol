@@ -14,6 +14,8 @@ var program
 
 onready var text_edit = $TextEdit
 
+# TODO: Add syntax highlighting
+
 func _ready():
 	connect('offset_changed', self, '_on_offset_changed')
 	text_edit.connect('text_changed', self, '_on_text_changed')

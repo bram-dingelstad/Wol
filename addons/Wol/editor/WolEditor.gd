@@ -176,7 +176,8 @@ func _on_graph_edit_input(event):
 func _input(event):
 	if event is InputEventKey \
 			and not event.pressed and event.scancode == KEY_DELETE \
-			and selected_node:
+			and selected_node \
+			and not $HBoxContainer/Editor.visible:
 		$DeleteNodeDialog.dialog_text = original_delete_node_dialog % selected_node.name
 		$DeleteNodeDialog.popup()
 		

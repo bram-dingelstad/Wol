@@ -7,6 +7,10 @@ onready var button_template = $Options/List/ButtonTemplate
 
 onready var wol_editor = find_parent('WolEditor')
 
+# TODO: Make sure all focus is lost when clicking this pane
+# TODO: Add restart button
+# TODO: Add next button
+
 func _ready():
 	hide()
 	$Wol.connect('line', self, '_on_line')
@@ -45,6 +49,8 @@ func _on_line(line):
 	var line_node = line_template.duplicate()
 	$Content/List.add_child(line_node)
 	$Content/List/PaddingBottom.raise()
+	# TODO: Add hash() based color from speaker
+
 	line_node.get_node('RichTextLabel').bbcode_text = line.text
 	line_node.show()
 	yield(get_tree(), 'idle_frame')
