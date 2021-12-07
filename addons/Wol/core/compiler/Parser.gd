@@ -25,7 +25,16 @@ func parse_node():
 	return WolNode.new('Start', null, self)
 
 func next_symbol_is(valid_types):
-	compiler.assert(tokens.size() != 0, 'Ran out of tokens looking for next symbol!')
+	if tokens.size() == 0:
+		var error_tokens = []
+		for token in valid_types:
+			error_tokens.append(Constants.token_name(token))
+
+		if error_tokens == ['TagMarker']:
+			error_tokens.append('OptionEnd')
+
+		compiler.assert(tokens.size() != 0, 'Ran out of tokens looking for next symbol "%s"!' % PoolStringArray(error_tokens).join(', '))
+
 	return tokens.front() and tokens.front().type in valid_types
 
 # NOTE: 0 look ahead for `<<` and `else`
@@ -734,7 +743,8 @@ class ExpressionNode extends ParseNode:
 
 				#next token is parent - left
 				next = parser.expect_symbol([Constants.TokenType.LeftParen])
-				op_stack.push_back(next)
+				if next:
+					op_stack.push_back(next)
 
 			elif next.type == Constants.TokenType.Comma:
 				#resolve sub expression before moving on
@@ -906,7 +916,11 @@ class ExpressionNode extends ParseNode:
 		
 		if parser.compiler.assert(Operator.is_op(_type), 'Unable to parse expression!'):
 			return false
-		
+
+		# FIXME: Make sure there can't be a Null value here
+		if parser.compiler.assert(operator_stack.back() != null, 'Something went wrong getting precedence'):
+			return false
+
 		var second = operator_stack.back().type
 
 		if not Operator.is_op(second):

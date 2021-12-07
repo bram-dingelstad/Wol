@@ -412,6 +412,9 @@ func generate_assignment(node, assignment):
 	emit(Constants.ByteCode.Pop, node)
 
 func generate_expression(node, expression):
+	if self.assert(expression != null, 'Wrong expression (perhaps unterminated command block ">>"?)'):
+		return false
+
 	match expression.type:
 		Constants.ExpressionType.Value:
 			generate_value(node, expression.value)
