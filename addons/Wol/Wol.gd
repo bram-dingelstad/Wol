@@ -51,7 +51,6 @@ func set_path(_path):
 	path = _path
 
 	if not Engine.editor_hint and virtual_machine and not path.empty():
-		print('recompiling')
 		var compiler = Compiler.new(path)
 		virtual_machine.program = compiler.compile()
 

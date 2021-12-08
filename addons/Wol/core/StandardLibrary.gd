@@ -79,11 +79,7 @@ func node_visit_count(node = virtual_machine.current_node.name):
 	if node is Value:
 		node = virtual_machine.program.strings[node.value()].text
 
-
 	var variable_storage = virtual_machine.dialogue.variable_storage
 	var visited_node_count = variable_storage[virtual_machine.program.filename]
-
-	print('checking node "%s"' % node)
-	print(variable_storage)
 
 	return visited_node_count[node] if visited_node_count.has(node) else 0
