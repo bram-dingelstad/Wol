@@ -117,7 +117,7 @@ func get_nodes():
 		nodes.append(headers)
 
 		# Add +2 to the final line to skip the === from that node
-		line_number = Array(source_lines).find_last(body.split('\n')[-1]) + 2
+		line_number = Array(source_lines).find('===', line_number) + 1
 
 		while line_number < source_lines.size() and source_lines[line_number].empty():
 			line_number += 1
@@ -134,6 +134,7 @@ func assert(statement, message, line_number = -1, column = -1, _absolute_line_nu
 
 func compile():
 	var parsed_nodes = []
+
 	for node in get_nodes():
 		var lexer = Lexer.new(self, filename, node.title, node.body)
 		var tokens = lexer.tokenize()
