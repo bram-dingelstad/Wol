@@ -50,12 +50,13 @@ class Command:
 
 class WolNode:
 	var name = ''
+	var program
 	var instructions = []
 	var labels = {}
 	var tags = []
 	var source_id = ''
 
-	func _init(other = null):
+	func _init(_program, other = null):
 		if other != null and other.get_script() == self.get_script():
 			name = other.name
 			instructions += other.instructions
@@ -63,6 +64,8 @@ class WolNode:
 				labels[key] = other.labels[key]
 			tags += other.tags
 			source_id = other.source_id
+
+		program = _program
 
 	func equals(other):
 		if other.get_script() != get_script():
@@ -79,6 +82,15 @@ class WolNode:
 
 	func _to_string():
 		return "WolNode[%s:%s]"  % [name, source_id]
+
+	func get_lines():
+		var lines = []
+
+		for instruction in instructions:
+			if instruction.operation == Constants.ByteCode.RunLine:
+				lines.append(program.strings[instruction.operands.front().value])
+
+		return lines
 
 # TODO: Make this make sense
 class Operand:

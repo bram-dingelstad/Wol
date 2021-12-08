@@ -4,12 +4,14 @@ extends Panel
 var current_graph_node
 
 onready var preview = get_node('../Preview')
+onready var wol_editor = find_parent('WolEditor')
 
 func _ready():
 	hide()
 	connect('visibility_changed', self, '_on_visibility_changed')
 	$Tools/Left/Play.connect('pressed', self, '_on_play')
 	$Tools/Right/Close.connect('pressed', self, 'close')
+	$Tools/Right/Delete.connect('pressed', self, '_on_delete_pressed')
 
 func close():
 	hide()
@@ -54,6 +56,9 @@ func toggle_text_edit(text_edit):
 
 func _on_play():
 	preview.open_node(current_graph_node)
+
+func _on_delete_pressed():
+	wol_editor.confirm_delete_node(current_graph_node)
 
 func _on_title_changed():
 	current_graph_node.node.title = $HBoxContainer/TextEdit.text

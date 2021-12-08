@@ -10,6 +10,17 @@ var selected_node
 
 onready var original_delete_node_dialog = $DeleteNodeDialog.dialog_text
 
+# TODO: Conditionally load in theme based on Editor or standalone
+# TODO: Make deleting undo-able
+# TODO: Implement alternative "single" line style of connecting
+# TODO: Test out web version
+# TODO: Make web loading / saving work
+# TODO: Make theme for standalone editor
+# TODO: Make a "Godot editor" version of the editor theme
+# FIXME: Make lines render appropriately after connecting
+# FIXME: Make all parts of the code "tool"s and safekeep its execution while in editor
+# FIXME: Fix changing of titles
+
 func _ready():
 	for menu_button in [$Menu/File]:
 		menu_button.get_popup().connect('index_pressed', self, '_on_menu_pressed', [menu_button.get_popup()])
@@ -20,13 +31,10 @@ func _ready():
 
 	$DeleteNodeDialog.connect('confirmed', self, 'delete_node')
 
-	# TODO: Conditionally load in theme based on Editor or standalone
-
 	path = 'res://dialogue.wol'
 	build_nodes()
 
 func create_node(position = Vector2.ZERO):
-	print('creating node!')
 	var graph_node = GraphNodeTemplate.duplicate()
 	$GraphEdit.add_child(graph_node)
 
@@ -43,8 +51,15 @@ func create_node(position = Vector2.ZERO):
 	graph_node.show()
 
 func delete_node(node = selected_node):
+	if $HBoxContainer/Editor.visible:
+		$HBoxContainer/Editor.close()
 	$GraphEdit.remove_child(node)
 	node.queue_free()
+
+func confirm_delete_node(node = selected_node):
+	selected_node = node
+	$DeleteNodeDialog.dialog_text = original_delete_node_dialog % selected_node.name
+	$DeleteNodeDialog.popup()
 
 func build_nodes():
 	for node in Compiler.new(path).get_nodes():
@@ -178,6 +193,5 @@ func _input(event):
 			and not event.pressed and event.scancode == KEY_DELETE \
 			and selected_node \
 			and not $HBoxContainer/Editor.visible:
-		$DeleteNodeDialog.dialog_text = original_delete_node_dialog % selected_node.name
-		$DeleteNodeDialog.popup()
-		
+		confirm_delete_node()
+

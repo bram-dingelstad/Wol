@@ -163,7 +163,7 @@ func compile():
 func compile_node(program, parsed_node):
 	self.assert(not program.nodes.has(parsed_node.name), 'Duplicate node in program: %s' % parsed_node.name)
 
-	var node_compiled = Program.WolNode.new()
+	var node_compiled = Program.WolNode.new(program)
 
 	node_compiled.name = parsed_node.name
 	node_compiled.tags = parsed_node.tags
