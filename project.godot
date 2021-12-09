@@ -11,8 +11,15 @@ config_version=4
 [application]
 
 config/name="Wol"
-run/main_scene="res://TestScene.tscn"
-config/icon="res://icon.png"
+config/description="Wol is a tool for creating interactive dialogue for games. Its based on YarnSpinner and it's Yarn language. 
+
+Write your conversations in Yarn, a simple programming language that's designed to be easy for writers to learn, while also powerful enough to handle whatever you need.
+
+Yarn's similar in style to Twine, so if you already know that, you'll be right at home! If you don't, that's cool - Yarn's syntax is extremely minimal, and there's not much there to learn.
+
+Wol is actively maintained by Bram Dingelstad, if you need a programmer or designer for your next (Godot) project, you can hire him!"
+run/main_scene="res://addons/Wol/editor/WolEditor.tscn"
+config/icon="res://addons/Wol/icon-white-with-stroke.svg"
 
 [debug]
 
@@ -20,9 +27,21 @@ gdscript/warnings/treat_warnings_as_errors=true
 gdscript/warnings/exclude_addons=false
 gdscript/warnings/return_value_discarded=false
 
+[display]
+
+window/size/test_width=2048
+window/size/test_height=1200
+window/dpi/allow_hidpi=true
+window/stretch/mode="2d"
+window/stretch/aspect="expand"
+
 [editor_plugins]
 
 enabled=PoolStringArray( "res://addons/Wol/plugin.cfg" )
+
+[gui]
+
+theme/use_hidpi=true
 
 [network]
 

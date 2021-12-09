@@ -199,10 +199,8 @@ class Statement extends ParseNode:
 
 		while parser.next_symbol_is([Constants.TokenType.TagMarker]):
 			parser.expect_symbol([Constants.TokenType.TagMarker])
-
-			if parser.next_symbol_is([Constants.TokenType.Identifier]):
-				var tag = parser.expect_symbol([Constants.TokenType.Identifier]).value
-				tags.append(tag)
+			var tag = parser.expect_symbol([Constants.TokenType.Identifier]).value
+			tags.append(tag)
 
 		if tags.size() > 0:
 			self.tags = tags
@@ -432,9 +430,9 @@ class ShortCutOption extends ParseNode:
 
 			elif parser.next_symbols_are([Constants.TokenType.TagMarker, Constants.TokenType.Identifier]):
 				parser.expect_symbol([Constants.TokenType.TagMarker])
-				if parser.next_token_is([Constants.TokenType.Identifier]):
-					var tag = parser.expect_symbol([Constants.TokenType.Identifier]).value
-					tags.append(tag)
+				var tag = parser.expect_symbol([Constants.TokenType.Identifier]).value
+				tags.append(tag)
+
 		
 		self.tags = tags
 		# parse remaining statements
@@ -511,9 +509,9 @@ class OptionStatement extends ParseNode:
 		# NOTE: if there is a | get the next string
 		if parser.next_symbol_is([Constants.TokenType.OptionDelimit]):
 			parser.expect_symbol([Constants.TokenType.OptionDelimit])
-			if parser.next_symbol_is([Constants.TokenType.Text, Constants.TokenType.Identifier]):
-				var t = parser.expect_symbol([Constants.TokenType.Text, Constants.TokenType.Identifier])
-				strings.append(t.value as String)
+			var t = parser.expect_symbol([Constants.TokenType.Text, Constants.TokenType.Identifier])
+
+			strings.append(t.value as String)
 		
 		label = strings[0] if strings.size() > 1 else ''
 		destination = strings[1] if strings.size() > 1 else strings[0]
@@ -947,12 +945,8 @@ class Assignment extends ParseNode:
 	func _init(parent, parser).(parent, parser):
 		parser.expect_symbol([Constants.TokenType.BeginCommand])
 		parser.expect_symbol([Constants.TokenType.Set])
-		
-		if parser.next_symbol_is([Constants.TokenType.Variable]):
-			destination = parser.expect_symbol([Constants.TokenType.Variable]).value
-		if parser.next_symbol_is(Assignment.valid_ops()):
-			operation = parser.expect_symbol(Assignment.valid_ops()).type
-
+		destination = parser.expect_symbol([Constants.TokenType.Variable]).value
+		operation = parser.expect_symbol(Assignment.valid_ops()).type
 		value = ExpressionNode.parse(self, parser)
 		parser.expect_symbol([Constants.TokenType.EndCommand])
 

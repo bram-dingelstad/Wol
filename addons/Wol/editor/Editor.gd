@@ -13,6 +13,10 @@ func _ready():
 	$Tools/Right/Close.connect('pressed', self, 'close')
 	$Tools/Right/Delete.connect('pressed', self, '_on_delete_pressed')
 
+	for child in $Tools/Left/Title.get_children():
+		if child is VScrollBar:
+			child.rect_scale = Vector2.ZERO
+
 func close():
 	hide()
 	preview.close()
@@ -20,7 +24,7 @@ func close():
 func open_node(graph_node):
 	current_graph_node = graph_node
 
-	var text_edit = graph_node.get_node('TextEdit')
+	var text_edit = graph_node.get_node('Wrapper/TextEdit')
 	text_edit.get_parent().remove_child(text_edit)
 	$Content.add_child(text_edit)
 	toggle_text_edit(text_edit)
@@ -61,12 +65,12 @@ func _on_delete_pressed():
 	wol_editor.confirm_delete_node(current_graph_node)
 
 func _on_title_changed():
-	current_graph_node.node.title = $HBoxContainer/TextEdit.text
+	current_graph_node.node.title = $Tools/Left/Title.text
 	current_graph_node.compile()
 
 func _on_visibility_changed():
 	if not visible:
 		var text_edit = $Content/TextEdit
 		$Content.remove_child(text_edit)
-		current_graph_node.add_child(text_edit)
+		current_graph_node.get_node('Wrapper').add_child(text_edit)
 		toggle_text_edit(text_edit)

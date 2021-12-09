@@ -12,7 +12,7 @@ var error_lines = []
 var compiler
 var program
 
-onready var text_edit = $TextEdit
+onready var text_edit = $Wrapper/TextEdit
 
 # TODO: Add syntax highlighting
 
@@ -38,14 +38,14 @@ func get_connections():
 		if instruction.operation == Constants.ByteCode.RunNode:
 			if instruction.operands.size() > 0 \
 					and instruction.operands.front().value != name:
-				connections.append(instruction.operands.front().value)
+				connections.append(instruction.operands.front().value.replace('.', '_'))
 
 		# NOTE: When next node is decided through options
 		if instruction.operation == Constants.ByteCode.AddOption:
 			if instruction.operands.size() == 2 \
 					and not label_check.search(instruction.operands[1].value) \
 					and instruction.operands[1].value != name:
-				connections.append(instruction.operands[1].value)
+				connections.append(instruction.operands[1].value.replace('.', '_'))
 
 	return connections
 
@@ -74,7 +74,7 @@ func _on_error(message, line_number, _column):
 func set_node(_node):
 	node = _node
 	title = node.title
-	name = node.title
+	name = node.title.replace('.', '_')
 	text_edit.text = node.body
 	text_edit.clear_undo_history()
 	offset = node.position

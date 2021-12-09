@@ -1,7 +1,7 @@
 title: Sally.Watch
 tags: 
 colorID: 
-position: 500, 400
+position: 600, 400
 ---
 Sally: Not really.  #line:8c3f98
 Sally: Same old nebula, doing the same old thing. #line:24c418
@@ -12,24 +12,17 @@ Sally: Oh, Ship wanted to see you. Go say hi to it. #line:df4eaf
     Sally: Go say hi again. #line:5df323
 <<endif>>
 ===
-title: Sally.Exit
-tags: 
-colorID: 
-position: 100, 400
----
-Sally: Bye. #line:60c282
-===
 title: Sally.Sorry
 tags: 
 colorID: 
-position: 900, 400
+position: 600, 700
 ---
 Sally: Yeah. Don't do it again. #line:d7df49
 ===
 title: Sally
 tags: 
 colorID: 
-position: 500, 100
+position: -100, 400
 ---
 <<if visited("Sally") is false>>
     Player: Hey, Sally. #line:794945

@@ -19,6 +19,10 @@ func _ready():
 	$Tools/Left/Restart.connect('pressed', self, 'restart')
 	$Tools/Right/Close.connect('pressed', self, 'close')
 
+	for child in $Tools/Left/Protagonist.get_children():
+		if child is VScrollBar:
+			child.rect_scale = Vector2.ZERO
+
 func open_node(graph_node):
 	current_graph_node = graph_node
 
@@ -123,6 +127,8 @@ func _on_option_pressed(option):
 		if child != button_template:
 			$Options/List.remove_child(child)
 			child.queue_free()
+
+	grab_focus()
 
 func _on_gui_input(event):
 	if visible:
