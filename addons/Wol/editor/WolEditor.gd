@@ -7,22 +7,21 @@ onready var GraphNodeTemplate = $GraphNodeTemplate
 var path
 var selected_node
 var saved_all_changes = false
+var mouse_panning = false
 
 onready var original_delete_node_dialog = $DeleteNodeDialog.dialog_text
 onready var inside_godot_editor = not get_tree().current_scene and Engine.editor_hint
 
 # Standalone
-# TODO: Add right-click offset scrolling
-# TODO: Add ESC as a way to go out of a "Preview" or "Editor"
 # TODO: Add confirm window for creating new file if working on another
 # TODO: Make arrow keys / WASD select next node
 # TODO: Make ENTER key open a editor
-# FIXME: Title debounce / space (\s) registering bug
-# FIXME: Titles not working
-# FIXME: Contextualize global _input events
+# TODO: Add comprehensive Help in a dialog
+# TODO: Add scrolling ability to a node when focussing a node
 
 # Godot Editor
-# FIXME: Make all parts of the code "tool"s and safekeep its execution while in editor
+# FIXME: Make all parts of the code "tool"s and safekeep its execution while in editora
+# FIXME: Hide console when viewing Wol main screen
 
 # Web version
 # TODO: Test out web version
@@ -42,6 +41,7 @@ func _ready():
 
 	$Menu/Settings.connect('pressed', self, 'show_settings')
 	$Menu/About.connect('pressed', self, 'show_about')
+	$Menu/Help.connect('pressed', self, 'show_help')
 
 	$GraphEdit.connect('gui_input', self, '_on_graph_edit_input')
 	$GraphEdit.connect('node_selected', self, '_on_node_selected', [true])
@@ -49,6 +49,7 @@ func _ready():
 	$GraphEdit.connect('_end_node_move', self, 'reconnect_nodes')
 
 	$DeleteNodeDialog.connect('confirmed', self, 'delete_node')
+	$HelpDialog/HSplitContainer/Right.connect('meta_clicked', self, '_on_url_clicked')
 
 	path = 'res://dialogue.wol'
 	build_nodes()
@@ -165,9 +166,15 @@ func show_settings():
 
 func show_about():
 	$AboutDialog.popup()
+
+func show_help():
+	$HelpDialog.popup()
+
+func _on_url_clicked(url):
+	OS.shell_open(url)
 	
 func _on_menu_pressed(index, node):
-	match(node.get_item_text(index)):
+	match node.get_item_text(index):
 		'New':
 			new()
 		'Save':
@@ -246,6 +253,28 @@ func connect_nodes_godot_style():
 
 			$GraphEdit.connect_node(graph_node.name, 0, connection, 0)
 
+func move_focus(event):
+	var current_focussed
+	var first_node
+	for node in $GraphEdit.get_children():
+		if node is GraphNode:
+			if not first_node:
+				first_node = node
+			if node.selected:
+				current_focussed = node
+
+	if not current_focussed:
+		current_focussed = first_node
+
+	var vector = Vector2.RIGHT
+	match event.scancode:
+		KEY_D, KEY_RIGHT:
+			pass # Defaults to right
+
+		KEY_A, KEY_LEFT:
+			vector = vector.rotated(PI)
+
+
 func _on_graph_node_input(event, graph_node):
 	if event is InputEventMouseButton \
 			and event.doubleclick and event.button_index == BUTTON_LEFT:
@@ -263,7 +292,20 @@ func _on_graph_edit_input(event):
 			and event.doubleclick and event.button_index == BUTTON_LEFT:
 		create_node(event.global_position + $GraphEdit.scroll_offset)
 
+	if event is InputEventMouseButton \
+			and event.button_index == BUTTON_RIGHT:
+		mouse_panning = event.pressed
+
+	if event is InputEventMouseMotion and mouse_panning:
+		$GraphEdit.scroll_offset -= event.relative
+	
+	if event is InputEventKey and not event.pressed:
+		move_focus(event)
+
 func _input(event):
+	if not visible:
+		return
+
 	if event is InputEventKey \
 			and not event.pressed and event.physical_scancode == KEY_DELETE \
 			and selected_node \

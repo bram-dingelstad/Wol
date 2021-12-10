@@ -7,6 +7,7 @@ onready var line_template = $Content/List/LineTemplate
 onready var button_template = $Options/List/ButtonTemplate
 
 onready var wol_editor = find_parent('WolEditor')
+onready var editor = get_node('../Editor')
 
 func _ready():
 	hide()
@@ -78,6 +79,9 @@ func close():
 	current_graph_node = null
 	$Wol.stop()
 
+	if editor.visible:
+		editor.grab_focus()
+
 func next():
 	$Wol.resume()
 
@@ -137,6 +141,9 @@ func _on_gui_input(event):
 
 		if event is InputEventMouseButton and event.pressed:
 			grab_focus()
+
+		if event is InputEventKey and event.scancode == KEY_ESCAPE:
+			close()
 
 func _input(event):
 	if visible and has_focus() and event is InputEventKey and not event.pressed and event.scancode in [KEY_SPACE, KEY_ENTER]:

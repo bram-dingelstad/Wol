@@ -11,5 +11,5 @@ func _on_text_changed(_new_text):
 		text = text.replace(' ', '')
 		caret_position = cursor_position
 
-		emit_signal('text_changed')
+		emit_signal('text_changed', text)
 

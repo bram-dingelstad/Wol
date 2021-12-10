@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=24 format=2]
 
 [ext_resource path="res://addons/Wol/editor/Editor.gd" type="Script" id=1]
 [ext_resource path="res://addons/Wol/editor/WolEditor.gd" type="Script" id=2]
@@ -8,10 +8,14 @@
 [ext_resource path="res://addons/Wol/editor/editor_default_font.tres" type="DynamicFont" id=6]
 [ext_resource path="res://addons/Wol/editor/editor_theme.tres" type="Theme" id=7]
 [ext_resource path="res://addons/Wol/editor/InlineTextEdit.gd" type="Script" id=8]
-[ext_resource path="res://addons/Wol/editor/ScrollContainerWithScrollWheel.gd" type="Script" id=9]
+[ext_resource path="res://addons/Wol/font/Aileron-Regular.otf" type="DynamicFontData" id=9]
 [ext_resource path="res://addons/Wol/editor/ScrollContainerWithScrollWheel.gd" type="Script" id=10]
 [ext_resource path="res://addons/Wol/icon-white-with-stroke.svg" type="Texture" id=11]
 [ext_resource path="res://addons/Wol/editor/AboutDialog.gd" type="Script" id=12]
+[ext_resource path="res://addons/Wol/font/Aileron-SemiBold.otf" type="DynamicFontData" id=13]
+[ext_resource path="res://addons/Wol/font/VictorMono-Light.otf" type="DynamicFontData" id=14]
+[ext_resource path="res://addons/Wol/font/Aileron-SemiBoldItalic.otf" type="DynamicFontData" id=15]
+[ext_resource path="res://addons/Wol/font/Aileron-Italic.otf" type="DynamicFontData" id=16]
 
 [sub_resource type="StyleBoxEmpty" id=2]
 
@@ -21,6 +25,35 @@ corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
+
+[sub_resource type="DynamicFont" id=330]
+size = 12
+use_mipmaps = true
+use_filter = true
+font_data = ExtResource( 14 )
+
+[sub_resource type="DynamicFont" id=331]
+size = 12
+use_mipmaps = true
+use_filter = true
+font_data = ExtResource( 15 )
+
+[sub_resource type="DynamicFont" id=332]
+size = 12
+use_mipmaps = true
+use_filter = true
+font_data = ExtResource( 16 )
+
+[sub_resource type="DynamicFont" id=333]
+use_mipmaps = true
+use_filter = true
+font_data = ExtResource( 13 )
+
+[sub_resource type="DynamicFont" id=329]
+size = 12
+use_mipmaps = true
+use_filter = true
+font_data = ExtResource( 9 )
 
 [node name="WolEditor" type="Panel"]
 anchor_right = 1.0
@@ -49,17 +82,26 @@ items = [ "New", null, 0, false, false, 0, 0, null, "", false, "Open", null, 0, 
 switch_on_hover = true
 
 [node name="Settings" type="Button" parent="Menu"]
-margin_left = 42.0
-margin_right = 112.0
+margin_left = 46.0
+margin_right = 116.0
 margin_bottom = 32.0
 focus_mode = 0
 enabled_focus_mode = 0
 text = "Settings"
 flat = true
 
-[node name="About" type="Button" parent="Menu"]
-margin_left = 116.0
+[node name="Help" type="Button" parent="Menu"]
+margin_left = 124.0
 margin_right = 171.0
+margin_bottom = 32.0
+focus_mode = 0
+enabled_focus_mode = 0
+text = "Help"
+flat = true
+
+[node name="About" type="Button" parent="Menu"]
+margin_left = 179.0
+margin_right = 234.0
 margin_bottom = 32.0
 focus_mode = 0
 enabled_focus_mode = 0
@@ -170,11 +212,13 @@ __meta__ = {
 }
 
 [node name="Preview" type="Panel" parent="HBoxContainer"]
+visible = false
 margin_left = 352.0
 margin_right = 672.0
 margin_bottom = 568.0
 rect_min_size = Vector2( 320, 0 )
 focus_mode = 1
+size_flags_horizontal = 3
 script = ExtResource( 4 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -265,7 +309,7 @@ margin_bottom = 4.89603
 mouse_filter = 1
 follow_focus = true
 scroll_horizontal_enabled = false
-script = ExtResource( 9 )
+script = ExtResource( 10 )
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -378,6 +422,9 @@ margin_left = 368.0
 margin_right = 1008.0
 margin_bottom = 568.0
 rect_min_size = Vector2( 640, 0 )
+focus_mode = 1
+mouse_filter = 1
+size_flags_horizontal = 3
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -542,6 +589,761 @@ grow_vertical = 2
 text = "Wol (alpha1)"
 align = 1
 valign = 1
+
+[node name="HelpDialog" type="WindowDialog" parent="."]
+visible = true
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -259.0
+margin_top = -157.5
+margin_right = 259.0
+margin_bottom = 157.5
+input_pass_on_modal_close_click = false
+popup_exclusive = true
+window_title = "Help"
+resizable = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HSplitContainer" type="HSplitContainer" parent="HelpDialog"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 16.0
+margin_top = 16.0
+margin_right = -16.0
+margin_bottom = -16.0
+
+[node name="Left" type="RichTextLabel" parent="HelpDialog/HSplitContainer"]
+margin_right = 231.0
+margin_bottom = 283.0
+rect_pivot_offset = Vector2( -370.24, 130.838 )
+size_flags_horizontal = 3
+custom_fonts/mono_font = SubResource( 330 )
+custom_fonts/bold_italics_font = SubResource( 331 )
+custom_fonts/italics_font = SubResource( 332 )
+custom_fonts/bold_font = SubResource( 333 )
+custom_fonts/normal_font = SubResource( 329 )
+bbcode_enabled = true
+bbcode_text = "[b]Keyboard shortcuts[/b]
+[s]Line through = not yet implemented[/s]
+
+[i]Anywhere[/i]
+New 
+[right]Ctrl/Cmd + N[/right]
+Save 
+[right]Ctrl/Cmd + S[/right]
+Save as... 
+[right]Ctrl/Cmd + Shift + S[/right]
+Open 
+[right]Ctrl/Cmd + O[/right]
+
+[i]Node view[/i]
+[s]WASD / Arrows[/s]
+[right]move focus[/right]
+[s]Enter / Dbl click[/s]
+[right]open node in editor[/right]
+
+[i]Editor[/i]
+Escape 
+[right]Close editor[/right]
+[s]Ctrl/Cmd + P[/s]
+[right]Play node[/right]
+
+[i]Preview[/i]
+Space
+[right]Proceed with dialogue[/right]
+
+."
+text = "Keyboard shortcuts
+Line through = not yet implemented
+
+Anywhere
+New 
+Ctrl/Cmd + N
+Save 
+Ctrl/Cmd + S
+Save as... 
+Ctrl/Cmd + Shift + S
+Open 
+Ctrl/Cmd + O
+
+Node view
+WASD / Arrows
+move focus
+Enter / Dbl click
+open node in editor
+
+Editor
+Escape 
+Close editor
+Ctrl/Cmd + P
+Play node
+
+Preview
+Space
+Proceed with dialogue
+
+."
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Right" type="RichTextLabel" parent="HelpDialog/HSplitContainer"]
+margin_left = 255.0
+margin_right = 486.0
+margin_bottom = 283.0
+rect_pivot_offset = Vector2( -370.24, 130.838 )
+size_flags_horizontal = 3
+custom_fonts/mono_font = SubResource( 330 )
+custom_fonts/bold_italics_font = SubResource( 331 )
+custom_fonts/italics_font = SubResource( 332 )
+custom_fonts/bold_font = SubResource( 333 )
+custom_fonts/normal_font = SubResource( 329 )
+bbcode_enabled = true
+bbcode_text = "[b][url=https://yarnspinner.dev/docs/syntax/]Yarn / Wol syntax reference[/url][/b]
+
+Yarn is a programming language designed for dialogue. This means it has to follow some rules, so a computer can make sense of it.
+
+Yarn / Wol files are broken up into nodes. Each node has multiple different statements that make it up. In general, Wol treats each new line in the Yarn / Wol file as a separate element. It needs to work out what that may be.
+
+[b]Nodes[/b]
+
+Everything in Yarn / Wol is a node, and all your dialogue is contained within a node. Your Yarn / Wol files might contain multiple nodes or only a single node, but all Yarn / Wol has to be part of a node. All nodes have the same basic structure:
+[code]
+header
+---
+body
+===
+[/code]
+The header is separated from the body by [code]---[/code] (three - symbols on a line by themselves). The node is terminated by [code]===[/code] (three = symbols on a line by themselves).
+
+If you are using a visual editor, these nodes make up the little boxes you see on the canvas.
+
+[b]Header[/b]
+
+The header contains metadata for the node, and can have as many pieces of node metadata as you wish. Metadata is created as key-value pairs. Each metadata piece has the same layout:
+[code]
+key:value
+[/code]
+Every metadata piece has to go one a line by itself.
+
+An example of this: [code]myKey:myValue[/code] has a key of [code]myKey[/code] and a value of [code]myValue[/code].
+
+[b]Title[/b]
+
+The title header defines the name of the node. All nodes must have a title.
+
+This header will look something like [code]title:nodename[/code]. The name of the node, in this case nodename, needs to be unique across the entire project, and can be any combination of upper or lower case letters and numbers. Node titles can’t have spaces.
+
+The value of this is case sensitive, so [code]nodename[/code] is not the same as [code]nodeName[/code].
+
+[b]Tags[/b]
+
+Nodes can have additional metadata about them, which you can define in the tags header. This is a space-separated list of words.
+Unlike the title metadata, the values don’t have to be unique.
+
+[b]Body[/b]
+
+The body, which are the parts of the node in-between the [code]---[/code] and [code]===[/code] lines, are where the bulk of your time will be spent and is where all of your dialogue will go.
+
+[b]Dialogue[/b]
+
+The majority of your Yarn / Wol files will normally be dialogue - lines spoken by your characters in the game. Each line of dialogue is treated as a new dialogue statement by Wol. Almost any text can go inside your dialogue.
+
+Most lines of dialogue are written like the following:
+[code]
+Player: Hey, Sally.
+Sally: Oh! Hi.
+Sally: You snuck up on me.
+[/code]
+In this case, we have the characters names preceding the text we want them to say. This is optional, and you can just have the dialogue if you prefer:
+[code]
+Hey, Sally.
+Oh! Hi.
+You snuck up on me.
+[/code]
+If you don’t include character names, your game will need some other way of working out which line is for which character, and we leave that up to you.
+
+[b]Inline Expressions[/b]
+
+Lines of dialogue can have [url=https://yarnspinner.dev/docs/syntax/#expression]expressions[/url] embedded inside them. These expressions will be expanded when the dialogue runner encounters them. Any expression inside [code]{[/code] and [code]}[/code] will be evaluated and rendered in-line with the rest of the text.
+
+For example, imagine you have a variable called [code]$gold[/code]. You can display the contents of this variable to the player like this:
+[code]
+You have {$gold} gold pieces.
+[/code]
+More complex expressions can be used as well. For example, you can do maths with your values:
+[code]
+If you had twice as much gold, you'd have {$gold * 2} gold pieces!
+[/code]
+
+NOTE: Inline expressions can be used with [url=https://yarnspinner.dev/docs/syntax/#format-functions]format functions[/url], especially when you need to localise your text.
+
+[b]Options[/b]
+
+Options are how you can move between different nodes.
+[code]
+[[Text to show to the user|NodeName]]
+[/code]
+Options are broken up into two parts seperated by a vertical bar symbol ([code]|[/code]). The first part is any text that is to be shown to the user, and the second part after the bar is the name of the node. The node name must be the name of another node somewhere else in your Yarn / Wol files, or else the program will not work. After the player selects an option the node linked, in this case [code]NodeName[/code], will be loaded and the story will continue from there.
+
+Inline expressions can be used in options.
+NOTE: Learn more about options in [url=https://yarnspinner.dev/docs/writing/controlling/#options]Controlling Dialogue[/url].
+
+[b]Jumps[/b]
+
+A jump tells Wol to start running a different node. They’re not shown to the player.
+[code]
+[[NodeName]]
+[/code]
+When Wol encounters this line, it will immediately start running the contents of the [code]NodeName[/code] node.
+NOTE: Learn more about jumps in [url=https://yarnspinner.dev/docs/writing/controlling/#options]Controlling Dialogue[/url].
+
+[b]Shortcut Options[/b]
+
+Shortcut options let you create simple branching dialogue without needing to create new nodes. Each shortcut starts with the [code]->[/code] arrow and then the line of text that should be presented to the player.
+[code]
+Where should we go next?
+-> North
+-> South
+-> East
+-> West
+[/code]
+This would show the line [code]Where should we go next?[/code] and then the options of [code]North[/code], [code]South[/code], [code]East[/code], [code]West[/code].
+NOTE: Learn more about shortcut options in [url=https://yarnspinner.dev/docs/writing/controlling/#options]Controlling Dialogue[/url].
+
+[b]Shortcut scope[/b]
+
+Shortcuts allow you add additional statements below the shortcut to run additional lines, and in many cases is used for setting or updating variables. The new statements have to go below the shortcut option they are a part of and need to be indented relative to the shortcut.
+[code]
+-> North
+    It is cold to the north.
+-> South
+    You've heard that the weather to the south is sunny.
+-> East
+    You're not sure if the rumours of bandits to the east are true.
+-> West
+You continue your journey.
+[/code]
+Different lines will be shown to the player depending on what options they select:
+
+* In the above example if the player selected the [code]North[/code] option the dialogue line [code]It is cold to the north[/code] would be shown after and then [code]You continue your journey[/code].
+* If they select [code]South[/code] or [code]East[/code], they’ll see different lines before [code]You continue your journey.[/code]
+* If they select [code]West[/code], they’ll only see [code]You continue your journey[/code].
+
+The indentation must be kept consistent, or else Wol won’t be able to work out your intent.
+
+[b]Shortcut conditionals[/b]
+
+Shortcuts can also be limited to only be presented if needed. You do this by adding an if statement to the end of the shortcut.
+[code]
+-> Locked Trapdoor <<if $hasKey is true>>
+-> North
+-> South
+-> East
+-> West
+[/code]
+In the above example the shortcut [code]Locked Trapdoor[/code] will only appear as an option your players can pick if the variable [code]$hasKey[/code] is true. If [code]$hasKey[/code] is [code]false[/code] only the four directions will appear.
+
+[b]Variables[/b]
+
+You can store information inside variables.
+
+Variable names are any combination of letters and numbers preceded by the [code]$[/code] symbol. Variable names are case sensitive, so [code]$varName[/code] and [code]$varname[/code] are two different variables as far as Wol is concerned.
+
+Variables are global in scope, so they exist across all nodes across all files. This means you can declare a variable in one file and then later use that variable in another file.
+
+[b]Values[/b]
+
+Variables can hold numbers, text, [code]true[/code] and [code]false[/code], or [code]null[/code].
+
+[b]Setting values[/b]
+
+You can set and update values inside of variables using the set operation:
+[code]
+<<set $var to 1>>
+[/code]
+The [code]set[/code] operation takes the form of the command opening symbol [code]<<[/code], followed immediately by the [code]set[/code] keyword, then the variable, [code]$var[/code] in our case, then the [code]to[/code] keyword, and finally the value you want.
+
+You can also use the [code]=[/code] in place of the to keyword if you wish.
+
+[b]Numbers[/b]
+
+Numbers are always decimals (technically, floating point) regardless of what values you give them. This means if you give a variable the value of [code]1[/code] when you get it back out from Wol it will be [code]1.0[/code].
+
+[b]Text[/b]
+
+Text inside variables can be anything you want but must be contained with quotation marks. This means that while [code]<<set $var to \"hello\">>[/code] is valid, [code]<<set $var to hello>>[/code] is not.
+
+[b][code]True[/code] and [code]False[/code][/b]
+
+Variables can be set to be [code]true[/code] or [code]false[/code] using the keywords [code]true[/code] or [code]TRUE[/code], and [code]false[/code] and [code]FALSE[/code]. These are case sensitive, so [code]<<set $var to true>>[/code] will work, but [code]<<set $var to True>>[/code] will not.
+
+[b]Conditionals[/b]
+
+Conditionals are how you can create different branching dialogue and events based on logical statements. All conditionals take the same basic structure, an [code]if[/code] statement, then zero or more [code]elseif[/code] statements, then zero or one [code]else[/code] statements, and finally the [code]endif[/code].
+
+Wol will work its way down the conditional until it meets a piece of it it can run and presents the statements for that piece.
+[code]
+<<if $money > 1>>
+	I would like a horse please.
+	<<set $money to $money - 2>>
+	<<set $hasHorse to true>>
+<<elseif $money eq 1 >>
+	Just a drink thanks.
+	<<set $money to $money - 1>>
+<<else>>
+	Drat, I can't afford anything.
+<<endif>>
+[/code]
+Take the above example, if [code]$money[/code] happens to be [code]1[/code] then the line [code]Just a drink thanks.[/code] will be shown, but if [code]$money[/code] was [code]5[/code] then the line [code]I would like a horse please.[/code] would be shown.
+
+It can be more readable to indent lines inside the [code]if[/code], but it’s not required.
+NOTE: Learn more about conditionals in [url=https://yarnspinner.dev/docs/writing/controlling/#options]Controlling Dialogue[/url].
+
+[b][code]if[/code], [code]elseif[/code], [code]else[/code] and [code]endif[/code][/b]
+
+The [code]if[/code] statement opens a conditional and is comprised of the [code]<<[/code] command opening keyword followed immediately by the [code]if[/code] keyword, then an expression that controls the [code]if[/code] and finally the command close keyword [code]>>[/code].
+
+Any lines that go between the [code]if[/code] and the next part of the conditional, so either an [code]elseif[/code], an [code]else[/code], or an [code]endif[/code], is shown if the expression is ultimately true.
+
+[code]elseif[/code]
+
+An [code]elseif[/code] is an optional part of the conditional and works similar to the [code]if[/code] but instead uses the [code]elseif[/code] keyword. Each [code]elseif[/code] is identical to its [code]if[/code] counterpart in structure and you can have as many [code]elseif[/code]'s as you want, including none.
+[code]
+<<elseif $money eq 1>>
+[/code]
+
+[code]else[/code]
+
+The [code]else[/code] is the fallback of the conditional and is run only if the [code]if[/code] and all its [code]elseif[/code]'s evaluate to [code]false[/code]. It is optional.
+[code]
+<<else>>
+[/code]
+
+[code]endif[/code]
+
+The [code]<<endif>>[/code] finishes the conditional statement and is required. It is needed so Wol knows when the conditional has concluded.
+
+[b]Expression[/b]
+
+An expression is a mathematical or logical operation and work and looks like a line of maths. For the expression to be useful in the conditional it needs to eventually evaluate to [code]true[/code] or [code]false[/code]. If the expression results in [code]true[/code] it will be the part of the conditional that gets run.
+
+All expressions follow the same pattern of a subexpression followed by an operator and then another subexpression. The subexpressions can further broken up into other expression if needed:
+[code]
+<<if ($counter + 1) >= ($max - 2)>>
+[/code]
+
+[b]Logical operators[/b]
+
+Wol supports the following logical operators and most have multiple ways being written:
+
+* Equality: [code]eq[/code] or [code]is[/code] or [code]==[/code]
+* Inequality: [code]neq[/code] or [code]![/code]
+* Greater than: [code]gt[/code] or [code]>[/code]
+* Less than: [code]lt[/code] or [code]<[/code]
+* Less than or equal to: [code]lte[/code] or [code]<=[/code]
+* Greater than or equal to: [code]gte[/code] or [code]>=[/code]
+* Boolean OR: [code]or[/code] or [code]||[/code]
+* Boolean XOR: [code]xor[/code] or [code]^[/code]
+* Boolean Negation: [code]![/code]
+* Boolean AND: [code]and[/code] or [code]&&[/code]
+
+[b]Maths operators[/b]
+
+* Addition: [code]+[/code]
+* Subtraction: [code]-[/code]
+* Multiplication: [code]*[/code]
+* Division: [code]/[/code]
+* Truncating Remainder Division: [code]%[/code]
+* Brackets: [code]([/code] to open the brackets and [code])[/code] to close them.
+
+[b]Order of operations[/b]
+
+Wol follows a fairly standard order of operations, and falling back to using left to right when operators are of equivalent priority. The order of operations is as follows:
+
+1.  Brackets
+2.  Boolean Negation
+3.  Multiplication, Division, and Truncating Remainder Division
+4.  Addition, Subtraction
+5.  Less than or equals, Greater than or equals, Less than, Greater than
+6.  Equality, Inequality
+7.  Boolean AND, Boolean OR, Boolean XOR
+
+[b]Commands[/b]
+
+Commands are a way of Wol communicating back to the game that events have happened that need to be handled. These are often used to trigger achievements and to move characters and cameras around to where they need to be.
+
+Commands start by having the command opening symbol [code]<<[/code] then any text you want sent over to the game, and finish with the command close symbol [code]>>[/code]. As an example:
+[code]
+<<move camera left>>
+<<unlockAchievement beganAdventure>>
+[/code]
+Commands by themselves do nothing, you need to handle these messages yourself.
+
+Inline expressions can be used in options.
+
+To learn more about how to define your own commands for your game, see [url=https://yarnspinner.dev/docs/unity/working-with-commands/]Working With Commands[/url].
+
+[b]Localisation Tags[/b]
+
+Localisation tags are a way of marking lines of dialogue to the localisation system. If you aren’t localising your game you don’t need them and will not encounter them. Each tag starts with a [code]#[/code] symbol and then have a line keyword and an autogenerated value.
+[code]
+#line:a8e70c
+[/code]
+The tags always go on the end of the line and should never be edited or created manually. You will find localisation tags at the end of dialogue lines, shortcuts, and options.
+[code]
+Player: Hey. #line:a8e70c
+Sally: Oh! Hi. #line:2dc39b
+
+[[See you later.|Sally.Exit]] #line:0facf7
+[/code]
+
+[b]Format functions[/b]
+
+Format functions allow you to select content based on a value. Format functions are useful for adapting a line to be grammatically valid based on the value of a variable.
+
+For example, if you want to say the sentence “I have 1 apple”, the word “apple” in English needs to change depending on whether you have 1 apple or 2 apples. Format functions allow you to switch the word out.
+
+Format functions are extremely useful for [url]localisation[/url], because they can be different in each of the string tables that you’re working with.
+
+Format functions start and end with [code][[/code] and [code]][/code]. Inside these braces, you specify which specific format function you want to use, and then a list of categories and replacements to use.
+NOTE: The format function syntax is based on similar implementations in [url=https://docs.unrealengine.com/en-US/Gameplay/Localization/Formatting/#argumentmodifiers]Unreal[/url], [url=https://docs.unity3d.com/Packages/com.unity.localization@0.2/manual/index.html#plural-support]Unity[/url], and Uniurl’s [url=https://messageformat.github.io/messageformat/]MessageFormat[/url].
+
+There are three format functions available: [code]select[/code], [code]plural[/code] and [code]ordinal[/code].
+
+[b][code]select[/code][/b]
+
+The select format function allows you to use a variable’s value to select between a fixed set of options.
+[code]
+[select {$value} option1=\"replacement1\" option2=\"replacement2\"]
+[/code]
+Based on the value of the variable you provide, different replacement will be selected. In the above example, if the value of [code]$value[/code] is [code]\"option1\"[/code], then the text [code]"
+text = "Yarn / Wol syntax reference
+
+Yarn is a programming language designed for dialogue. This means it has to follow some rules, so a computer can make sense of it.
+
+Yarn / Wol files are broken up into nodes. Each node has multiple different statements that make it up. In general, Wol treats each new line in the Yarn / Wol file as a separate element. It needs to work out what that may be.
+
+Nodes
+
+Everything in Yarn / Wol is a node, and all your dialogue is contained within a node. Your Yarn / Wol files might contain multiple nodes or only a single node, but all Yarn / Wol has to be part of a node. All nodes have the same basic structure:
+
+header
+---
+body
+===
+
+The header is separated from the body by --- (three - symbols on a line by themselves). The node is terminated by === (three = symbols on a line by themselves).
+
+If you are using a visual editor, these nodes make up the little boxes you see on the canvas.
+
+Header
+
+The header contains metadata for the node, and can have as many pieces of node metadata as you wish. Metadata is created as key-value pairs. Each metadata piece has the same layout:
+
+key:value
+
+Every metadata piece has to go one a line by itself.
+
+An example of this: myKey:myValue has a key of myKey and a value of myValue.
+
+Title
+
+The title header defines the name of the node. All nodes must have a title.
+
+This header will look something like title:nodename. The name of the node, in this case nodename, needs to be unique across the entire project, and can be any combination of upper or lower case letters and numbers. Node titles can’t have spaces.
+
+The value of this is case sensitive, so nodename is not the same as nodeName.
+
+Tags
+
+Nodes can have additional metadata about them, which you can define in the tags header. This is a space-separated list of words.
+Unlike the title metadata, the values don’t have to be unique.
+
+Body
+
+The body, which are the parts of the node in-between the --- and === lines, are where the bulk of your time will be spent and is where all of your dialogue will go.
+
+Dialogue
+
+The majority of your Yarn / Wol files will normally be dialogue - lines spoken by your characters in the game. Each line of dialogue is treated as a new dialogue statement by Wol. Almost any text can go inside your dialogue.
+
+Most lines of dialogue are written like the following:
+
+Player: Hey, Sally.
+Sally: Oh! Hi.
+Sally: You snuck up on me.
+
+In this case, we have the characters names preceding the text we want them to say. This is optional, and you can just have the dialogue if you prefer:
+
+Hey, Sally.
+Oh! Hi.
+You snuck up on me.
+
+If you don’t include character names, your game will need some other way of working out which line is for which character, and we leave that up to you.
+
+Inline Expressions
+
+Lines of dialogue can have expressions embedded inside them. These expressions will be expanded when the dialogue runner encounters them. Any expression inside { and } will be evaluated and rendered in-line with the rest of the text.
+
+For example, imagine you have a variable called $gold. You can display the contents of this variable to the player like this:
+
+You have {$gold} gold pieces.
+
+More complex expressions can be used as well. For example, you can do maths with your values:
+
+If you had twice as much gold, you'd have {$gold * 2} gold pieces!
+
+
+NOTE: Inline expressions can be used with format functions, especially when you need to localise your text.
+
+Options
+
+Options are how you can move between different nodes.
+
+[[Text to show to the user|NodeName]]
+
+Options are broken up into two parts seperated by a vertical bar symbol (|). The first part is any text that is to be shown to the user, and the second part after the bar is the name of the node. The node name must be the name of another node somewhere else in your Yarn / Wol files, or else the program will not work. After the player selects an option the node linked, in this case NodeName, will be loaded and the story will continue from there.
+
+Inline expressions can be used in options.
+NOTE: Learn more about options in Controlling Dialogue.
+
+Jumps
+
+A jump tells Wol to start running a different node. They’re not shown to the player.
+
+[[NodeName]]
+
+When Wol encounters this line, it will immediately start running the contents of the NodeName node.
+NOTE: Learn more about jumps in Controlling Dialogue.
+
+Shortcut Options
+
+Shortcut options let you create simple branching dialogue without needing to create new nodes. Each shortcut starts with the -> arrow and then the line of text that should be presented to the player.
+
+Where should we go next?
+-> North
+-> South
+-> East
+-> West
+
+This would show the line Where should we go next? and then the options of North, South, East, West.
+NOTE: Learn more about shortcut options in Controlling Dialogue.
+
+Shortcut scope
+
+Shortcuts allow you add additional statements below the shortcut to run additional lines, and in many cases is used for setting or updating variables. The new statements have to go below the shortcut option they are a part of and need to be indented relative to the shortcut.
+
+-> North
+    It is cold to the north.
+-> South
+    You've heard that the weather to the south is sunny.
+-> East
+    You're not sure if the rumours of bandits to the east are true.
+-> West
+You continue your journey.
+
+Different lines will be shown to the player depending on what options they select:
+
+* In the above example if the player selected the North option the dialogue line It is cold to the north would be shown after and then You continue your journey.
+* If they select South or East, they’ll see different lines before You continue your journey.
+* If they select West, they’ll only see You continue your journey.
+
+The indentation must be kept consistent, or else Wol won’t be able to work out your intent.
+
+Shortcut conditionals
+
+Shortcuts can also be limited to only be presented if needed. You do this by adding an if statement to the end of the shortcut.
+
+-> Locked Trapdoor <<if $hasKey is true>>
+-> North
+-> South
+-> East
+-> West
+
+In the above example the shortcut Locked Trapdoor will only appear as an option your players can pick if the variable $hasKey is true. If $hasKey is false only the four directions will appear.
+
+Variables
+
+You can store information inside variables.
+
+Variable names are any combination of letters and numbers preceded by the $ symbol. Variable names are case sensitive, so $varName and $varname are two different variables as far as Wol is concerned.
+
+Variables are global in scope, so they exist across all nodes across all files. This means you can declare a variable in one file and then later use that variable in another file.
+
+Values
+
+Variables can hold numbers, text, true and false, or null.
+
+Setting values
+
+You can set and update values inside of variables using the set operation:
+
+<<set $var to 1>>
+
+The set operation takes the form of the command opening symbol <<, followed immediately by the set keyword, then the variable, $var in our case, then the to keyword, and finally the value you want.
+
+You can also use the = in place of the to keyword if you wish.
+
+Numbers
+
+Numbers are always decimals (technically, floating point) regardless of what values you give them. This means if you give a variable the value of 1 when you get it back out from Wol it will be 1.0.
+
+Text
+
+Text inside variables can be anything you want but must be contained with quotation marks. This means that while <<set $var to \"hello\">> is valid, <<set $var to hello>> is not.
+
+True and False
+
+Variables can be set to be true or false using the keywords true or TRUE, and false and FALSE. These are case sensitive, so <<set $var to true>> will work, but <<set $var to True>> will not.
+
+Conditionals
+
+Conditionals are how you can create different branching dialogue and events based on logical statements. All conditionals take the same basic structure, an if statement, then zero or more elseif statements, then zero or one else statements, and finally the endif.
+
+Wol will work its way down the conditional until it meets a piece of it it can run and presents the statements for that piece.
+
+<<if $money > 1>>
+	I would like a horse please.
+	<<set $money to $money - 2>>
+	<<set $hasHorse to true>>
+<<elseif $money eq 1 >>
+	Just a drink thanks.
+	<<set $money to $money - 1>>
+<<else>>
+	Drat, I can't afford anything.
+<<endif>>
+
+Take the above example, if $money happens to be 1 then the line Just a drink thanks. will be shown, but if $money was 5 then the line I would like a horse please. would be shown.
+
+It can be more readable to indent lines inside the if, but it’s not required.
+NOTE: Learn more about conditionals in Controlling Dialogue.
+
+if, elseif, else and endif
+
+The if statement opens a conditional and is comprised of the << command opening keyword followed immediately by the if keyword, then an expression that controls the if and finally the command close keyword >>.
+
+Any lines that go between the if and the next part of the conditional, so either an elseif, an else, or an endif, is shown if the expression is ultimately true.
+
+elseif
+
+An elseif is an optional part of the conditional and works similar to the if but instead uses the elseif keyword. Each elseif is identical to its if counterpart in structure and you can have as many elseif's as you want, including none.
+
+<<elseif $money eq 1>>
+
+
+else
+
+The else is the fallback of the conditional and is run only if the if and all its elseif's evaluate to false. It is optional.
+
+<<else>>
+
+
+endif
+
+The <<endif>> finishes the conditional statement and is required. It is needed so Wol knows when the conditional has concluded.
+
+Expression
+
+An expression is a mathematical or logical operation and work and looks like a line of maths. For the expression to be useful in the conditional it needs to eventually evaluate to true or false. If the expression results in true it will be the part of the conditional that gets run.
+
+All expressions follow the same pattern of a subexpression followed by an operator and then another subexpression. The subexpressions can further broken up into other expression if needed:
+
+<<if ($counter + 1) >= ($max - 2)>>
+
+
+Logical operators
+
+Wol supports the following logical operators and most have multiple ways being written:
+
+* Equality: eq or is or ==
+* Inequality: neq or !
+* Greater than: gt or >
+* Less than: lt or <
+* Less than or equal to: lte or <=
+* Greater than or equal to: gte or >=
+* Boolean OR: or or ||
+* Boolean XOR: xor or ^
+* Boolean Negation: !
+* Boolean AND: and or &&
+
+Maths operators
+
+* Addition: +
+* Subtraction: -
+* Multiplication: *
+* Division: /
+* Truncating Remainder Division: %
+* Brackets: ( to open the brackets and ) to close them.
+
+Order of operations
+
+Wol follows a fairly standard order of operations, and falling back to using left to right when operators are of equivalent priority. The order of operations is as follows:
+
+1.  Brackets
+2.  Boolean Negation
+3.  Multiplication, Division, and Truncating Remainder Division
+4.  Addition, Subtraction
+5.  Less than or equals, Greater than or equals, Less than, Greater than
+6.  Equality, Inequality
+7.  Boolean AND, Boolean OR, Boolean XOR
+
+Commands
+
+Commands are a way of Wol communicating back to the game that events have happened that need to be handled. These are often used to trigger achievements and to move characters and cameras around to where they need to be.
+
+Commands start by having the command opening symbol << then any text you want sent over to the game, and finish with the command close symbol >>. As an example:
+
+<<move camera left>>
+<<unlockAchievement beganAdventure>>
+
+Commands by themselves do nothing, you need to handle these messages yourself.
+
+Inline expressions can be used in options.
+
+To learn more about how to define your own commands for your game, see Working With Commands.
+
+Localisation Tags
+
+Localisation tags are a way of marking lines of dialogue to the localisation system. If you aren’t localising your game you don’t need them and will not encounter them. Each tag starts with a # symbol and then have a line keyword and an autogenerated value.
+
+#line:a8e70c
+
+The tags always go on the end of the line and should never be edited or created manually. You will find localisation tags at the end of dialogue lines, shortcuts, and options.
+
+Player: Hey. #line:a8e70c
+Sally: Oh! Hi. #line:2dc39b
+
+[[See you later.|Sally.Exit]] #line:0facf7
+
+
+Format functions
+
+Format functions allow you to select content based on a value. Format functions are useful for adapting a line to be grammatically valid based on the value of a variable.
+
+For example, if you want to say the sentence “I have 1 apple”, the word “apple” in English needs to change depending on whether you have 1 apple or 2 apples. Format functions allow you to switch the word out.
+
+Format functions are extremely useful for localisation, because they can be different in each of the string tables that you’re working with.
+
+Format functions start and end with [ and ]. Inside these braces, you specify which specific format function you want to use, and then a list of categories and replacements to use.
+NOTE: The format function syntax is based on similar implementations in Unreal, Unity, and Uniurl’s MessageFormat.
+
+There are three format functions available: select, plural and ordinal.
+
+select
+
+The select format function allows you to use a variable’s value to select between a fixed set of options.
+
+[select {$value} option1=\"replacement1\" option2=\"replacement2\"]
+
+Based on the value of the variable you provide, different replacement will be selected. In the above example, if the value of $value is \"option1\", then the text "
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="SettingsDialog" type="WindowDialog" parent="."]
 anchor_left = 0.5

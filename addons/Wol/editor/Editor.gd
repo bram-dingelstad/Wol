@@ -9,9 +9,12 @@ onready var wol_editor = find_parent('WolEditor')
 func _ready():
 	hide()
 	connect('visibility_changed', self, '_on_visibility_changed')
+	connect('gui_input', self, '_on_gui_input')
+
 	$Tools/Left/Play.connect('pressed', self, '_on_play')
 	$Tools/Right/Close.connect('pressed', self, 'close')
 	$Tools/Right/Delete.connect('pressed', self, '_on_delete_pressed')
+	$Tools/Left/Title.connect('gui_input', self, '_on_gui_input')
 
 	for child in $Tools/Left/Title.get_children():
 		if child is VScrollBar:
@@ -32,8 +35,11 @@ func open_node(graph_node):
 	$Tools/Left/Title.disconnect('text_changed', self, '_on_title_changed')
 	$Tools/Left/Title.text = graph_node.node.title
 	$Tools/Left/Title.connect('text_changed', self, '_on_title_changed')
+
+	text_edit.connect('gui_input', self, '_on_gui_input')
 	
 	show()
+	grab_focus()
 
 func toggle_text_edit(text_edit):
 	text_edit.anchor_left = 0
@@ -64,8 +70,9 @@ func _on_play():
 func _on_delete_pressed():
 	wol_editor.confirm_delete_node(current_graph_node)
 
-func _on_title_changed():
-	current_graph_node.node.title = $Tools/Left/Title.text
+func _on_title_changed(text):
+	current_graph_node.node.title = text.replace(' ', '')
+	prints('title', text)
 	current_graph_node.compile()
 
 func _on_visibility_changed():
@@ -74,3 +81,8 @@ func _on_visibility_changed():
 		$Content.remove_child(text_edit)
 		current_graph_node.get_node('Wrapper').add_child(text_edit)
 		toggle_text_edit(text_edit)
+
+func _on_gui_input(event):
+	if event is InputEventKey \
+			and event.pressed and event.scancode == KEY_ESCAPE:
+		close()
