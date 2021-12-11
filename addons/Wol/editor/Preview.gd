@@ -13,6 +13,8 @@ func _ready():
 	hide()
 	$Wol.connect('line', self, '_on_line')
 	$Wol.connect('options', self, '_on_options')
+	$Wol.connect('command', self, '_on_command')
+	$Wol.connect('finished', self, '_on_finished')
 
 	connect('gui_input', self, '_on_gui_input')
 
@@ -56,7 +58,7 @@ func clear_chat():
 			$Options/List.remove_child(child)
 			child.queue_free()
 
-
+# TODO: Implement default protagonist setting
 func guess_protagonist():
 	var protagonist = 'You'
 	var wol_node = wol_editor.get_program().nodes[current_graph_node.node.title]
@@ -89,33 +91,60 @@ func restart():
 	$Wol.stop()
 
 	yield(get_tree(), 'idle_frame')
-
 	clear_chat()
-
 	yield(get_tree(), 'idle_frame')
 
+	add_message('Restarting dialogue...')
 	$Wol.start(current_graph_node.node.title)
 
-func _on_line(line):
+func add_message(text, align = 'system', color = Color(0, 0, 0, 0)):
 	var line_node = line_template.duplicate()
 	$Content/List.add_child(line_node)
 	$Content/List/PaddingBottom.raise()
 
-	# TODO: Add hash() based color from speaker
-	line_node.get_node('RichTextLabel').bbcode_text = line.text
+	match align:
+		'left':
+			line_node.get_node('PaddingRight').size_flags_horizontal = SIZE_EXPAND_FILL
+		'right':
+			line_node.get_node('PaddingLeft').size_flags_horizontal = SIZE_EXPAND_FILL
+		'center':
+			line_node.get_node('PaddingRight').size_flags_horizontal = SIZE_EXPAND_FILL
+			line_node.get_node('PaddingLeft').size_flags_horizontal = SIZE_EXPAND_FILL
+		'system':
+			line_node.get_node('PaddingRight').size_flags_horizontal = SIZE_FILL
+			line_node.get_node('PaddingLeft').size_flags_horizontal = SIZE_FILL
+			text = '[color=gray][center][i]%s[/i][/center][/color]' % text
+			
+	line_node.get_node('RichTextLabel').bbcode_text = text
 
-	var padding_node = 'PaddingRight' if get_protagonist(line) == $Tools/Left/Protagonist.text else 'PaddingLeft'
-	line_node.get_node(padding_node).size_flags_horizontal = SIZE_EXPAND_FILL
-	var panel = line_node.get_node('RichTextLabel/Panel').get('custom_styles/panel').duplicate()
-	panel.bg_color = Color(hash(get_protagonist(line)))
+	var panel = line_node.get_node('RichTextLabel/Panel') \
+			.get('custom_styles/panel') \
+			.duplicate()
+
+	panel.bg_color = color
 	line_node.get_node('RichTextLabel/Panel').set('custom_styles/panel', panel)
-
 	line_node.show()
 	
 	yield(get_tree(), 'idle_frame')
 	$Content.scroll_vertical = $Content/List.rect_size.y
 
+func _on_line(line):
+	var align = 'left' if get_protagonist(line) == $Tools/Left/Protagonist.text else 'right'
+	var color
+	if get_protagonist(line):
+		color = Color(hash(get_protagonist(line)))
+	else:
+		color = Color.darkgray
+
+	add_message(line.text, align, color)
+
+func _on_command(command):
+	add_message('Executed command "%s"' % command.command)
+	$Wol.resume()
+
 func _on_options(options):
+	add_message('Being shown %d options' % options.size())
+
 	for option in options:
 		var button = button_template.duplicate()
 		$Options/List.add_child(button)
@@ -125,6 +154,7 @@ func _on_options(options):
 		button.show()
 
 func _on_option_pressed(option):
+	add_message('Selected option "%s"' % option.line.text)
 	$Wol.select_option(option.id)
 
 	for child in $Options/List.get_children():
@@ -133,6 +163,9 @@ func _on_option_pressed(option):
 			child.queue_free()
 
 	grab_focus()
+
+func _on_finished():
+	add_message('Dialogue stopped.')
 
 func _on_gui_input(event):
 	if visible:

@@ -1,9 +1,12 @@
 tool
 extends Panel
 
+signal closed
+
 var current_graph_node
 
 onready var preview = get_node('../Preview')
+onready var help = get_node('../Help')
 onready var wol_editor = find_parent('WolEditor')
 
 func _ready():
@@ -23,6 +26,9 @@ func _ready():
 func close():
 	hide()
 	preview.close()
+	help.close()
+
+	emit_signal('closed')
 
 func open_node(graph_node):
 	current_graph_node = graph_node
@@ -40,6 +46,7 @@ func open_node(graph_node):
 	
 	show()
 	grab_focus()
+	text_edit.grab_focus()
 
 func toggle_text_edit(text_edit):
 	text_edit.anchor_left = 0
@@ -51,6 +58,7 @@ func toggle_text_edit(text_edit):
 	text_edit.margin_bottom = 0
 	text_edit.margin_top = 0
 	text_edit.mouse_filter = MOUSE_FILTER_STOP if text_edit.get_parent().name == 'Content' else MOUSE_FILTER_IGNORE
+	text_edit.focus_mode = FOCUS_ALL if text_edit.get_parent().name == 'Content' else FOCUS_NONE
 
 	text_edit.deselect()
 
@@ -72,7 +80,6 @@ func _on_delete_pressed():
 
 func _on_title_changed(text):
 	current_graph_node.node.title = text.replace(' ', '')
-	prints('title', text)
 	current_graph_node.compile()
 
 func _on_visibility_changed():
@@ -86,3 +93,13 @@ func _on_gui_input(event):
 	if event is InputEventKey \
 			and event.pressed and event.scancode == KEY_ESCAPE:
 		close()
+
+	if event is InputEventKey:
+		var combination = OS.get_scancode_string(event.get_physical_scancode_with_modifiers())
+
+		if OS.get_name() == 'OSX':
+			combination = combination.replace('Command', 'Control')
+
+		match combination:
+			'Control+P':
+				preview.open_node(current_graph_node)

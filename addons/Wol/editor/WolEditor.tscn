@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=2]
+[gd_scene load_steps=25 format=2]
 
 [ext_resource path="res://addons/Wol/editor/Editor.gd" type="Script" id=1]
 [ext_resource path="res://addons/Wol/editor/WolEditor.gd" type="Script" id=2]
@@ -16,6 +16,7 @@
 [ext_resource path="res://addons/Wol/font/VictorMono-Light.otf" type="DynamicFontData" id=14]
 [ext_resource path="res://addons/Wol/font/Aileron-SemiBoldItalic.otf" type="DynamicFontData" id=15]
 [ext_resource path="res://addons/Wol/font/Aileron-Italic.otf" type="DynamicFontData" id=16]
+[ext_resource path="res://addons/Wol/editor/Help.gd" type="Script" id=17]
 
 [sub_resource type="StyleBoxEmpty" id=2]
 
@@ -67,6 +68,8 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Tween" type="Tween" parent="."]
+
 [node name="Menu" type="HBoxContainer" parent="."]
 anchor_right = 1.0
 rect_min_size = Vector2( 0, 32 )
@@ -108,12 +111,31 @@ enabled_focus_mode = 0
 text = "About"
 flat = true
 
+[node name="AuthorNotice" type="Button" parent="Menu"]
+modulate = Color( 1, 1, 1, 0.466667 )
+margin_left = 846.0
+margin_right = 1016.0
+margin_bottom = 32.0
+focus_mode = 0
+size_flags_horizontal = 10
+text = "By @bram_dingelstad"
+flat = true
+
+[node name="Padding" type="Control" parent="Menu"]
+margin_left = 1024.0
+margin_right = 1024.0
+margin_bottom = 32.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="GraphNodeTemplate" type="GraphNode" parent="."]
 visible = false
 margin_left = 2.0
 margin_top = 318.0
 margin_right = 322.0
 margin_bottom = 575.0
+focus_mode = 1
 mouse_filter = 1
 title = "Hello world"
 offset = Vector2( 120, 0 )
@@ -141,6 +163,7 @@ size_flags_vertical = 3
 [node name="TextEdit" type="TextEdit" parent="GraphNodeTemplate/Wrapper"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+focus_mode = 0
 mouse_filter = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -193,6 +216,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = 32.0
 custom_styles/bg = SubResource( 2 )
+scroll_offset = Vector2( 0, -511 )
 snap_distance = 100
 show_zoom_label = true
 __meta__ = {
@@ -203,9 +227,9 @@ __meta__ = {
 anchor_top = 0.053
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_top = 0.199999
+margin_top = 0.200001
 mouse_filter = 2
-custom_constants/separation = 32
+custom_constants/separation = 0
 alignment = 1
 __meta__ = {
 "_edit_use_anchors_": false
@@ -213,10 +237,8 @@ __meta__ = {
 
 [node name="Preview" type="Panel" parent="HBoxContainer"]
 visible = false
-margin_left = 352.0
-margin_right = 672.0
+margin_right = 1024.0
 margin_bottom = 568.0
-rect_min_size = Vector2( 320, 0 )
 focus_mode = 1
 size_flags_horizontal = 3
 script = ExtResource( 4 )
@@ -240,7 +262,7 @@ __meta__ = {
 }
 
 [node name="Left" type="HBoxContainer" parent="HBoxContainer/Preview/Tools"]
-margin_right = 280.0
+margin_right = 504.0
 margin_bottom = 26.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -252,15 +274,15 @@ margin_bottom = 23.0
 text = "Protagonist: "
 
 [node name="Protagonist" type="LineEdit" parent="HBoxContainer/Preview/Tools/Left"]
-margin_left = 93.0
-margin_right = 165.0
+margin_left = 97.0
+margin_right = 169.0
 margin_bottom = 26.0
 rect_min_size = Vector2( 72, 0 )
 script = ExtResource( 8 )
 
 [node name="Next" type="Button" parent="HBoxContainer/Preview/Tools/Left"]
-margin_left = 169.0
-margin_right = 214.0
+margin_left = 177.0
+margin_right = 222.0
 margin_bottom = 26.0
 focus_mode = 0
 enabled_focus_mode = 0
@@ -270,8 +292,8 @@ __meta__ = {
 }
 
 [node name="Restart" type="Button" parent="HBoxContainer/Preview/Tools/Left"]
-margin_left = 218.0
-margin_right = 280.0
+margin_left = 230.0
+margin_right = 292.0
 margin_bottom = 26.0
 focus_mode = 0
 enabled_focus_mode = 0
@@ -281,8 +303,8 @@ __meta__ = {
 }
 
 [node name="Right" type="HBoxContainer" parent="HBoxContainer/Preview/Tools"]
-margin_left = 284.0
-margin_right = 312.0
+margin_left = 512.0
+margin_right = 1016.0
 margin_bottom = 26.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -292,8 +314,8 @@ __meta__ = {
 }
 
 [node name="Close" type="Button" parent="HBoxContainer/Preview/Tools/Right"]
-margin_left = 4.0
-margin_right = 28.0
+margin_left = 480.0
+margin_right = 504.0
 margin_bottom = 26.0
 rect_min_size = Vector2( 24, 0 )
 text = "x"
@@ -315,7 +337,7 @@ __meta__ = {
 }
 
 [node name="List" type="VBoxContainer" parent="HBoxContainer/Preview/Content"]
-margin_right = 320.0
+margin_right = 1024.0
 margin_bottom = 419.0
 mouse_filter = 2
 size_flags_horizontal = 3
@@ -326,30 +348,31 @@ __meta__ = {
 }
 
 [node name="PaddingTop" type="Control" parent="HBoxContainer/Preview/Content/List"]
-margin_right = 320.0
+margin_right = 1024.0
 mouse_filter = 2
 
 [node name="LineTemplate" type="HBoxContainer" parent="HBoxContainer/Preview/Content/List"]
 visible = false
 margin_top = 18.0
-margin_right = 320.0
-margin_bottom = 33.0
+margin_right = 1024.0
+margin_bottom = 40.0
 mouse_filter = 2
 alignment = 1
 
 [node name="PaddingLeft" type="Control" parent="HBoxContainer/Preview/Content/List/LineTemplate"]
 margin_right = 16.0
-margin_bottom = 15.0
+margin_bottom = 22.0
 rect_min_size = Vector2( 16, 0 )
 mouse_filter = 2
 
 [node name="RichTextLabel" type="RichTextLabel" parent="HBoxContainer/Preview/Content/List/LineTemplate"]
-margin_left = 20.0
-margin_right = 300.0
-margin_bottom = 15.0
+margin_left = 24.0
+margin_right = 1000.0
+margin_bottom = 22.0
 rect_clip_content = false
 mouse_filter = 2
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
 bbcode_enabled = true
 bbcode_text = "Hello world"
 text = "Hello world"
@@ -370,15 +393,15 @@ __meta__ = {
 }
 
 [node name="PaddingRight" type="Control" parent="HBoxContainer/Preview/Content/List/LineTemplate"]
-margin_left = 304.0
-margin_right = 320.0
-margin_bottom = 15.0
+margin_left = 1008.0
+margin_right = 1024.0
+margin_bottom = 22.0
 rect_min_size = Vector2( 16, 0 )
 mouse_filter = 2
 
 [node name="PaddingBottom" type="Control" parent="HBoxContainer/Preview/Content/List"]
 margin_top = 18.0
-margin_right = 320.0
+margin_right = 1024.0
 margin_bottom = 18.0
 mouse_filter = 2
 
@@ -400,7 +423,7 @@ __meta__ = {
 }
 
 [node name="List" type="VBoxContainer" parent="HBoxContainer/Preview/Options"]
-margin_right = 288.0
+margin_right = 992.0
 margin_bottom = 97.08
 mouse_filter = 2
 size_flags_horizontal = 3
@@ -418,13 +441,13 @@ text = "Option"
 
 [node name="Editor" type="Panel" parent="HBoxContainer"]
 visible = false
-margin_left = 368.0
-margin_right = 1008.0
+margin_left = 362.0
+margin_right = 1024.0
 margin_bottom = 568.0
-rect_min_size = Vector2( 640, 0 )
 focus_mode = 1
 mouse_filter = 1
 size_flags_horizontal = 3
+size_flags_stretch_ratio = 2.0
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_use_anchors_": false
@@ -441,7 +464,7 @@ __meta__ = {
 }
 
 [node name="Left" type="HBoxContainer" parent="HBoxContainer/Editor/Tools"]
-margin_right = 314.0
+margin_right = 323.0
 margin_bottom = 26.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -454,16 +477,16 @@ script = ExtResource( 8 )
 disable_spaces = true
 
 [node name="Play" type="Button" parent="HBoxContainer/Editor/Tools/Left"]
-margin_left = 148.0
-margin_right = 191.0
+margin_left = 152.0
+margin_right = 195.0
 margin_bottom = 26.0
 focus_mode = 0
 enabled_focus_mode = 0
 text = "Play"
 
 [node name="Right" type="HBoxContainer" parent="HBoxContainer/Editor/Tools"]
-margin_left = 318.0
-margin_right = 632.0
+margin_left = 331.0
+margin_right = 654.0
 margin_bottom = 26.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -473,20 +496,20 @@ __meta__ = {
 }
 
 [node name="Delete" type="Button" parent="HBoxContainer/Editor/Tools/Right"]
-margin_left = 199.0
-margin_right = 258.0
+margin_left = 200.0
+margin_right = 259.0
 margin_bottom = 26.0
 text = "Delete"
 
 [node name="Control" type="Control" parent="HBoxContainer/Editor/Tools/Right"]
-margin_left = 262.0
-margin_right = 286.0
+margin_left = 267.0
+margin_right = 291.0
 margin_bottom = 26.0
 rect_min_size = Vector2( 24, 0 )
 
 [node name="Close" type="Button" parent="HBoxContainer/Editor/Tools/Right"]
-margin_left = 290.0
-margin_right = 314.0
+margin_left = 299.0
+margin_right = 323.0
 margin_bottom = 26.0
 rect_min_size = Vector2( 24, 0 )
 text = "x"
@@ -499,6 +522,59 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = 42.0
 mouse_filter = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Help" type="Panel" parent="HBoxContainer"]
+visible = false
+margin_left = 784.0
+margin_right = 1024.0
+margin_bottom = 568.0
+focus_mode = 1
+mouse_filter = 1
+size_flags_horizontal = 3
+script = ExtResource( 17 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Content" type="Control" parent="HBoxContainer/Help"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_top = 42.0
+mouse_filter = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Tools" type="HBoxContainer" parent="HBoxContainer/Help"]
+anchor_right = 1.0
+margin_left = 4.0
+margin_top = 4.0
+margin_right = -4.0
+margin_bottom = 27.8
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Right" type="HBoxContainer" parent="HBoxContainer/Help/Tools"]
+margin_left = 331.0
+margin_right = 654.0
+margin_bottom = 26.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+alignment = 2
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Close" type="Button" parent="HBoxContainer/Help/Tools/Right"]
+margin_left = 299.0
+margin_right = 323.0
+margin_bottom = 26.0
+rect_min_size = Vector2( 24, 0 )
+text = "x"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -532,6 +608,22 @@ rect_min_size = Vector2( 400, 140 )
 dialog_text = "Are you sure you want to delete the \"%s\" node from your dialogue?
 
 You can't undo this action."
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="UnsavedDialog" type="ConfirmationDialog" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -223.0
+margin_top = -70.0
+margin_right = 223.0
+margin_bottom = 70.0
+rect_min_size = Vector2( 400, 140 )
+popup_exclusive = true
+dialog_text = "Save changes to \"%s\" before closing?"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -591,7 +683,6 @@ align = 1
 valign = 1
 
 [node name="HelpDialog" type="WindowDialog" parent="."]
-visible = true
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -608,15 +699,16 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="HSplitContainer" type="HSplitContainer" parent="HelpDialog"]
+[node name="HelpSplit" type="HSplitContainer" parent="HelpDialog"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 margin_left = 16.0
 margin_top = 16.0
 margin_right = -16.0
 margin_bottom = -16.0
+mouse_filter = 1
 
-[node name="Left" type="RichTextLabel" parent="HelpDialog/HSplitContainer"]
+[node name="Left" type="RichTextLabel" parent="HelpDialog/HelpSplit"]
 margin_right = 231.0
 margin_bottom = 283.0
 rect_pivot_offset = Vector2( -370.24, 130.838 )
@@ -691,7 +783,7 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
-[node name="Right" type="RichTextLabel" parent="HelpDialog/HSplitContainer"]
+[node name="Right" type="RichTextLabel" parent="HelpDialog/HelpSplit"]
 margin_left = 255.0
 margin_right = 486.0
 margin_bottom = 283.0
