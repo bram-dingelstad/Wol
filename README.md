@@ -1,7 +1,7 @@
 <p align="center">
 <img style="height: 120px; object-fit: cover" src="https://user-images.githubusercontent.com/3514405/143497096-e5d98c85-1f1b-4d8a-9a63-ee439d4c616d.png" /> 
 <p align="center" style="font-style: italic"> The friendly tool for writing game dialogue, in and for Godot</p>
-<p align="center" style="font-style: italic"> <a href="README.md#Getting-Started">Getting Started</a> | <a href="README.md#Documentation">Documentation</a> | <a href="README.md#Tutorial">Tutorial</a> | <a href="https://twitter.com/bram_dingelstad">Follow me 🐦!</a> </p>
+<p align="center" style="font-style: italic"> <a href="README.md#Getting-Started">Getting Started</a> | <a href="README.md#Documentation">Documentation</a> | <a href="README.md#Tutorial">Tutorial</a> | <a href="https://wol-editor.bram.dingelstad.works">Web Editor</a> | <a href="https://twitter.com/bram_dingelstad">Follow me 🐦!</a> </p>
 </p> 
 
 ---
