@@ -247,18 +247,18 @@ class FormatFunctionNode extends ParseNode:
 	var format_text = ''
 	var expression_value
 
-	func _init(parent:ParseNode, parser, expressionCount:int).(parent, parser):
-		format_text="["
+	func _init(parent, parser, expression_count).(parent, parser):
+		format_text = '['
 		parser.expect_symbol([Constants.TokenType.FormatFunctionStart])
 
-		# FIXME: Add exit condition in case of failure
 		while parser.tokens.size() > 0 and not parser.next_symbol_is([Constants.TokenType.FormatFunctionEnd]):
 			if parser.next_symbol_is([Constants.TokenType.Text]):
 				format_text += parser.expect_symbol().value
 
 			if InlineExpression.can_parse(parser):
 				expression_value = InlineExpression.new(self, parser)
-				format_text +=" \"{%d}\" " % expressionCount
+				format_text +=" \"{%d}\" " % expression_count
+
 		parser.expect_symbol()
 		format_text+="]"
 
@@ -346,7 +346,6 @@ class CustomCommand extends ParseNode:
 		var command_tokens = []
 		command_tokens.append(parser.expect_symbol())
 
-		# FIXME: add exit condition
 		while parser.tokens.size() > 0 and not parser.next_symbol_is([Constants.TokenType.EndCommand]):
 			command_tokens.append(parser.expect_symbol())
 
@@ -470,7 +469,6 @@ class Block extends ParseNode:
 		parser.expect_symbol([Constants.TokenType.Indent])
 
 		#keep reading statements until we hit a dedent
-		# FIXME: find exit condition
 		while parser.tokens.size() > 0 and not parser.next_symbol_is([Constants.TokenType.Dedent]):
 			#parse all statements including nested blocks
 			statements.append(Statement.new(self, parser))

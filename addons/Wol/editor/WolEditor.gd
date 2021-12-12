@@ -14,10 +14,6 @@ onready var original_delete_node_dialog = $DeleteNodeDialog.dialog_text
 onready var original_unsaved_dialog = $UnsavedDialog.dialog_text
 onready var inside_godot_editor = not get_tree().current_scene and Engine.editor_hint
 
-# Standalone
-# TODO: Make arrow keys select options in preview
-# FIXME: Fix focus issues while being in-editor
-
 # Godot Editor
 # FIXME: Make all parts of the code "tool"s and safekeep its execution while in editora
 # FIXME: Hide console when viewing Wol main screen
@@ -76,8 +72,7 @@ func _ready():
 		
 		$HBoxContainer.set('custom_constants/seperation', 0)
 
-	open('res://dialogue.wol')
-
+	update_title()
 
 func create_node(position = Vector2.ZERO):
 	var graph_node = GraphNodeTemplate.duplicate()
@@ -161,19 +156,22 @@ func serialize_to_file():
 	return PoolStringArray(buffer).join('\n')
 
 func save_as(file_path = null):
-	if not file_path:
-		$FileDialog.mode = $FileDialog.MODE_SAVE_FILE
-		# TODO: Set up path based on context (Godot editor, standalone or web)
-		$FileDialog.popup_centered()
-		file_path = yield($FileDialog, 'file_selected')
-
+	if $Javascript:
+		$Javascript.save_as(file_path)
+	else:
 		if not file_path:
-			return
-	
-	var file = File.new()
-	file.open(file_path, File.WRITE)
-	file.store_string(serialize_to_file())
-	file.close()
+			$FileDialog.mode = $FileDialog.MODE_SAVE_FILE
+			# TODO: Set up path based on context (Godot editor, standalone or web)
+			$FileDialog.popup_centered()
+			file_path = yield($FileDialog, 'file_selected')
+
+			if not file_path:
+				return
+		
+		var file = File.new()
+		file.open(file_path, File.WRITE)
+		file.store_string(serialize_to_file())
+		file.close()
 
 	saved_all_changes = true
 	last_save = serialize_to_file()
@@ -352,8 +350,9 @@ func move_focus():
 			> node.center.distance_to(current_focussed.center + focus_pan):
 			closest = node
 
-	$GraphEdit.set_selected(closest)
-	closest.grab_focus()
+	if closest:
+		$GraphEdit.set_selected(closest)
+		closest.grab_focus()
 
 	focus_pan = null
 
@@ -435,8 +434,9 @@ func _input(event):
 				return save_as()
 			'Control+O':
 				return open()
-
-		if event.pressed:
-			focus_pan = Input.get_vector('ui_left', 'ui_right', 'ui_up', 'ui_down') * 500
-		elif focus_pan:
-			move_focus()
+		
+		if not $HBoxContainer/Editor.visible:
+			if event.pressed:
+				focus_pan = Input.get_vector('ui_left', 'ui_right', 'ui_up', 'ui_down') * 500
+			elif focus_pan:
+				move_focus()

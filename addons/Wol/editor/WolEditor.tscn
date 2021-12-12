@@ -1,4 +1,4 @@
-[gd_scene load_steps=25 format=2]
+[gd_scene load_steps=29 format=2]
 
 [ext_resource path="res://addons/Wol/editor/Editor.gd" type="Script" id=1]
 [ext_resource path="res://addons/Wol/editor/WolEditor.gd" type="Script" id=2]
@@ -17,8 +17,21 @@
 [ext_resource path="res://addons/Wol/font/Aileron-SemiBoldItalic.otf" type="DynamicFontData" id=15]
 [ext_resource path="res://addons/Wol/font/Aileron-Italic.otf" type="DynamicFontData" id=16]
 [ext_resource path="res://addons/Wol/editor/Help.gd" type="Script" id=17]
+[ext_resource path="res://addons/Wol/logo.svg" type="Texture" id=18]
+[ext_resource path="res://addons/Wol/editor/Javascript.gd" type="Script" id=19]
 
 [sub_resource type="StyleBoxEmpty" id=2]
+
+[sub_resource type="Shader" id=334]
+code = "shader_type canvas_item;
+
+void fragment() {
+	vec4 color = texture(TEXTURE, UV);
+	COLOR = vec4(1.0 - color.rgb, color.a);
+}"
+
+[sub_resource type="ShaderMaterial" id=335]
+shader = SubResource( 334 )
 
 [sub_resource type="StyleBoxFlat" id=328]
 bg_color = Color( 0.345098, 0.345098, 0.345098, 1 )
@@ -68,6 +81,30 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="Javascript" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+input_pass_on_modal_close_click = false
+script = ExtResource( 19 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Label" type="Label" parent="Javascript"]
+modulate = Color( 1, 1, 1, 0.3 )
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -20.0
+margin_top = -10.0
+margin_right = 20.0
+margin_bottom = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Drag in a file to get started!"
+
 [node name="Tween" type="Tween" parent="."]
 
 [node name="Menu" type="HBoxContainer" parent="."]
@@ -77,16 +114,23 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="FrontPadding" type="Control" parent="Menu"]
+margin_bottom = 32.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="File" type="MenuButton" parent="Menu"]
-margin_right = 38.0
+margin_left = 8.0
+margin_right = 46.0
 margin_bottom = 32.0
 text = "File"
 items = [ "New", null, 0, false, false, 0, 0, null, "", false, "Open", null, 0, false, false, 1, 0, null, "", false, "Save", null, 0, false, false, 2, 0, null, "", false, "Save as...", null, 0, false, false, 3, 0, null, "", false ]
 switch_on_hover = true
 
 [node name="Settings" type="Button" parent="Menu"]
-margin_left = 46.0
-margin_right = 116.0
+margin_left = 54.0
+margin_right = 124.0
 margin_bottom = 32.0
 focus_mode = 0
 enabled_focus_mode = 0
@@ -94,8 +138,8 @@ text = "Settings"
 flat = true
 
 [node name="Help" type="Button" parent="Menu"]
-margin_left = 124.0
-margin_right = 171.0
+margin_left = 132.0
+margin_right = 179.0
 margin_bottom = 32.0
 focus_mode = 0
 enabled_focus_mode = 0
@@ -103,8 +147,8 @@ text = "Help"
 flat = true
 
 [node name="About" type="Button" parent="Menu"]
-margin_left = 179.0
-margin_right = 234.0
+margin_left = 187.0
+margin_right = 242.0
 margin_bottom = 32.0
 focus_mode = 0
 enabled_focus_mode = 0
@@ -121,7 +165,7 @@ size_flags_horizontal = 10
 text = "By @bram_dingelstad"
 flat = true
 
-[node name="Padding" type="Control" parent="Menu"]
+[node name="BackPadding" type="Control" parent="Menu"]
 margin_left = 1024.0
 margin_right = 1024.0
 margin_bottom = 32.0
@@ -216,9 +260,33 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 margin_top = 32.0
 custom_styles/bg = SubResource( 2 )
-scroll_offset = Vector2( 0, -511 )
 snap_distance = 100
 show_zoom_label = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextureRect" type="TextureRect" parent="GraphEdit"]
+modulate = Color( 1, 1, 1, 0.2 )
+material = SubResource( 335 )
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 16.9979
+margin_top = -92.0011
+margin_right = 141.998
+margin_bottom = -29.001
+texture = ExtResource( 18 )
+expand = true
+stretch_mode = 7
+
+[node name="Label" type="Label" parent="GraphEdit/TextureRect"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 10.0013
+margin_top = -2.00079
+margin_right = 116.001
+margin_bottom = 17.9992
+text = "version alpha2"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -590,7 +658,11 @@ margin_right = 297.0
 margin_bottom = 231.0
 rect_min_size = Vector2( 400, 140 )
 resizable = true
+access = 2
 filters = PoolStringArray( "*.yarn", "*.wol" )
+current_dir = "/Users/bram/Development/Wol"
+current_file = "Users"
+current_path = "/Users/bram/Development/Wol/Users"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -678,7 +750,7 @@ margin_right = 26.5
 margin_bottom = 8.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Wol (alpha1)"
+text = "Wol (alpha2)"
 align = 1
 valign = 1
 
@@ -720,7 +792,6 @@ custom_fonts/bold_font = SubResource( 333 )
 custom_fonts/normal_font = SubResource( 329 )
 bbcode_enabled = true
 bbcode_text = "[b]Keyboard shortcuts[/b]
-[s]Line through = not yet implemented[/s]
 
 [i]Anywhere[/i]
 New 
@@ -733,15 +804,19 @@ Open
 [right]Ctrl/Cmd + O[/right]
 
 [i]Node view[/i]
-[s]WASD / Arrows[/s]
+WASD / Arrows
 [right]move focus[/right]
-[s]Enter / Dbl click[/s]
+Enter / Dbl click
 [right]open node in editor[/right]
+Dbl click background
+[right]New node[/right]
+Delete
+[right]Delete selected node[/right]
 
 [i]Editor[/i]
 Escape 
 [right]Close editor[/right]
-[s]Ctrl/Cmd + P[/s]
+Ctrl/Cmd + P
 [right]Play node[/right]
 
 [i]Preview[/i]
@@ -750,7 +825,6 @@ Space
 
 ."
 text = "Keyboard shortcuts
-Line through = not yet implemented
 
 Anywhere
 New 
@@ -767,6 +841,10 @@ WASD / Arrows
 move focus
 Enter / Dbl click
 open node in editor
+Dbl click background
+New node
+Delete
+Delete selected node
 
 Editor
 Escape 

@@ -20,6 +20,8 @@ Yarn's similar in style to Twine, so if you already know that, you'll be right a
 Wol is actively maintained by Bram Dingelstad, if you need a programmer or designer for your next (Godot) project, you can hire him!"
 run/main_scene="res://addons/Wol/editor/WolEditor.tscn"
 run/low_processor_mode=true
+boot_splash/image="res://addons/Wol/splash.png"
+boot_splash/fullsize=false
 config/icon="res://addons/Wol/icon-white-with-stroke.svg"
 
 [debug]

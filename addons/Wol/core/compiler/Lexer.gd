@@ -309,10 +309,12 @@ func tokenize_line(line, line_number):
 				
 				var start_index = indentation
 
-				if token_stack.size() > 0 :
-					while token_stack.front().type == Constants.TokenType.Identifier:
+				if token_stack.size() > 0:
+					while token_stack.size() > 0 and token_stack.front().type == Constants.TokenType.Identifier:
 						token_stack.pop_front()
-					
+					if token_stack.size() == 0:
+						return
+
 					var start_delimit_token = token_stack.front()
 					start_index =  start_delimit_token.column
 

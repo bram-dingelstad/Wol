@@ -116,7 +116,7 @@ func get_nodes():
 
 		nodes.append(headers)
 
-		# Add +2 to the final line to skip the === from that node
+		# Add +1 to the final line to skip the === from that node
 		line_number = Array(source_lines).find('===', line_number) + 1
 
 		while line_number < source_lines.size() and source_lines[line_number].empty():

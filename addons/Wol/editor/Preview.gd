@@ -152,6 +152,7 @@ func _on_options(options):
 		button.text = option.line.text
 		button.connect('pressed', self, '_on_option_pressed', [option])
 		button.show()
+		button.grab_focus()
 
 func _on_option_pressed(option):
 	add_message('Selected option "%s"' % option.line.text)
