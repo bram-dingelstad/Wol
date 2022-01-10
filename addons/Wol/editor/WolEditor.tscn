@@ -286,7 +286,7 @@ margin_left = 10.0013
 margin_top = -2.00079
 margin_right = 116.001
 margin_bottom = 17.9992
-text = "version alpha2"
+text = "version alpha3"
 __meta__ = {
 "_edit_use_anchors_": false
 }
@@ -754,7 +754,7 @@ margin_right = 26.5
 margin_bottom = 8.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Wol (alpha2)"
+text = "Wol (alpha3)"
 align = 1
 valign = 1
 
