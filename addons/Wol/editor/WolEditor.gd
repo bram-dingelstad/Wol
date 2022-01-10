@@ -15,7 +15,7 @@ onready var original_unsaved_dialog = $UnsavedDialog.dialog_text
 onready var inside_godot_editor = not get_tree().current_scene and Engine.editor_hint
 
 # Godot Editor
-# FIXME: Make all parts of the code "tool"s and safekeep its execution while in editora
+# FIXME: Make all parts of the code "tool"s and safekeep its execution while in editor
 # FIXME: Hide console when viewing Wol main screen
 
 # Web version
@@ -253,6 +253,17 @@ func reconnect_nodes():
 	# NOTE: This gets executed a lot on changes, so check if there are any changes
 	saved_all_changes = last_save and last_save == serialize_to_file()
 	update_title()
+
+	if $Javascript:
+		$Javascript/Label.visible = get_node_count() == 0
+
+func get_node_count():
+	var count = 0
+	for graph_node in $GraphEdit.get_children():
+		if graph_node is GraphNode:
+			count += 1
+	
+	return count
 
 func update_title():
 	var filename = 'Unnamed file' if not path else path.get_file()

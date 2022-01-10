@@ -157,12 +157,12 @@ flat = true
 
 [node name="AuthorNotice" type="Button" parent="Menu"]
 modulate = Color( 1, 1, 1, 0.466667 )
-margin_left = 846.0
+margin_left = 715.0
 margin_right = 1016.0
 margin_bottom = 32.0
 focus_mode = 0
 size_flags_horizontal = 10
-text = "By @bram_dingelstad"
+text = "By @bram_dingelstad (available for hire)"
 flat = true
 
 [node name="BackPadding" type="Control" parent="Menu"]
@@ -701,6 +701,7 @@ __meta__ = {
 }
 
 [node name="AboutDialog" type="WindowDialog" parent="."]
+visible = true
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -724,12 +725,15 @@ margin_right = -8.0
 margin_bottom = -6.0
 custom_fonts/normal_font = ExtResource( 6 )
 bbcode_enabled = true
-bbcode_text = "Wol actively maintained by [url=https://bram.dingelstad.works]Bram Dingelstad[/url] ([url=https://hire.bram.dingelstad.works]hire me[/url]).
+bbcode_text = "Wol is actively maintained by [url=https://bram.dingelstad.works]Bram Dingelstad[/url] ([url=https://hire.bram.dingelstad.works]hire me[/url]).
 
 Based on [url=https://github.com/kyperbelt/GDYarn]GDYarn by kyperbelt[/url] & [url=https://yarnspinner.dev/]YarnSpinner by Secret Labs[/url]."
-text = "Wol actively maintained by Bram Dingelstad (hire me).
+text = "Wol is actively maintained by Bram Dingelstad (hire me).
 
 Based on GDYarn by kyperbelt & YarnSpinner by Secret Labs."
+__meta__ = {
+"_edit_use_anchors_": false
+}
 
 [node name="TextureRect" type="TextureRect" parent="AboutDialog"]
 anchor_left = 0.5
