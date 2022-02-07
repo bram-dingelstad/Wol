@@ -106,11 +106,9 @@ func is_blocked():
 
 func start(node = starting_node):
 	running = true
-	emit_signal('started')
-	running = true
-
 	virtual_machine.set_node(node)
 	virtual_machine.start()
+	emit_signal('started')
 
 func stop():
 	if running:

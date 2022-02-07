@@ -21,8 +21,6 @@ var current_node
 
 var execution_state = Constants.ExecutionState.Stopped
 
-var string_table = {}
-
 func _init(_dialogue, _libraries):
 	dialogue = _dialogue
 	libraries = _libraries
