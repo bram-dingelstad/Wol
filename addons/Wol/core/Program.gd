@@ -42,11 +42,21 @@ class Option:
 	func clone():
 		return get_script().new(self)
 
-class Command:
-	var command = ''
+	# TODO: implement tostring for easy debugging
 
-	func _init(_command):
-		command = _command
+class Command:
+	var code = ''
+	var arguments = []
+	var arguments_string = ''
+	var raw = ''
+
+	func _init(_raw):
+		raw = _raw
+		var split = Array(_raw.split(' '))
+
+		code = split.front()
+		arguments = split.slice(1, split.size())
+		arguments_string = PoolStringArray(arguments).join(' ')
 
 class WolNode:
 	var name = ''

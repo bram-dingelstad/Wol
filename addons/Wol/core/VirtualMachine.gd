@@ -230,6 +230,7 @@ func run_instruction(instruction):
 
 		Constants.ByteCode.PushVariable:
 			var name = instruction.operands[0].value
+			print(dialogue.variable_storage)
 			if dialogue.variable_storage.has(name.replace('$', '')):
 				var value = dialogue.variable_storage[name.replace('$', '')]
 				state.push_value(value)

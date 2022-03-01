@@ -42,10 +42,13 @@ func _ready():
 
 	libraries.import_library(StandardLibrary.new())
 
-	set_path(path)
+	if not ResourceLoader.exists(path):
+		printerr('Couldn\'t find wol file at path "%s". Are you sure the file exists?' % path)
+	else:
+		set_path(path)
 
-	if auto_start:
-		start()
+		if auto_start:
+			start()
 
 func set_path(_path):
 	path = _path
