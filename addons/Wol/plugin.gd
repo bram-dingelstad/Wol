@@ -1,9 +1,10 @@
 tool
 extends EditorPlugin
 
-const WolEditor = preload('res://addons/Wol/editor/WolEditor.tscn')
+# const WolEditor = preload('res://addons/Wol/editor/WolEditor.tscn')
 
 var wol_editor_instance
+var import_plugin
 
 func _enter_tree():
 	add_custom_type(
@@ -16,9 +17,13 @@ func _enter_tree():
 	# wol_editor_instance = WolEditor.instance()
 	# get_editor_interface().get_editor_viewport().add_child(wol_editor_instance)
 
+	import_plugin = preload('res://addons/Wol/import.gd').new()
+	add_import_plugin(import_plugin)
+
 	make_visible(false)
 	
 	call_deferred('move_button')
+	
 	
 func move_button():
 	var buttons = get_editor_interface().get_base_control()
@@ -36,6 +41,9 @@ func make_visible(visible):
 
 func _exit_tree():
 	remove_custom_type('Wol')
+
+	remove_import_plugin(import_plugin)
+	import_plugin = null
 
 	# if wol_editor_instance:
 	# 	wol_editor_instance.queue_free()
