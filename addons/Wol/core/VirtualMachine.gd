@@ -76,8 +76,8 @@ func pause():
 
 func stop():
 	execution_state = Constants.ExecutionState.Stopped
-	reset()
 	current_node = null
+	reset()
 
 func set_selected_option(id):
 	if execution_state != Constants.ExecutionState.WaitingForOption:
@@ -99,7 +99,7 @@ func reset():
 	state = VmState.new()
 
 func get_next_instruction():
-	if current_node.instructions.size() - 1 > state.program_counter:
+	if current_node and current_node.instructions.size() - 1 > state.program_counter:
 		return current_node.instructions[state.program_counter + 1]
 	return
 
@@ -205,6 +205,9 @@ func run_instruction(instruction):
 		Constants.ByteCode.CallFunc:
 			var function_name = instruction.operands[0].value
 			var function = libraries.get_function(function_name)
+			if not function:
+				printerr('Function "%s" not found in any attached library' % function_name)
+				return false
 			var expected_parameter_count = function.parameter_count
 			var actual_parameter_count = state.pop_value().as_number()
 

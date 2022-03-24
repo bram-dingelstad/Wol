@@ -102,6 +102,7 @@ func select_option(id):
 	resume()
 
 func pause():
+	running = false
 	virtual_machine.call_deferred('pause')
 
 func is_blocked():
@@ -119,4 +120,5 @@ func stop():
 	running = false
 
 func resume():
+	running = true
 	virtual_machine.call_deferred('resume')
